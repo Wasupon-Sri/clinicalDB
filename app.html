@@ -30,19 +30,21 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <div class="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
             
+            <!-- SETUP MODE (Create Password) -->
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold"></span></p>
-                <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-primary-500" placeholder="New PIN">
+                <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-primary-500 transition" placeholder="New PIN">
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
 
+            <!-- LOGIN MODE (Verify Password) -->
             <div id="authLogin" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Locked</h2>
                 <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold"></span></p>
-                <input type="password" id="loginPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-primary-500" placeholder="PIN">
+                <input type="password" id="loginPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-primary-500 transition" placeholder="PIN">
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
-                <p id="loginError" class="text-rose-500 text-xs mt-3 hidden">Incorrect PIN</p>
+                <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
             
             <div id="authLoading">
@@ -193,7 +195,11 @@
             document.getElementById('authLogin').classList.add('hidden');
             
             try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'auth_check_status', db: TARGET_SHEET }) });
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'auth_check_status', db: TARGET_SHEET }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
+                });
                 const json = await res.json();
                 document.getElementById('authLoading').classList.add('hidden');
                 
@@ -220,7 +226,11 @@
             if(pin.length < 4) return alert("PIN must be at least 4 digits");
             const btn = document.getElementById('btnSetup'); btn.disabled=true; btn.innerText="Configuring...";
             try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'auth_set_password', db: TARGET_SHEET, password: pin }) });
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'auth_set_password', db: TARGET_SHEET, password: pin }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
+                });
                 const json = await res.json();
                 if(json.status === 'success') {
                     USER_PASSWORD = pin;
@@ -235,7 +245,11 @@
             const pin = document.getElementById('loginPin').value;
             const btn = document.getElementById('btnLogin'); btn.disabled=true; btn.innerText="Verifying...";
             try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'auth_verify', db: TARGET_SHEET, password: pin }) });
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'auth_verify', db: TARGET_SHEET, password: pin }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
+                });
                 const json = await res.json();
                 if(json.status === 'success') {
                     USER_PASSWORD = pin;
@@ -261,7 +275,8 @@
             try {
                 const res = await fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD })
+                    body: JSON.stringify({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
                 });
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
@@ -272,7 +287,6 @@
                 if(!silent) {
                     console.warn("Connection lost:", e);
                     updateSyncStatus('Offline', 'rose'); 
-                    // No Auto-Demo Mode anymore, user must decide
                 }
             }
         }
@@ -300,7 +314,8 @@
             }
             const res = await fetch(API_URL, {
                 method: 'POST',
-                body: JSON.stringify({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD })
+                body: JSON.stringify({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD }),
+                headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
             });
             return await res.json();
         }
