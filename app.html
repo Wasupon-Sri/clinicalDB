@@ -24,47 +24,19 @@
         }
     </script>
     <style>
-        :root { 
-            --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); 
-            transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; 
-        }
-
+        :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
-
         .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
         .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; }
-        
-        /* EXPANDED NOTE FIXED */
-        .expanded-note { 
-            position: fixed !important; 
-            top: 50% !important; 
-            left: 50% !important; 
-            transform: translate(-50%, -50%) !important;
-            width: 90vw !important; 
-            height: 90vh !important; 
-            z-index: 9999 !important; 
-            font-size: 1.5rem !important; 
-            border-radius: 1rem !important; 
-            box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; 
-            border-color: var(--p-600) !important; 
-            border-width: 4px !important;
-            padding: 3rem !important; 
-            margin: 0 !important;
-            max-width: none !important;
-            max-height: none !important;
-        }
-        
+        .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 90vw !important; height: 90vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -74,14 +46,12 @@
     <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative">
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
-            
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
                 <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="New PIN">
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
-
             <div id="authLogin" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Locked</h2>
                 <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
@@ -89,13 +59,11 @@
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
                 <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
-            
             <div id="authLoading">
                 <span class="loader mx-auto"></span>
                 <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
                 <p id="loadingMsg" class="text-xs text-slate-400 mt-2"></p>
             </div>
-
             <div id="authError" class="hidden">
                 <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
                 <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
@@ -320,26 +288,17 @@
                 const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
                 if(json.error) throw new Error(json.error);
                 
-                // CRITICAL FIX: DATE PARSING & D/C LOGIC
+                // CRITICAL FIX: STRIP TIME & FORCE STRING
                 records = json.map(r => {
-                    // D/C Fix: Check multiple potential truthy values
-                    const rawDC = r.is_discharged ?? r.isDischarged;
-                    const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true' || rawDC === 1 || rawDC === "1");
+                    const rawVal = r.is_discharged ?? r.isDischarged;
+                    // Improved D/C Check
+                    const isDC = (rawVal === true || String(rawVal).toLowerCase() === 'true' || rawVal === 1 || rawVal === "1");
                     
-                    // Date Fix: PARSE AS LOCAL DATE
-                    let dateStr = r.timestamp;
-                    if(dateStr && typeof dateStr === 'string' && dateStr.includes('T')) {
-                        // If standard ISO (UTC), convert to local date object then to string
-                        const d = new Date(dateStr);
-                        const y = d.getFullYear();
-                        const m = String(d.getMonth() + 1).padStart(2, '0');
-                        const day = String(d.getDate()).padStart(2, '0');
-                        dateStr = `${y}-${m}-${day}`;
-                    } else if (dateStr && dateStr.length > 10) {
-                        dateStr = dateStr.substring(0, 10);
-                    }
+                    // FORCE STRING DATE - Remove any ' if present and strip time
+                    let cleanDate = String(r.timestamp).replace(/'/g, ''); 
+                    if(cleanDate.includes('T')) cleanDate = cleanDate.split('T')[0];
                     
-                    return { ...r, isDischarged: isDC, timestamp: dateStr };
+                    return { ...r, isDischarged: isDC, timestamp: cleanDate };
                 }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                 renderCalendar(); renderWards(); updateWardSuggestions();
@@ -353,13 +312,18 @@
         function updateSyncStatus(msg, c) { const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const colors={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=msg; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${colors[c]||'bg-slate-400'} shadow-sm ${msg==='Live'?'animate-pulse':''}`; }
         
         async function saveToBackend(payload, action = "save") {
+            // FORCE TEXT SAVE: Prepend apostrophe to date
+            if(action === 'save') {
+                payload.timestamp = "'" + payload.timestamp; 
+            }
             return await robustFetch({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD });
         }
 
         // --- EXPORT & HELPERS ---
         function formatDateDMY(iso) { 
             if(!iso) return '';
-            if (iso.match(/^\d{4}-\d{2}-\d{2}$/)) { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
+            // Safe split
+            if (iso.includes('-')) { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
             return iso; 
         }
 
@@ -373,19 +337,20 @@
             const g=document.getElementById('calendarGrid'); g.innerHTML=''; const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); applyTheme(m);
             document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});
             const fd=new Date(y,m,1).getDay(); const dim=new Date(y,m+1,0).getDate();
+            
+            // Build Today String manually (Local)
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
             for(let i=0;i<fd;i++) g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';
             for(let d=1;d<=dim;d++){
                 // Build cell date string manually (YYYY-MM-DD)
                 const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 
-                // FILTER: Hide D/C patients from Calendar (Using strict text comparison)
+                // FILTER: Strict string comparison (Fixes UTC shift)
                 const dr=records.filter(r=> r.timestamp === ds && !r.isDischarged);
                 
-                // Today Check (Using Local Time initialized at start)
-                const now = new Date();
-                const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
                 const isT = todayStr === ds;
-
                 const c=document.createElement('div'); c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;
                 c.onclick=()=>openPortal(ds);
                 let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;
@@ -405,16 +370,16 @@
         function renderWards() {
             const g=document.getElementById('wardGrid'); g.innerHTML=''; const wm={}; let dc=0;
             records.forEach(r=>{ 
-                if(r.isDischarged) {
-                    dc++; 
-                } else { 
-                    const w=r.ward?r.ward.trim():'Unassigned'; if(!wm[w])wm[w]=0; wm[w]++; 
-                } 
+                if(r.isDischarged) { dc++; } 
+                else { const w=r.ward?r.ward.trim():'Unassigned'; if(!wm[w])wm[w]=0; wm[w]++; } 
             });
+            
             Object.entries(wm).sort().forEach(([n,c])=>{
                 g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;
             });
+            
             if(dc>0) g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;
+            
             if(Object.keys(wm).length===0 && dc===0) g.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
         }
         function updateWardSuggestions() { document.getElementById('wardSuggestions').innerHTML = Array.from(new Set(records.map(r=>r.ward).filter(Boolean))).map(w=>`<option value="${w}">`).join(''); }
