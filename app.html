@@ -7,28 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'] },
-                    colors: {
-                        primary: { 50: 'var(--p-50)', 100: 'var(--p-100)', 500: 'var(--p-500)', 600: 'var(--p-600)', 700: 'var(--p-700)' },
-                        surface: '#ffffff', background: '#f8fafc',
-                    },
-                    boxShadow: { soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', glow: '0 0 15px var(--p-glow)' },
-                    transitionProperty: { colors: 'background-color, border-color, color, fill, stroke, box-shadow' }
-                }
-            }
-        }
-    </script>
     <style>
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -44,9 +26,10 @@
 
     <!-- AUTH OVERLAY -->
     <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative">
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
             
+            <!-- SETUP MODE -->
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
@@ -54,6 +37,7 @@
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
 
+            <!-- LOGIN MODE -->
             <div id="authLogin" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Locked</h2>
                 <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
@@ -71,7 +55,7 @@
             <div id="authError" class="hidden">
                 <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
                 <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
-                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2">Could not reach the server.</p>
+                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p>
                 <button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button>
                 <button onclick="startDemoMode()" class="w-full py-2 text-slate-400 text-xs hover:text-slate-600">Use Offline Demo</button>
             </div>
@@ -177,6 +161,7 @@
     </div>
 
     <script>
+        // --- HARDCODED CONFIGURATION ---
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
         
         let USER_PASSWORD = "";
@@ -198,25 +183,45 @@
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML = `ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`;
             document.getElementById('dbNameSetup').innerText = TARGET_SHEET;
             document.getElementById('dbNameLogin').innerText = TARGET_SHEET;
-            
-            // Start Auth Check immediately
             checkAuth();
         };
+
+        // --- ROBUST API HELPER ---
+        async function robustFetch(payload) {
+            try {
+                // FORCE text/plain to avoid CORS preflight options request which GAS hates
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
+                
+                const text = await res.text(); // Get raw text first to debug
+                
+                try {
+                    return JSON.parse(text); // Try parsing JSON
+                } catch (e) {
+                    console.error("Non-JSON Response:", text);
+                    // If HTML error (usually starts with <), throw readable error
+                    if(text.trim().startsWith("<")) {
+                        throw new Error("Server Error (HTML returned). Check Google Script deployment.");
+                    }
+                    throw new Error("Invalid Server Response");
+                }
+            } catch (e) {
+                throw e; // Bubble up network errors
+            }
+        }
 
         async function checkAuth() {
             document.getElementById('authOverlay').classList.remove('hidden');
             document.getElementById('authLoading').classList.remove('hidden');
             document.getElementById('authSetup').classList.add('hidden');
             document.getElementById('authLogin').classList.add('hidden');
+            document.getElementById('authError').classList.add('hidden');
             
             try {
-                // FIXED: CONTENT-TYPE TEXT/PLAIN to avoid CORS preflight
-                const res = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'auth_check_status', db: TARGET_SHEET }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }
-                });
-                const json = await res.json();
+                const json = await robustFetch({ action: 'auth_check_status', db: TARGET_SHEET });
                 document.getElementById('authLoading').classList.add('hidden');
                 
                 if(json.status === 'setup_needed') {
@@ -227,7 +232,7 @@
                     showAuthError(json.error);
                 }
             } catch(e) { 
-                showAuthError("Connection Failed. Please check your internet or URL.");
+                showAuthError(e.message || "Connection Failed");
             }
         }
 
@@ -240,33 +245,30 @@
         async function setupPassword() {
             const pin = document.getElementById('createPin').value;
             if(pin.length < 4) return alert("PIN must be at least 4 digits");
-            const btn = document.getElementById('btnSetup'); btn.disabled=true; btn.innerText="Configuring...";
+            
+            const btn = document.getElementById('btnSetup'); 
+            const orgText = btn.innerText;
+            btn.disabled=true; btn.innerText="Creating...";
+            
             try {
-                const res = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'auth_set_password', db: TARGET_SHEET, password: pin }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
-                });
-                const json = await res.json();
+                const json = await robustFetch({ action: 'auth_set_password', db: TARGET_SHEET, password: pin });
                 if(json.status === 'success') {
                     USER_PASSWORD = pin;
                     document.getElementById('authOverlay').classList.add('hidden');
                     startApp();
                 } else alert(json.error);
-            } catch(e) { alert("Network Error"); }
-            finally { btn.disabled=false; btn.innerText="Create PIN"; }
+            } catch(e) { alert(e.message); }
+            finally { btn.disabled=false; btn.innerText=orgText; }
         }
 
         async function verifyPassword() {
             const pin = document.getElementById('loginPin').value;
-            const btn = document.getElementById('btnLogin'); btn.disabled=true; btn.innerText="Verifying...";
+            const btn = document.getElementById('btnLogin'); 
+            const orgText = btn.innerText;
+            btn.disabled=true; btn.innerText="Verifying...";
+            
             try {
-                const res = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'auth_verify', db: TARGET_SHEET, password: pin }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
-                });
-                const json = await res.json();
+                const json = await robustFetch({ action: 'auth_verify', db: TARGET_SHEET, password: pin });
                 if(json.status === 'success') {
                     USER_PASSWORD = pin;
                     document.getElementById('authOverlay').classList.add('hidden');
@@ -275,8 +277,8 @@
                     document.getElementById('loginError').classList.remove('hidden');
                     document.getElementById('loginPin').value = '';
                 }
-            } catch(e) { alert("Network Error"); }
-            finally { btn.disabled=false; btn.innerText="Unlock"; }
+            } catch(e) { alert(e.message); }
+            finally { btn.disabled=false; btn.innerText=orgText; }
         }
 
         function startApp() {
@@ -289,19 +291,15 @@
         async function fetchData(silent = false) {
             if(!silent) updateSyncStatus('Syncing...', 'amber');
             try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
-                });
-                const data = await res.json();
-                if(data.error) throw new Error(data.error);
-                records = data.map(r => ({ ...r, isDischarged: (String(r.isDischarged)==='true') })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
+                if(json.error) throw new Error(json.error);
+                
+                records = json.map(r => ({ ...r, isDischarged: (String(r.isDischarged)==='true') })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderCalendar(); renderWards(); updateWardSuggestions();
                 updateSyncStatus('Live', 'emerald');
             } catch (e) { 
                 if(!silent) {
-                    console.warn("Connection lost:", e);
+                    console.warn(e);
                     updateSyncStatus('Offline', 'rose'); 
                 }
             }
@@ -322,18 +320,13 @@
         function updateSyncStatus(msg, c) { const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const colors={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=msg; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${colors[c]||'bg-slate-400'} shadow-sm ${msg==='Live'?'animate-pulse':''}`; }
         
         async function saveToBackend(payload, action = "save") {
-            if(isDemoMode) { 
+            if (isDemoMode) { 
                 await new Promise(r=>setTimeout(r,500)); 
                 if(action==='save') { const idx=records.findIndex(r=>r.id===payload.id); if(idx!==-1) records[idx]=payload; else records.push(payload); }
                 else if(action==='delete') { records=records.filter(r=>!payload.ids.includes(r.id)); }
                 return {status:'success'};
             }
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD }),
-                headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
-            });
-            return await res.json();
+            return await robustFetch({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD });
         }
 
         // --- EXPORT & HELPERS ---
@@ -420,9 +413,9 @@
         function selectColor(id) { document.getElementById('editColor').value=id; const o=COLORS.find(c=>c.id===id); document.querySelectorAll('.color-option').forEach(b=>{ if(b.dataset.value===id){b.classList.add(o.ring,'ring-offset-2');b.classList.remove('ring-transparent');}else{b.classList.remove(o.ring,'ring-offset-2');b.classList.add('ring-transparent');} }); }
 
         async function saveRecord() {
-            const btn=document.getElementById('btnSave'); const originalHtml = btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; btn.disabled=true;
+            const btn=document.getElementById('btnSave'); const org=btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; btn.disabled=true;
             const p = { id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5), timestamp:document.getElementById('editTimestamp').value, ward:document.getElementById('editWard').value, name:document.getElementById('editName').value, icon:document.getElementById('editIcon').value, color:document.getElementById('editColor').value, content:document.getElementById('editContent').value, isDischarged:document.getElementById('editDischarged').checked };
-            try { await saveToBackend(p,'save'); closeEditor(); closePortal(); await fetchData(false); } catch(e){ alert("Save Failed: "+e.message); } finally { btn.innerHTML=originalHtml; btn.disabled=false; }
+            try { await saveToBackend(p,'save'); closeEditor(); closePortal(); await fetchData(false); } catch(e){ alert("Save Failed: "+e.message); } finally { btn.innerHTML=org; btn.disabled=false; }
         }
         async function deleteRecord() { if(!confirm("Delete?"))return; try{ await saveToBackend({ids:[editingId]},'delete'); closeEditor(); closePortal(); await fetchData(false); }catch(e){alert("Delete failed");} }
         function toggleBatchMode() { isBatchMode=!isBatchMode; document.querySelectorAll('.batch-check').forEach(e=>e.style.display=isBatchMode?'block':'none'); updateBatchUI(); }
