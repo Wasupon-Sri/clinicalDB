@@ -24,7 +24,7 @@
         </div>
 
         <div class="p-6 space-y-8">
-            <!-- CREATE USER SECTION -->
+            <!-- CREATE USER -->
             <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-3"><i class="fa-solid fa-lock text-indigo-500 mr-1"></i> Admin Controls (Requires Master Key)</label>
                 <div class="flex gap-2">
@@ -35,20 +35,22 @@
                 </div>
             </div>
 
-            <!-- DATABASE LIST -->
+            <!-- DB LIST -->
             <div>
                 <div class="flex justify-between items-end mb-3">
                     <label class="block text-xs font-bold text-slate-400 uppercase">Available Databases</label>
                     <span class="text-xs text-slate-500" id="dbCount">Loading...</span>
                 </div>
                 <div id="userList" class="bg-slate-900 rounded-xl border border-slate-700 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                    <div class="p-8 text-center text-slate-500 text-sm"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Connecting to System...</div>
+                    <div class="p-8 text-center text-slate-500 text-sm">
+                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Connecting to System...
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN PASSWORD MODAL -->
+    <!-- ADMIN MODAL -->
     <div id="adminModal" class="fixed inset-0 bg-slate-900/90 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-2xl w-80 text-center animate-bounce-in">
             <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-shield-halved"></i></div>
@@ -63,11 +65,11 @@
     </div>
 
     <script>
+        // CONFIG
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
         const APP_BASE_URL = "https://wasupon-sri.github.io/clinicalDB/app.html"; 
         
         let pendingAction = null; let pendingPayload = null;
-
         window.onload = () => { fetchUsers(); };
 
         async function fetchUsers() {
@@ -84,9 +86,10 @@
                         const isMe = u === 'Sheet1';
                         const displayName = isMe ? 'Main Database (Sheet1)' : u;
                         const iconClass = isMe ? 'text-emerald-400 bg-emerald-500/10' : 'text-indigo-400 bg-indigo-500/10';
+                        
                         const item = document.createElement('div');
                         item.className = "flex items-center justify-between p-4 border-b border-slate-800 hover:bg-slate-800/50 transition last:border-0";
-                        item.innerHTML = `<div class="flex items-center gap-4 min-w-0"><div class="w-10 h-10 rounded-lg ${iconClass} flex items-center justify-center shrink-0"><i class="fa-solid fa-database"></i></div><div class="truncate"><h3 class="font-bold text-slate-200 truncate">${displayName}</h3><div class="text-xs text-slate-500 font-mono truncate flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Online</div></div></div><div class="flex gap-2 shrink-0"><a href="${link}" target="_blank" class="px-4 py-2 bg-slate-700 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open App</a><button onclick="copyLink('${link}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-white hover:text-slate-900 text-slate-400 border border-slate-700 transition" title="Copy Link"><i class="fa-regular fa-copy"></i></button>${!isMe ? `<button onclick="triggerAdminAction('delete', '${u}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-rose-500 hover:text-white text-rose-500 border border-slate-700 transition" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
+                        item.innerHTML = `<div class="flex items-center gap-4 min-w-0"><div class="w-10 h-10 rounded-lg ${iconClass} flex items-center justify-center shrink-0"><i class="fa-solid fa-database"></i></div><div class="truncate"><h3 class="font-bold text-slate-200 truncate">${displayName}</h3><div class="text-xs text-slate-500 font-mono truncate flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Online</div></div></div><div class="flex gap-2 shrink-0"><a href="${link}" target="_blank" class="px-4 py-2 bg-slate-700 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open App</a><button onclick="copyLink('${link}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-white hover:text-slate-900 text-slate-400 border border-slate-700 transition" title="Copy Link"><i class="fa-regular fa-copy"></i></button>${!isMe ? `<button onclick="triggerAdminAction('delete', '${u}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-rose-500 hover:text-white text-rose-500 border border-slate-700 transition" title="Delete Database"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
                         list.appendChild(item);
                     });
                 }
@@ -99,13 +102,11 @@
                 if (!name) return alert("Enter a valid name (Letters, Numbers, _ only)");
                 pendingAction = 'admin_create_user'; pendingPayload = { dbName: name };
             } else if (type === 'delete') {
-                if(!confirm(`PERMANENTLY DELETE database "${targetName}"?`)) return;
+                if(!confirm(`PERMANENTLY DELETE database "${targetName}"? Data will be lost.`)) return;
                 pendingAction = 'admin_delete_user'; pendingPayload = { dbName: targetName };
             }
             document.getElementById('adminPin').value = '';
-            document.getElementById('adminModal').classList.remove('hidden');
-            document.getElementById('adminModal').classList.add('flex');
-            document.getElementById('adminPin').focus();
+            document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminModal').classList.add('flex'); document.getElementById('adminPin').focus();
         }
 
         function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('flex'); pendingAction = null; }
@@ -124,7 +125,8 @@
 
         function copyLink(url) {
             navigator.clipboard.writeText(url);
-            alert("Link copied: " + url);
+            const btn = event.currentTarget; const icon = btn.querySelector('i');
+            icon.className = "fa-solid fa-check text-emerald-400"; setTimeout(() => icon.className = "fa-regular fa-copy", 1500);
         }
     </script>
 </body>
