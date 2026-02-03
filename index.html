@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ConsultationDB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        // TAILWIND CONFIG WITH CSS VARIABLES FOR DYNAMIC THEMING
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        // Dynamic Primary Colors mapped to CSS Variables
+                        primary: { 
+                            50: 'var(--p-50)', 
+                            100: 'var(--p-100)', 
+                            500: 'var(--p-500)', 
+                            600: 'var(--p-600)', 
+                            700: 'var(--p-700)' 
+                        },
+                        surface: '#ffffff',
+                        background: '#f8fafc',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px var(--p-glow)', // Dynamic Glow
+                    },
+                    transitionProperty: {
+                        'colors': 'background-color, border-color, color, fill, stroke, box-shadow',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS VARIABLES ROOT */
+        :root {
+            --p-50: #eef2ff;
+            --p-100: #e0e7ff;
+            --p-500: #6366f1;
+            --p-600: #4f46e5;
+            --p-700: #4338ca;
+            --p-glow: rgba(99, 102, 241, 0.3);
+            transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s;
+        }
+
+        body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
+        
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Custom Checkbox */
+        .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
+        .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
+        .check-box:checked { background: var(--p-600); border-color: var(--p-600); }
+        .check-box:checked::before { transform: scale(1); }
+
+        .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
+        .name-input { @apply w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-700 focus:bg-white focus:border-primary-500 focus:outline-none transition; }
+    </style>
+</head>
+<body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
+
+    <!-- HEADER -->
+    <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 text-white transition-all duration-500">
+                <i class="fa-solid fa-user-doctor text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none">ConsultationDB</h1>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+            <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50"><i class="fa-regular fa-calendar"></i></button>
+            <button onclick="switchView('wards')" id="btnViewWard" class="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600"><i class="fa-solid fa-layer-group"></i></button>
+            <div class="w-px bg-slate-200 my-1 mx-1"></div>
+            <button onclick="manualRefresh()" id="btnRefresh" class="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-primary-600 hover:bg-slate-50"><i class="fa-solid fa-rotate"></i></button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 relative overflow-hidden">
+        
+        <!-- VIEW 1: CALENDAR -->
+        <div id="viewCalendar" class="absolute inset-0 flex flex-col transition-transform duration-300 bg-[#f8fafc]">
+            <div class="px-6 py-4 flex justify-between items-center bg-white/50 backdrop-blur-sm border-b border-slate-100 transition-colors duration-500">
+                <h2 id="monthLabel" class="text-2xl font-bold text-slate-800 tracking-tight transition-all">Loading...</h2>
+                <div class="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+                    <button onclick="changeMonth(-1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button onclick="goToToday()" class="px-4 h-8 text-xs font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg uppercase tracking-wide transition-colors duration-500">Today</button>
+                    <button onclick="changeMonth(1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-7 px-4 py-2 text-center bg-white/30 border-b border-slate-100">
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Sun</div>
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Mon</div>
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Tue</div>
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Wed</div>
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Thu</div>
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Fri</div>
+                <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Sat</div>
+            </div>
+
+            <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 px-4 pb-4 pt-4 gap-2 overflow-y-auto">
+                <!-- Days Generated by JS -->
+            </div>
+        </div>
+
+        <!-- VIEW 2: WARDS MATRIX -->
+        <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-300 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>
+                Ward Matrix
+            </h2>
+            <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                <!-- Wards Generated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: DAY PORTAL (Side Panel) -->
+    <div id="portalModal" class="fixed inset-0 z-40 hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
+        <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
+            
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-start shrink-0 bg-white z-10">
+                <div>
+                    <h3 id="portalTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Details</h3>
+                    <p id="portalSubtitle" class="text-slate-500 text-sm mt-1">Select a record to view details</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleBatchMode()" id="btnBatch" class="w-9 h-9 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition flex items-center justify-center" title="Select Multiple"><i class="fa-solid fa-list-check"></i></button>
+                    <button onclick="closePortal()" class="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+            </div>
+
+            <div id="portalList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
+                <!-- List Items Generated JS -->
+            </div>
+
+            <div id="batchToolbar" class="hidden shrink-0 px-6 py-4 bg-white border-t border-slate-200 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <span class="text-sm font-medium text-slate-600"><span id="batchCount" class="text-slate-900 font-bold">0</span> selected</span>
+                <div class="flex gap-2">
+                    <button onclick="exportBatch()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 px-3 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Export
+                    </button>
+                    <button onclick="executeBatchDelete()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        <i class="fa-regular fa-trash-can"></i> Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-100 bg-white shrink-0" id="portalFooter">
+                <button onclick="openEditor()" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2 transition transform active:scale-[0.99] transition-colors duration-500">
+                    <i class="fa-solid fa-plus"></i> New Consultation Record
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SUPER EDITOR -->
+    <div id="editorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/30 backdrop-blur-md" onclick="closeEditor()"></div>
+        <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-zoomIn border border-white/50">
+            
+            <div class="px-6 py-4 border-b border-slate-100 bg-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center transition-colors duration-500">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800"><span id="editorMode">New</span> Record</h3>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportCurrentRecord()" id="btnExportSingle" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition" title="Export as TXT">
+                        <i class="fa-solid fa-file-export"></i> Export
+                    </button>
+                    <button onclick="closeEditor()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 bg-slate-50/30">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">Timestamp</label>
+                        <input type="datetime-local" id="editTimestamp" class="input-modern">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">Ward / Unit</label>
+                        <div class="relative">
+                            <input type="text" id="editWard" list="wardSuggestions" placeholder="Select or type..." class="input-modern pl-10">
+                            <i class="fa-solid fa-hospital absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <datalist id="wardSuggestions"></datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Context</label>
+                    <div class="grid grid-cols-6 sm:grid-cols-12 gap-2" id="iconPicker">
+                        <!-- Icons generated JS -->
+                    </div>
+                    <input type="hidden" id="editIcon">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Priority Level</label>
+                    <div class="flex gap-3" id="colorPicker">
+                        <!-- Colors generated JS -->
+                    </div>
+                    <input type="hidden" id="editColor">
+                </div>
+
+                <div class="flex-1 flex flex-col min-h-[180px]">
+                    <div class="flex justify-between items-end mb-1.5 ml-1">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Record Name & Note</label>
+                    </div>
+                    
+                    <div class="mb-2">
+                         <input type="text" id="editName" class="name-input" placeholder="Data_001">
+                    </div>
+
+                    <textarea id="editContent" class="flex-1 w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition resize-none leading-relaxed text-base shadow-sm" placeholder="Detailed progress note..."></textarea>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-100 bg-white flex justify-between items-center">
+                <button type="button" onclick="deleteRecord()" id="btnDeleteRecord" class="text-rose-500 hover:text-rose-700 text-sm font-bold px-4 py-2 rounded-lg hover:bg-rose-50 hidden transition flex items-center gap-2"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                <div class="flex gap-3 ml-auto">
+                    <button onclick="closeEditor()" class="px-5 py-2.5 text-slate-500 hover:text-slate-800 font-semibold transition">Cancel</button>
+                    <button onclick="saveRecord()" id="btnSave" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold shadow-lg shadow-primary-600/20 transition flex items-center gap-2 transition-colors duration-500">
+                        <i class="fa-solid fa-check"></i> <span>Save Record</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INITIAL LOADER -->
+    <div id="appLoader" class="fixed inset-0 bg-slate-50 z-[100] flex flex-col items-center justify-center transition-colors duration-500">
+        <div class="relative">
+            <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-6">
+                <i class="fa-solid fa-user-doctor text-3xl text-primary-600 transition-colors duration-500"></i>
+            </div>
+            <span class="loader absolute -bottom-2 -right-2 w-8 h-8 border-2"></span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">ConsultationDB</h2>
+        <p class="text-slate-400 text-sm mt-2 font-medium">Securely loading your workspace...</p>
+        
+        <div id="demoPrompt" class="hidden mt-6 bg-white p-6 rounded-xl border border-rose-200 shadow-xl max-w-sm text-center">
+            <i class="fa-solid fa-cloud-bolt text-rose-500 text-3xl mb-3"></i>
+            <h3 class="font-bold text-slate-800 mb-2">Connection Failed</h3>
+            <p class="text-xs text-slate-500 mb-4">Could not connect to Google backend.</p>
+            <button onclick="startDemoMode()" class="w-full py-2.5 bg-slate-800 text-white rounded-lg font-bold text-sm hover:bg-slate-700 transition">Enter Offline Demo Mode</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec"; 
+        const POLLING_INTERVAL = 5000; 
+
+        // --- THEME ENGINE ---
+        // 50: light bg, 100: hover bg, 500: base color, 600: dark base (btn), 700: text/icon
+        const MONTH_THEMES = [
+            { name: 'Jan', colors: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' } }, // Sky
+            { name: 'Feb', colors: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' } }, // Rose
+            { name: 'Mar', colors: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857' } }, // Emerald
+            { name: 'Apr', colors: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309' } }, // Amber
+            { name: 'May', colors: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' } }, // Teal
+            { name: 'Jun', colors: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } }, // Indigo
+            { name: 'Jul', colors: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9' } }, // Violet
+            { name: 'Aug', colors: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' } }, // Royal Blue
+            { name: 'Sep', colors: { 50: '#fdf4ff', 100: '#fae8ff', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf' } }, // Fuchsia
+            { name: 'Oct', colors: { 50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 700: '#c2410c' } }, // Orange
+            { name: 'Nov', colors: { 50: '#f7fee7', 100: '#ecfccb', 500: '#84cc16', 600: '#65a30d', 700: '#4d7c0f' } }, // Lime
+            { name: 'Dec', colors: { 50: '#fef2f2', 100: '#fee2e2', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c' } }  // Red
+        ];
+
+        function applyTheme(monthIndex) {
+            const theme = MONTH_THEMES[monthIndex];
+            const root = document.documentElement;
+            
+            root.style.setProperty('--p-50', theme.colors[50]);
+            root.style.setProperty('--p-100', theme.colors[100]);
+            root.style.setProperty('--p-500', theme.colors[500]);
+            root.style.setProperty('--p-600', theme.colors[600]);
+            root.style.setProperty('--p-700', theme.colors[700]);
+            
+            // Calculate Glow (Base color with opacity)
+            // Note: We use a simple approximation for the glow variable as tailwind colors are hex
+            // This is a simplified glow based on the 500 shade
+            root.style.setProperty('--p-glow', `${theme.colors[500]}4D`); // 4D is approx 30% alpha
+        }
+
+        // --- STATE ---
+        let records = [];
+        let currentMonth = new Date();
+        let selectedDate = new Date();
+        let editingId = null;
+        let isBatchMode = false;
+        let selectedBatchIds = new Set();
+        let viewMode = 'calendar'; 
+        let isDemoMode = false;
+        let pollTimer = null;
+
+        // --- CONSTANTS ---
+        const ICONS = [
+            { id: 'heart-pulse', icon: 'fa-heart-pulse', label: 'Cardio' },
+            { id: 'lungs', icon: 'fa-lungs', label: 'Pulmo' },
+            { id: 'brain', icon: 'fa-brain', label: 'Neuro' },
+            { id: 'kidneys', icon: 'fa-bacterium', label: 'Nephro' }, 
+            { id: 'pills', icon: 'fa-pills', label: 'Meds' },
+            { id: 'syringe', icon: 'fa-syringe', label: 'Proc' },
+            { id: 'user-doctor', icon: 'fa-user-doctor', label: 'Consult' },
+            { id: 'clipboard', icon: 'fa-clipboard-list', label: 'Rounds' },
+            { id: 'skull', icon: 'fa-skull', label: 'Crit/Exp' },
+            { id: 'flask', icon: 'fa-flask', label: 'Lab' },
+            { id: 'file-medical', icon: 'fa-file-medical', label: 'Admin' },
+            { id: 'bed', icon: 'fa-bed', label: 'Admit' }
+        ];
+
+        const COLORS = [
+            { id: 'slate', bg: 'bg-slate-500', text: 'text-white', ring: 'ring-slate-200' },
+            { id: 'emerald', bg: 'bg-emerald-500', text: 'text-white', ring: 'ring-emerald-200' }, 
+            { id: 'amber', bg: 'bg-amber-500', text: 'text-white', ring: 'ring-amber-200' },     
+            { id: 'rose', bg: 'bg-rose-500', text: 'text-white', ring: 'ring-rose-200' },        
+            { id: 'indigo', bg: 'bg-indigo-500', text: 'text-white', ring: 'ring-indigo-200' },   
+            { id: 'violet', bg: 'bg-violet-500', text: 'text-white', ring: 'ring-violet-200' }    
+        ];
+
+        // --- INIT ---
+        window.onload = function() {
+            // Apply initial theme based on current month
+            applyTheme(currentMonth.getMonth());
+            
+            renderIconPicker();
+            renderColorPicker();
+            fetchData();
+            // Start Polling
+            pollTimer = setInterval(() => {
+                if(!isDemoMode) fetchData(true); 
+            }, POLLING_INTERVAL);
+        };
+
+        // --- DATA FETCHING ---
+        async function fetchData(silent = false) {
+            if(!silent) updateSyncStatus('Syncing...', 'amber');
+            
+            try {
+                const res = await fetch(API_URL + "?action=read&_t=" + Date.now(), {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                
+                const data = await res.json();
+                if(data.error) throw new Error(data.error);
+                
+                records = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                isDemoMode = false;
+                
+                renderCalendar();
+                renderWards();
+                updateWardSuggestions();
+                
+                updateSyncStatus('Live', 'emerald');
+                document.getElementById('appLoader').classList.add('hidden');
+                document.getElementById('demoPrompt').classList.add('hidden');
+                
+            } catch (e) {
+                if(!silent) {
+                    console.warn("Connection lost:", e);
+                    updateSyncStatus('Reconnecting...', 'rose');
+                    if(records.length === 0) startDemoMode(); 
+                }
+            }
+        }
+        
+        function manualRefresh() {
+            const btn = document.getElementById('btnRefresh');
+            btn.classList.add('animate-spin');
+            fetchData(false).then(() => setTimeout(() => btn.classList.remove('animate-spin'), 1000));
+        }
+
+        function startDemoMode() {
+            if(isDemoMode) return;
+            isDemoMode = true;
+            clearInterval(pollTimer); 
+            document.getElementById('appLoader').classList.add('hidden');
+            updateSyncStatus('Offline Demo', 'slate');
+            
+            if(records.length === 0) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                
+                records = [
+                    { id: 'd1', timestamp: `${year}-${month}-02T09:00`, ward: 'ICU', name: 'Data_001', icon: 'heart-pulse', color: 'rose', content: 'Demo Record: Acute MI. Thrombolysis started.' },
+                    { id: 'd2', timestamp: `${year}-${month}-02T14:30`, ward: 'OPD', name: 'Data_002', icon: 'pills', color: 'indigo', content: 'Demo Record: Hypertension follow up. BP 130/80.' },
+                    { id: 'd3', timestamp: `${year}-${month}-05T10:00`, ward: 'Ward 9', name: 'Data_003', icon: 'lungs', color: 'amber', content: 'Demo Record: COPD exacerbation. Nebulized.' }
+                ];
+            }
+            renderCalendar();
+            renderWards();
+        }
+
+        function updateSyncStatus(msg, colorName) {
+            const label = document.getElementById('syncStatus');
+            const dot = document.getElementById('statusDot');
+            const colors = {
+                'amber': 'bg-amber-400',
+                'emerald': 'bg-emerald-500',
+                'rose': 'bg-rose-500',
+                'slate': 'bg-slate-400'
+            };
+            
+            label.innerText = msg;
+            label.className = `text-[10px] font-bold uppercase tracking-wider text-${colorName}-500`;
+            dot.className = `w-2 h-2 rounded-full ${colors[colorName] || 'bg-slate-400'} shadow-sm ${msg === 'Live' ? 'animate-pulse' : ''}`;
+        }
+
+        async function saveToBackend(payload, action = "save") {
+            if (isDemoMode) {
+                await new Promise(r => setTimeout(r, 600)); 
+                if (action === 'save') {
+                    const idx = records.findIndex(r => r.id === payload.id);
+                    if(idx !== -1) records[idx] = payload;
+                    else records.push(payload);
+                } else if (action === 'delete') {
+                    records = records.filter(r => !payload.ids.includes(r.id));
+                }
+                return { status: "success" };
+            }
+
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ ...payload, action: action }),
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            });
+            return await res.json();
+        }
+
+        // --- EXPORT LOGIC ---
+        function exportRecord(record) {
+            const filename = (record.name || 'Untitled') + ".txt";
+            const text = `ID: ${record.id}\nName: ${record.name}\nTimestamp: ${record.timestamp}\nWard: ${record.ward}\nStatus: ${record.color}\n\n--- CLINICAL NOTE ---\n\n${record.content}`;
+            
+            const blob = new Blob([text], { type: "text/plain" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportCurrentRecord() {
+            if(!editingId) return;
+            const tempRec = {
+                id: editingId,
+                name: document.getElementById('editName').value,
+                timestamp: document.getElementById('editTimestamp').value,
+                ward: document.getElementById('editWard').value,
+                color: document.getElementById('editColor').value,
+                content: document.getElementById('editContent').value
+            };
+            exportRecord(tempRec);
+        }
+
+        function exportBatch() {
+            if(selectedBatchIds.size === 0) return;
+            
+            const selectedRecs = records.filter(r => selectedBatchIds.has(r.id));
+            if(selectedRecs.length === 1) {
+                exportRecord(selectedRecs[0]);
+                return;
+            }
+
+            let combinedText = "--- EXPORT BATCH ---\n\n";
+            selectedRecs.forEach(r => {
+                combinedText += `=== RECORD START: ${r.name || r.id} ===\n`;
+                combinedText += `Timestamp: ${r.timestamp}\nWard: ${r.ward}\n\n${r.content}\n\n=== RECORD END ===\n\n`;
+            });
+
+            const blob = new Blob([combinedText], { type: "text/plain" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Batch_Export_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // --- CALENDAR LOGIC ---
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const label = document.getElementById('monthLabel');
+            grid.innerHTML = '';
+
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            // THEME UPDATE TRIGGER
+            applyTheme(month);
+            
+            label.innerText = new Date(year, month).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const div = document.createElement('div');
+                div.className = "bg-slate-100/50 rounded-xl opacity-50";
+                grid.appendChild(div);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayRecords = records.filter(r => r.timestamp.startsWith(dateStr));
+                const isToday = new Date().toISOString().split('T')[0] === dateStr;
+
+                const cell = document.createElement('div');
+                cell.className = `bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isToday ? 'ring-2 ring-primary-500 shadow-md z-10' : 'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;
+                cell.onclick = () => openPortal(dateStr);
+
+                cell.innerHTML = `<div class="text-right text-sm font-bold mb-1 ${isToday ? 'text-primary-600' : 'text-slate-400 group-hover:text-primary-500'}">${d}</div>`;
+
+                const pillContainer = document.createElement('div');
+                pillContainer.className = "flex flex-col gap-1 overflow-hidden";
+                
+                dayRecords.slice(0, 3).forEach(rec => {
+                    const colorObj = COLORS.find(c => c.id === rec.color) || COLORS[0];
+                    const iconObj = ICONS.find(i => i.id === rec.icon) || ICONS[0];
+                    const displayName = rec.name || rec.ward || 'Case';
+                    
+                    const pill = document.createElement('div');
+                    pill.className = `h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${colorObj.bg} text-white truncate`;
+                    pill.innerHTML = `<i class="fa-solid ${iconObj.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${displayName}</span>`;
+                    pillContainer.appendChild(pill);
+                });
+
+                if(dayRecords.length > 3) {
+                    const more = document.createElement('div');
+                    more.className = "text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5";
+                    more.innerText = `+${dayRecords.length - 3}`;
+                    pillContainer.appendChild(more);
+                }
+
+                cell.appendChild(pillContainer);
+                grid.appendChild(cell);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            renderCalendar();
+        }
+        function goToToday() {
+            currentMonth = new Date();
+            renderCalendar();
+        }
+
+        // --- WARD MATRIX LOGIC ---
+        function renderWards() {
+            const grid = document.getElementById('wardGrid');
+            grid.innerHTML = '';
+            
+            const wardMap = {};
+            records.forEach(r => {
+                const w = r.ward ? r.ward.trim() : 'Unassigned';
+                if(!wardMap[w]) wardMap[w] = 0;
+                wardMap[w]++;
+            });
+
+            if (Object.keys(wardMap).length === 0) {
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
+                return;
+            }
+
+            Object.entries(wardMap).sort().forEach(([name, count]) => {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden";
+                card.onclick = () => openPortal(null, name);
+
+                card.innerHTML = `
+                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div>
+                    <div class="relative">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${name}</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${count} Cases</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updateWardSuggestions() {
+            const datalist = document.getElementById('wardSuggestions');
+            const wards = new Set(records.map(r => r.ward).filter(Boolean));
+            datalist.innerHTML = Array.from(wards).map(w => `<option value="${w}">`).join('');
+        }
+
+        // --- PORTAL (MODAL) LOGIC ---
+        function openPortal(dateStr, wardFilter = null) {
+            const modal = document.getElementById('portalModal');
+            const panel = document.getElementById('portalPanel');
+            const title = document.getElementById('portalTitle');
+            const sub = document.getElementById('portalSubtitle');
+            const list = document.getElementById('portalList');
+            const footer = document.getElementById('portalFooter');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => { panel.classList.remove('translate-x-full'); }, 10);
+
+            let filteredRecords = [];
+            
+            if (dateStr) {
+                selectedDate = new Date(dateStr);
+                const prettyDate = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' });
+                title.innerText = prettyDate;
+                filteredRecords = records.filter(r => r.timestamp.startsWith(dateStr));
+                footer.classList.remove('hidden');
+            } else {
+                title.innerText = wardFilter;
+                filteredRecords = records.filter(r => (r.ward || 'Unassigned') === wardFilter);
+                footer.classList.add('hidden');
+            }
+
+            sub.innerText = `${filteredRecords.length} records`;
+            
+            list.innerHTML = '';
+            filteredRecords.forEach(rec => {
+                const colorObj = COLORS.find(c => c.id === rec.color) || COLORS[0];
+                const iconObj = ICONS.find(i => i.id === rec.icon) || ICONS[0];
+                const timeStr = new Date(rec.timestamp).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                const shortContent = rec.content.substring(0, 120) + (rec.content.length > 120 ? '...' : '');
+
+                const item = document.createElement('div');
+                item.className = "bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer relative group";
+                
+                let html = `
+                    <div class="flex items-start gap-4">
+                        <div class="w-11 h-11 shrink-0 rounded-xl ${colorObj.bg} text-white flex items-center justify-center shadow-sm">
+                            <i class="fa-solid ${iconObj.icon} text-lg"></i>
+                        </div>
+                        <div class="flex-1 min-w-0" onclick="openEditor('${rec.id}')">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div>
+                                    <span class="block text-sm font-bold text-slate-800">${rec.name || 'Untitled'}</span>
+                                    <span class="text-[10px] font-bold text-slate-400">${timeStr} &bull; ${rec.ward || 'Gen'}</span>
+                                </div>
+                            </div>
+                            <p class="text-slate-600 text-sm leading-relaxed font-sans line-clamp-3">${shortContent}</p>
+                        </div>
+                    </div>
+                `;
+
+                const checkboxHtml = `
+                    <div class="absolute top-4 right-4 ${isBatchMode ? 'block' : 'hidden'} batch-check z-10 bg-white p-1 rounded">
+                        <input type="checkbox" class="check-box" onchange="toggleBatchSelect('${rec.id}', this)" ${selectedBatchIds.has(rec.id) ? 'checked' : ''}>
+                    </div>
+                `;
+                
+                item.innerHTML = html + checkboxHtml;
+                list.appendChild(item);
+            });
+
+            isBatchMode = false;
+            selectedBatchIds.clear();
+            updateBatchUI();
+        }
+
+        function closePortal() {
+            const panel = document.getElementById('portalPanel');
+            panel.classList.add('translate-x-full');
+            setTimeout(() => { document.getElementById('portalModal').classList.add('hidden'); }, 300);
+        }
+
+        // --- EDITOR LOGIC ---
+        function openEditor(id = null) {
+            const modal = document.getElementById('editorModal');
+            const mode = document.getElementById('editorMode');
+            const btnDel = document.getElementById('btnDeleteRecord');
+            const btnExp = document.getElementById('btnExportSingle');
+            
+            modal.classList.remove('hidden');
+            editingId = id;
+
+            if (id) {
+                const rec = records.find(r => r.id === id);
+                mode.innerText = "Edit";
+                btnDel.classList.remove('hidden'); btnDel.classList.add('flex');
+                btnExp.classList.remove('hidden'); btnExp.classList.add('flex');
+                
+                document.getElementById('editTimestamp').value = rec.timestamp;
+                document.getElementById('editWard').value = rec.ward;
+                document.getElementById('editName').value = rec.name || '';
+                document.getElementById('editContent').value = rec.content;
+                selectIcon(rec.icon);
+                selectColor(rec.color);
+            } else {
+                mode.innerText = "New";
+                btnDel.classList.add('hidden'); btnDel.classList.remove('flex');
+                btnExp.classList.add('hidden'); btnExp.classList.remove('flex');
+                
+                const now = new Date();
+                const tzOffset = now.getTimezoneOffset() * 60000;
+                
+                const targetDate = new Date(selectedDate);
+                targetDate.setHours(now.getHours(), now.getMinutes());
+                const targetLocalISO = new Date(targetDate.getTime() - tzOffset).toISOString().slice(0, 16);
+
+                const count = records.length + 1;
+                const smartName = `Data_${String(count).padStart(3, '0')}`;
+
+                document.getElementById('editTimestamp').value = targetLocalISO;
+                document.getElementById('editWard').value = '';
+                document.getElementById('editName').value = smartName;
+                document.getElementById('editContent').value = '';
+                selectIcon(ICONS[0].id);
+                selectColor(COLORS[0].id);
+            }
+        }
+
+        function closeEditor() {
+            document.getElementById('editorModal').classList.add('hidden');
+            editingId = null; 
+        }
+
+        function renderIconPicker() {
+            const container = document.getElementById('iconPicker');
+            ICONS.forEach(i => {
+                const btn = document.createElement('button');
+                btn.className = "aspect-square rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600 transition flex flex-col items-center justify-center gap-1 icon-option group";
+                btn.dataset.value = i.id;
+                btn.onclick = () => selectIcon(i.id);
+                btn.innerHTML = `<i class="fa-solid ${i.icon} text-lg group-hover:scale-110 transition-transform"></i>`;
+                container.appendChild(btn);
+            });
+        }
+        function selectIcon(id) {
+            document.getElementById('editIcon').value = id;
+            document.querySelectorAll('.icon-option').forEach(b => {
+                if(b.dataset.value === id) {
+                    b.className = "aspect-square rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/30 flex flex-col items-center justify-center gap-1 icon-option transform scale-105 transition-all";
+                } else {
+                    b.className = "aspect-square rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-slate-300 transition flex flex-col items-center justify-center gap-1 icon-option";
+                }
+            });
+        }
+
+        function renderColorPicker() {
+            const container = document.getElementById('colorPicker');
+            COLORS.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = `w-8 h-8 rounded-full ${c.bg} ring-2 ring-offset-2 ring-transparent transition-all color-option hover:scale-110`;
+                btn.dataset.value = c.id;
+                btn.onclick = () => selectColor(c.id);
+                container.appendChild(btn);
+            });
+        }
+        function selectColor(id) {
+            document.getElementById('editColor').value = id;
+            const colorObj = COLORS.find(c => c.id === id);
+            document.querySelectorAll('.color-option').forEach(b => {
+                if(b.dataset.value === id) {
+                    b.classList.add(colorObj.ring, 'ring-offset-2');
+                    b.classList.remove('ring-transparent');
+                } else {
+                    b.classList.remove(colorObj.ring, 'ring-offset-2');
+                    b.classList.add('ring-transparent');
+                }
+            });
+        }
+
+        async function saveRecord() {
+            const btn = document.getElementById('btnSave');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...`;
+            btn.disabled = true;
+
+            const payload = {
+                id: editingId || 'rec_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                timestamp: document.getElementById('editTimestamp').value,
+                ward: document.getElementById('editWard').value,
+                name: document.getElementById('editName').value,
+                icon: document.getElementById('editIcon').value,
+                color: document.getElementById('editColor').value,
+                content: document.getElementById('editContent').value
+            };
+
+            try {
+                await saveToBackend(payload, 'save');
+                closeEditor();
+                closePortal();
+                await fetchData(false);
+            } catch(e) {
+                alert("Save Failed: " + e.message);
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteRecord() {
+            if(!confirm("Are you sure you want to delete this record?")) return;
+            try {
+                await saveToBackend({ ids: [editingId] }, 'delete');
+                closeEditor();
+                closePortal();
+                await fetchData(false);
+            } catch(e) { alert("Delete failed"); }
+        }
+
+        function toggleBatchMode() {
+            isBatchMode = !isBatchMode;
+            document.querySelectorAll('.batch-check').forEach(el => {
+                el.style.display = isBatchMode ? 'block' : 'none';
+            });
+            updateBatchUI();
+        }
+
+        function toggleBatchSelect(id, checkbox) {
+            if(checkbox.checked) selectedBatchIds.add(id);
+            else selectedBatchIds.delete(id);
+            updateBatchUI();
+        }
+
+        function updateBatchUI() {
+            const toolbar = document.getElementById('batchToolbar');
+            const count = document.getElementById('batchCount');
+            const btnBatch = document.getElementById('btnBatch');
+            
+            if(isBatchMode) {
+                toolbar.classList.remove('hidden');
+                btnBatch.classList.add('text-primary-600', 'bg-primary-50');
+                btnBatch.classList.remove('text-slate-400');
+            } else {
+                toolbar.classList.add('hidden');
+                btnBatch.classList.remove('text-primary-600', 'bg-primary-50');
+                btnBatch.classList.add('text-slate-400');
+            }
+            count.innerText = selectedBatchIds.size;
+        }
+
+        async function executeBatchDelete() {
+            if(selectedBatchIds.size === 0) return;
+            if(!confirm(`Delete ${selectedBatchIds.size} records?`)) return;
+            
+            try {
+                await saveToBackend({ ids: Array.from(selectedBatchIds) }, 'delete');
+                toggleBatchMode();
+                closePortal();
+                await fetchData(false);
+            } catch(e) { alert("Batch delete failed"); }
+        }
+
+        function switchView(mode) {
+            viewMode = mode;
+            const calDiv = document.getElementById('viewCalendar');
+            const wardDiv = document.getElementById('viewWards');
+            const btnCal = document.getElementById('btnViewCal');
+            const btnWard = document.getElementById('btnViewWard');
+
+            if (mode === 'calendar') {
+                calDiv.classList.remove('-translate-x-full');
+                wardDiv.classList.add('translate-x-full');
+                
+                btnCal.className = "w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";
+                btnWard.className = "w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";
+            } else {
+                calDiv.classList.add('-translate-x-full');
+                wardDiv.classList.remove('translate-x-full');
+                
+                btnWard.className = "w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";
+                btnCal.className = "w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";
+            }
+        }
+    </script>
+</body>
+</html>
