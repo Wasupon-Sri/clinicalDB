@@ -30,7 +30,7 @@
                     },
                     boxShadow: {
                         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'glow': '0 0 15px var(--p-glow)', // Dynamic Glow
+                        'glow': '0 0 15px var(--p-glow)', 
                     },
                     transitionProperty: {
                         'colors': 'background-color, border-color, color, fill, stroke, box-shadow',
@@ -58,7 +58,6 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Custom Checkbox */
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); }
@@ -68,10 +67,45 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
-        .name-input { @apply w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-700 focus:bg-white focus:border-primary-500 focus:outline-none transition; }
+        
+        /* HIGH CONTRAST INPUTS (Border-2 and Darker Slate) */
+        .input-contrast { 
+            @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; 
+        }
+        
+        /* HIGH CONTRAST TEXTAREA */
+        .textarea-contrast { 
+            @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; 
+            font-size: 1.25rem; /* ~Font 16 equivalent */
+        }
+        
+        /* EXPANDED MODE - FULL SCREEN OVERRIDE */
+        .expanded-note { 
+            position: fixed !important; 
+            top: 50% !important; 
+            left: 50% !important; 
+            transform: translate(-50%, -50%) !important;
+            width: 90vw !important; 
+            height: 90vh !important; 
+            z-index: 9999 !important; 
+            font-size: 1.5rem !important; 
+            border-radius: 1rem !important; 
+            box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; /* Darker Backdrop */
+            border-color: var(--p-600) !important; 
+            border-width: 4px !important;
+            padding: 3rem !important; 
+            margin: 0 !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
+
+    <!-- EXIT FULL SCREEN BUTTON (Hidden by default) -->
+    <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
+        <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
+    </button>
 
     <!-- HEADER -->
     <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
@@ -201,8 +235,8 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">Timestamp</label>
-                        <input type="datetime-local" id="editTimestamp" class="input-modern">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">Date</label>
+                        <input type="date" id="editTimestamp" class="input-modern">
                     </div>
                     <div>
                         <div class="flex justify-between items-center mb-1.5 ml-1">
@@ -231,23 +265,31 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Priority Level</label>
-                    <div class="flex gap-3" id="colorPicker">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Color</label>
+                    <div class="flex gap-2" id="colorPicker">
                         <!-- Colors generated JS -->
                     </div>
                     <input type="hidden" id="editColor">
                 </div>
 
-                <div class="flex-1 flex flex-col min-h-[180px]">
+                <!-- EXPANDABLE NOTE SECTION -->
+                <div class="flex-1 flex flex-col min-h-[400px]"> 
                     <div class="flex justify-between items-end mb-1.5 ml-1">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Record Name & Note</label>
+                        <button id="btnLabelExpand" onclick="toggleExpandNote()" class="text-xs text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1 transition">
+                            <i class="fa-solid fa-expand"></i> <span>Expand</span>
+                        </button>
                     </div>
                     
                     <div class="mb-2">
-                         <input type="text" id="editName" class="name-input" placeholder="Data_001">
+                         <!-- High Contrast Name Input -->
+                         <input type="text" id="editName" class="input-contrast" placeholder="Data_001">
                     </div>
 
-                    <textarea id="editContent" class="flex-1 w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition resize-none leading-relaxed text-base shadow-sm" placeholder="Detailed progress note..."></textarea>
+                    <div class="relative flex-1 group">
+                        <!-- High Contrast Textarea: Text-XL, Resizable -->
+                        <textarea id="editContent" ondblclick="toggleExpandNote()" class="textarea-contrast" placeholder="Detailed progress note..."></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -318,13 +360,14 @@
         // --- STATE ---
         let records = [];
         let currentMonth = new Date();
-        let selectedDate = new Date();
+        let selectedDateStr = new Date().toISOString().split('T')[0];
         let editingId = null;
         let isBatchMode = false;
         let selectedBatchIds = new Set();
         let viewMode = 'calendar'; 
         let isDemoMode = false;
         let pollTimer = null;
+        let isNoteExpanded = false; // State for expanded note
 
         // --- CONSTANTS ---
         const ICONS = [
@@ -370,10 +413,8 @@
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
                 
-                // DATA NORMALIZATION: Fix snake_case vs camelCase mismatch
                 records = data.map(r => ({
                     ...r,
-                    // Normalize backend 'is_discharged' to frontend 'isDischarged'
                     isDischarged: (r.isDischarged === true || r.isDischarged === 'true' || r.is_discharged === true || r.is_discharged === 'true')
                 })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
@@ -453,10 +494,22 @@
             return await res.json();
         }
 
-        // --- EXPORT LOGIC (UPDATED) ---
+        // --- HELPER: DATE FORMATTING (D/M/Y) ---
+        function formatDateDMY(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString; // Fallback
+            
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const y = date.getFullYear();
+            return `${d}/${m}/${y}`;
+        }
+
+        // --- EXPORT LOGIC ---
         function generateTxtContent(record) {
             return `Name: ${record.name || 'Untitled'}
-Timestamp: ${record.timestamp}
+Date: ${formatDateDMY(record.timestamp)}
 Ward: ${record.ward || 'Unassigned'}
 
 Note:
@@ -480,7 +533,7 @@ ${record.content || ''}`;
             const tempRec = {
                 id: editingId,
                 name: document.getElementById('editName').value,
-                timestamp: document.getElementById('editTimestamp').value,
+                timestamp: document.getElementById('editTimestamp').value, // Use raw YYYY-MM-DD from input for helper
                 ward: document.getElementById('editWard').value,
                 content: document.getElementById('editContent').value
             };
@@ -492,11 +545,10 @@ ${record.content || ''}`;
             if(selectedBatchIds.size === 0) return;
             
             const selectedRecs = records.filter(r => selectedBatchIds.has(r.id));
-            const usedNames = {}; // Track name counts to handle duplicates
+            const usedNames = {};
 
             for (const rec of selectedRecs) {
                 let baseName = rec.name || 'Untitled';
-                // Remove illegal characters for filename
                 baseName = baseName.replace(/[/\\?%*:|"<>]/g, '-');
                 
                 let fileName = baseName;
@@ -504,12 +556,10 @@ ${record.content || ''}`;
                     usedNames[baseName]++;
                     fileName = `${baseName} (${usedNames[baseName]})`;
                 } else {
-                    usedNames[baseName] = 1; // Start count
+                    usedNames[baseName] = 1; 
                 }
                 
                 downloadFile(fileName + ".txt", generateTxtContent(rec));
-                
-                // Small delay to prevent browser blocking simultaneous downloads
                 await new Promise(r => setTimeout(r, 200));
             }
         }
@@ -536,8 +586,6 @@ ${record.content || ''}`;
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                
-                // FILTER: Hide D/C patients from Calendar
                 const dayRecords = records.filter(r => r.timestamp.startsWith(dateStr) && !r.isDischarged);
                 const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
@@ -598,7 +646,6 @@ ${record.content || ''}`;
                 }
             });
 
-            // Active Wards
             Object.entries(wardMap).sort().forEach(([name, count]) => {
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden";
@@ -614,10 +661,8 @@ ${record.content || ''}`;
                 grid.appendChild(card);
             });
 
-            // Discharged Section (Always create if Discharged exists, or just empty check)
             if (dischargedCount > 0) {
                 const dcCard = document.createElement('div');
-                // Distinct styling for D/C section (Red/Rose accent)
                 dcCard.className = "bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50";
                 dcCard.onclick = () => openPortal(null, 'DISCHARGED');
                 dcCard.innerHTML = `
@@ -660,10 +705,15 @@ ${record.content || ''}`;
             let filteredRecords = [];
             
             if (dateStr) {
+                selectedDateStr = dateStr; 
                 selectedDate = new Date(dateStr);
-                const prettyDate = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' });
-                title.innerText = prettyDate;
-                // Calendar view: Hide discharged
+                
+                // Format Date Title (D/M/Y)
+                const d = String(selectedDate.getDate()).padStart(2, '0');
+                const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                const y = selectedDate.getFullYear();
+                title.innerText = `${d}/${m}/${y}`;
+                
                 filteredRecords = records.filter(r => r.timestamp.startsWith(dateStr) && !r.isDischarged);
                 footer.classList.remove('hidden');
             } else {
@@ -683,7 +733,7 @@ ${record.content || ''}`;
             filteredRecords.forEach(rec => {
                 const colorObj = COLORS.find(c => c.id === rec.color) || COLORS[0];
                 const iconObj = ICONS.find(i => i.id === rec.icon) || ICONS[0];
-                const timeStr = new Date(rec.timestamp).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                const dateDisplay = formatDateDMY(rec.timestamp);
                 const shortContent = rec.content.substring(0, 120) + (rec.content.length > 120 ? '...' : '');
 
                 const item = document.createElement('div');
@@ -699,7 +749,7 @@ ${record.content || ''}`;
                             <div class="flex justify-between items-center mb-1.5">
                                 <div>
                                     <span class="block text-sm font-bold text-slate-800">${rec.name || 'Untitled'}</span>
-                                    <span class="text-[10px] font-bold text-slate-400">${timeStr} &bull; ${rec.ward || 'Gen'}</span>
+                                    <span class="text-[10px] font-bold text-slate-400">${dateDisplay} &bull; ${rec.ward || 'Gen'}</span>
                                 </div>
                                 ${rec.isDischarged ? '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>' : ''}
                             </div>
@@ -738,6 +788,8 @@ ${record.content || ''}`;
             
             modal.classList.remove('hidden');
             editingId = id;
+            isNoteExpanded = false; // Reset expansion state
+            toggleExpandNote(false); // Ensure it starts collapsed
 
             if (id) {
                 const rec = records.find(r => r.id === id);
@@ -746,8 +798,8 @@ ${record.content || ''}`;
                 btnExp.classList.remove('hidden'); btnExp.classList.add('flex');
                 
                 let safeTime = rec.timestamp;
-                if(safeTime && safeTime.indexOf('T') > -1 && safeTime.length > 16) {
-                    safeTime = safeTime.substring(0, 16);
+                if(safeTime && safeTime.indexOf('T') > -1) {
+                    safeTime = safeTime.split('T')[0];
                 }
                 document.getElementById('editTimestamp').value = safeTime;
                 
@@ -763,17 +815,11 @@ ${record.content || ''}`;
                 btnDel.classList.add('hidden'); btnDel.classList.remove('flex');
                 btnExp.classList.add('hidden'); btnExp.classList.remove('flex');
                 
-                const now = new Date();
-                const tzOffset = now.getTimezoneOffset() * 60000;
-                
-                const targetDate = new Date(selectedDate);
-                targetDate.setHours(now.getHours(), now.getMinutes());
-                const targetLocalISO = new Date(targetDate.getTime() - tzOffset).toISOString().slice(0, 16);
+                document.getElementById('editTimestamp').value = selectedDateStr;
 
                 const count = records.length + 1;
                 const smartName = `Data_${String(count).padStart(3, '0')}`;
 
-                document.getElementById('editTimestamp').value = targetLocalISO;
                 document.getElementById('editWard').value = '';
                 document.getElementById('editName').value = smartName;
                 document.getElementById('editContent').value = '';
@@ -786,6 +832,38 @@ ${record.content || ''}`;
         function closeEditor() {
             document.getElementById('editorModal').classList.add('hidden');
             editingId = null; 
+        }
+
+        // --- EXPANDABLE NOTE LOGIC ---
+        function toggleExpandNote(forceState) {
+            const textarea = document.getElementById('editContent');
+            const btn = document.getElementById('btnLabelExpand');
+            const btnExit = document.getElementById('btnExitExpand');
+            
+            if (!btn) return;
+
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span'); 
+            
+            if (typeof forceState === 'boolean') {
+                isNoteExpanded = forceState;
+            } else {
+                isNoteExpanded = !isNoteExpanded;
+            }
+
+            if (isNoteExpanded) {
+                textarea.classList.add('expanded-note');
+                icon.classList.remove('fa-expand');
+                icon.classList.add('fa-compress');
+                if(text) text.innerText = "Collapse";
+                btnExit.classList.remove('hidden'); // Show Floating Exit
+            } else {
+                textarea.classList.remove('expanded-note');
+                icon.classList.remove('fa-compress');
+                icon.classList.add('fa-expand');
+                if(text) text.innerText = "Expand";
+                btnExit.classList.add('hidden'); // Hide Floating Exit
+            }
         }
 
         function renderIconPicker() {
@@ -814,7 +892,8 @@ ${record.content || ''}`;
             const container = document.getElementById('colorPicker');
             COLORS.forEach(c => {
                 const btn = document.createElement('button');
-                btn.className = `w-8 h-8 rounded-full ${c.bg} ring-2 ring-offset-2 ring-transparent transition-all color-option hover:scale-110`;
+                // Smaller size (w-6 h-6)
+                btn.className = `w-6 h-6 rounded-full ${c.bg} ring-2 ring-offset-2 ring-transparent transition-all color-option hover:scale-110`;
                 btn.dataset.value = c.id;
                 btn.onclick = () => selectColor(c.id);
                 container.appendChild(btn);
