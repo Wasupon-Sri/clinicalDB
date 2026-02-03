@@ -24,12 +24,7 @@
         }
     </script>
     <style>
-        /* Set Default Colors immediately to prevent invisible buttons */
-        :root { 
-            --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); 
-            transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; 
-        }
-        
+        :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
@@ -37,7 +32,7 @@
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
-        .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: #4f46e5; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
+        .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
@@ -52,21 +47,17 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
             
-            <!-- SETUP MODE -->
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
                 <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="New PIN">
-                <!-- Using fixed indigo color to ensure visibility -->
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
 
-            <!-- LOGIN MODE -->
             <div id="authLogin" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Locked</h2>
                 <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
                 <input type="password" id="loginPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="PIN">
-                <!-- Using fixed indigo color to ensure visibility -->
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
                 <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
@@ -186,13 +177,11 @@
     </div>
 
     <script>
-        // *** CONFIGURATION ***
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
         
         let USER_PASSWORD = "";
         const POLLING_INTERVAL = 5000; 
         
-        // --- THEME ENGINE ---
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
         const COLORS = [{id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'}];
@@ -209,12 +198,17 @@
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML = `ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`;
             document.getElementById('dbNameSetup').innerText = TARGET_SHEET;
             document.getElementById('dbNameLogin').innerText = TARGET_SHEET;
+            
+            // Start Auth Check immediately
             checkAuth();
         };
 
         async function checkAuth() {
             document.getElementById('authOverlay').classList.remove('hidden');
             document.getElementById('authLoading').classList.remove('hidden');
+            document.getElementById('authSetup').classList.add('hidden');
+            document.getElementById('authLogin').classList.add('hidden');
+            
             try {
                 // FIXED: CONTENT-TYPE TEXT/PLAIN to avoid CORS preflight
                 const res = await fetch(API_URL, { 
@@ -246,12 +240,12 @@
         async function setupPassword() {
             const pin = document.getElementById('createPin').value;
             if(pin.length < 4) return alert("PIN must be at least 4 digits");
-            const btn = document.getElementById('btnSetup'); btn.disabled=true; btn.innerText="Creating...";
+            const btn = document.getElementById('btnSetup'); btn.disabled=true; btn.innerText="Configuring...";
             try {
                 const res = await fetch(API_URL, { 
                     method: 'POST', 
                     body: JSON.stringify({ action: 'auth_set_password', db: TARGET_SHEET, password: pin }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
                 });
                 const json = await res.json();
                 if(json.status === 'success') {
@@ -270,7 +264,7 @@
                 const res = await fetch(API_URL, { 
                     method: 'POST', 
                     body: JSON.stringify({ action: 'auth_verify', db: TARGET_SHEET, password: pin }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
                 });
                 const json = await res.json();
                 if(json.status === 'success') {
@@ -298,7 +292,7 @@
                 const res = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD }),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                    headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
                 });
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
@@ -337,7 +331,7 @@
             const res = await fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD }),
-                headers: { "Content-Type": "text/plain;charset=utf-8" }
+                headers: { "Content-Type": "text/plain;charset=utf-8" } // Fixed Header
             });
             return await res.json();
         }
