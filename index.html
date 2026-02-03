@@ -288,7 +288,6 @@
         const POLLING_INTERVAL = 5000; 
 
         // --- THEME ENGINE ---
-        // 50: light bg, 100: hover bg, 500: base color, 600: dark base (btn), 700: text/icon
         const MONTH_THEMES = [
             { name: 'Jan', colors: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' } }, // Sky
             { name: 'Feb', colors: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' } }, // Rose
@@ -313,11 +312,7 @@
             root.style.setProperty('--p-500', theme.colors[500]);
             root.style.setProperty('--p-600', theme.colors[600]);
             root.style.setProperty('--p-700', theme.colors[700]);
-            
-            // Calculate Glow (Base color with opacity)
-            // Note: We use a simple approximation for the glow variable as tailwind colors are hex
-            // This is a simplified glow based on the 500 shade
-            root.style.setProperty('--p-glow', `${theme.colors[500]}4D`); // 4D is approx 30% alpha
+            root.style.setProperty('--p-glow', `${theme.colors[500]}4D`);
         }
 
         // --- STATE ---
@@ -358,16 +353,11 @@
 
         // --- INIT ---
         window.onload = function() {
-            // Apply initial theme based on current month
             applyTheme(currentMonth.getMonth());
-            
             renderIconPicker();
             renderColorPicker();
             fetchData();
-            // Start Polling
-            pollTimer = setInterval(() => {
-                if(!isDemoMode) fetchData(true); 
-            }, POLLING_INTERVAL);
+            pollTimer = setInterval(() => { if(!isDemoMode) fetchData(true); }, POLLING_INTERVAL);
         };
 
         // --- DATA FETCHING ---
@@ -375,19 +365,19 @@
             if(!silent) updateSyncStatus('Syncing...', 'amber');
             
             try {
-                const res = await fetch(API_URL + "?action=read&_t=" + Date.now(), {
-                    method: 'GET',
-                    redirect: 'follow'
-                });
-                
+                const res = await fetch(API_URL + "?action=read&_t=" + Date.now(), { method: 'GET', redirect: 'follow' });
                 if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-                
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
                 
-                records = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                isDemoMode = false;
+                // DATA NORMALIZATION: Fix snake_case vs camelCase mismatch
+                records = data.map(r => ({
+                    ...r,
+                    // Normalize backend 'is_discharged' to frontend 'isDischarged'
+                    isDischarged: (r.isDischarged === true || r.isDischarged === 'true' || r.is_discharged === true || r.is_discharged === 'true')
+                })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
+                isDemoMode = false;
                 renderCalendar();
                 renderWards();
                 updateWardSuggestions();
@@ -424,9 +414,9 @@
                 const month = String(now.getMonth() + 1).padStart(2, '0');
                 
                 records = [
-                    { id: 'd1', timestamp: `${year}-${month}-02T09:00`, ward: 'ICU', name: 'Data_001', icon: 'heart-pulse', color: 'rose', content: 'Demo Record: Acute MI. Thrombolysis started.' },
-                    { id: 'd2', timestamp: `${year}-${month}-02T14:30`, ward: 'OPD', name: 'Data_002', icon: 'pills', color: 'indigo', content: 'Demo Record: Hypertension follow up. BP 130/80.' },
-                    { id: 'd3', timestamp: `${year}-${month}-05T10:00`, ward: 'Ward 9', name: 'Data_003', icon: 'lungs', color: 'amber', content: 'Demo Record: COPD exacerbation. Nebulized.' }
+                    { id: 'd1', timestamp: `${year}-${month}-02T09:00`, ward: 'ICU', name: 'Data_001', icon: 'heart-pulse', color: 'rose', content: 'Demo Record: Acute MI. Thrombolysis started.', isDischarged: false },
+                    { id: 'd2', timestamp: `${year}-${month}-02T14:30`, ward: 'OPD', name: 'Data_002', icon: 'pills', color: 'indigo', content: 'Demo Record: Hypertension follow up. BP 130/80.', isDischarged: false },
+                    { id: 'd3', timestamp: `${year}-${month}-05T10:00`, ward: 'Ward 9', name: 'Data_003', icon: 'lungs', color: 'amber', content: 'Demo Record: COPD exacerbation. Nebulized.', isDischarged: true }
                 ];
             }
             renderCalendar();
@@ -436,13 +426,7 @@
         function updateSyncStatus(msg, colorName) {
             const label = document.getElementById('syncStatus');
             const dot = document.getElementById('statusDot');
-            const colors = {
-                'amber': 'bg-amber-400',
-                'emerald': 'bg-emerald-500',
-                'rose': 'bg-rose-500',
-                'slate': 'bg-slate-400'
-            };
-            
+            const colors = { 'amber': 'bg-amber-400', 'emerald': 'bg-emerald-500', 'rose': 'bg-rose-500', 'slate': 'bg-slate-400' };
             label.innerText = msg;
             label.className = `text-[10px] font-bold uppercase tracking-wider text-${colorName}-500`;
             dot.className = `w-2 h-2 rounded-full ${colors[colorName] || 'bg-slate-400'} shadow-sm ${msg === 'Live' ? 'animate-pulse' : ''}`;
@@ -469,11 +453,17 @@
             return await res.json();
         }
 
-        // --- EXPORT LOGIC ---
-        function exportRecord(record) {
-            const filename = (record.name || 'Untitled') + ".txt";
-            const text = `ID: ${record.id}\nName: ${record.name}\nTimestamp: ${record.timestamp}\nWard: ${record.ward}\nStatus: ${record.color}\nDischarged: ${record.isDischarged ? 'Yes' : 'No'}\n\n--- CLINICAL NOTE ---\n\n${record.content}`;
-            
+        // --- EXPORT LOGIC (UPDATED) ---
+        function generateTxtContent(record) {
+            return `Name: ${record.name || 'Untitled'}
+Timestamp: ${record.timestamp}
+Ward: ${record.ward || 'Unassigned'}
+
+Note:
+${record.content || ''}`;
+        }
+
+        function downloadFile(filename, text) {
             const blob = new Blob([text], { type: "text/plain" });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -492,36 +482,36 @@
                 name: document.getElementById('editName').value,
                 timestamp: document.getElementById('editTimestamp').value,
                 ward: document.getElementById('editWard').value,
-                color: document.getElementById('editColor').value,
-                content: document.getElementById('editContent').value,
-                isDischarged: document.getElementById('editDischarged').checked
+                content: document.getElementById('editContent').value
             };
-            exportRecord(tempRec);
+            const filename = (tempRec.name || 'Untitled') + ".txt";
+            downloadFile(filename, generateTxtContent(tempRec));
         }
 
-        function exportBatch() {
+        async function exportBatch() {
             if(selectedBatchIds.size === 0) return;
             
             const selectedRecs = records.filter(r => selectedBatchIds.has(r.id));
-            if(selectedRecs.length === 1) {
-                exportRecord(selectedRecs[0]);
-                return;
+            const usedNames = {}; // Track name counts to handle duplicates
+
+            for (const rec of selectedRecs) {
+                let baseName = rec.name || 'Untitled';
+                // Remove illegal characters for filename
+                baseName = baseName.replace(/[/\\?%*:|"<>]/g, '-');
+                
+                let fileName = baseName;
+                if (usedNames[baseName]) {
+                    usedNames[baseName]++;
+                    fileName = `${baseName} (${usedNames[baseName]})`;
+                } else {
+                    usedNames[baseName] = 1; // Start count
+                }
+                
+                downloadFile(fileName + ".txt", generateTxtContent(rec));
+                
+                // Small delay to prevent browser blocking simultaneous downloads
+                await new Promise(r => setTimeout(r, 200));
             }
-
-            let combinedText = "--- EXPORT BATCH ---\n\n";
-            selectedRecs.forEach(r => {
-                combinedText += `=== RECORD START: ${r.name || r.id} ===\n`;
-                combinedText += `Timestamp: ${r.timestamp}\nWard: ${r.ward}\nDischarged: ${r.isDischarged ? 'Yes' : 'No'}\n\n${r.content}\n\n=== RECORD END ===\n\n`;
-            });
-
-            const blob = new Blob([combinedText], { type: "text/plain" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `Batch_Export_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
         }
 
         // --- CALENDAR LOGIC ---
@@ -532,10 +522,7 @@
 
             const year = currentMonth.getFullYear();
             const month = currentMonth.getMonth();
-            
-            // THEME UPDATE TRIGGER
             applyTheme(month);
-            
             label.innerText = new Date(year, month).toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
             const firstDay = new Date(year, month, 1).getDay();
@@ -550,9 +537,8 @@
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 
-                // FILTER: Exclude Discharged Patients from Calendar
+                // FILTER: Hide D/C patients from Calendar
                 const dayRecords = records.filter(r => r.timestamp.startsWith(dateStr) && !r.isDischarged);
-                
                 const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
                 const cell = document.createElement('div');
@@ -568,7 +554,6 @@
                     const colorObj = COLORS.find(c => c.id === rec.color) || COLORS[0];
                     const iconObj = ICONS.find(i => i.id === rec.icon) || ICONS[0];
                     const displayName = rec.name || rec.ward || 'Case';
-                    
                     const pill = document.createElement('div');
                     pill.className = `h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${colorObj.bg} text-white truncate`;
                     pill.innerHTML = `<i class="fa-solid ${iconObj.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${displayName}</span>`;
@@ -581,7 +566,6 @@
                     more.innerText = `+${dayRecords.length - 3}`;
                     pillContainer.appendChild(more);
                 }
-
                 cell.appendChild(pillContainer);
                 grid.appendChild(cell);
             }
@@ -614,12 +598,11 @@
                 }
             });
 
-            // 1. Render Normal Wards
+            // Active Wards
             Object.entries(wardMap).sort().forEach(([name, count]) => {
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden";
                 card.onclick = () => openPortal(null, name);
-
                 card.innerHTML = `
                     <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div>
                     <div class="relative">
@@ -627,29 +610,27 @@
                         <div class="flex items-center gap-2">
                             <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${count} Active Cases</span>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 grid.appendChild(card);
             });
 
-            // 2. Render DISCHARGED Card
+            // Discharged Section (Always create if Discharged exists, or just empty check)
             if (dischargedCount > 0) {
                 const dcCard = document.createElement('div');
-                dcCard.className = "bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-slate-300 cursor-pointer transition-all duration-300 group relative overflow-hidden";
+                // Distinct styling for D/C section (Red/Rose accent)
+                dcCard.className = "bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50";
                 dcCard.onclick = () => openPortal(null, 'DISCHARGED');
-
                 dcCard.innerHTML = `
-                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full group-hover:from-slate-200 group-hover:to-slate-300 transition-colors duration-300"></div>
+                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div>
                     <div class="relative">
                         <div class="flex items-center gap-2 mb-2">
-                            <h3 class="text-xl font-bold text-slate-700 group-hover:text-slate-900 transition-colors">Discharged</h3>
-                            <i class="fa-solid fa-check-double text-slate-400"></i>
+                            <h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3>
+                            <i class="fa-solid fa-file-export text-rose-400"></i>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="bg-slate-200 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-slate-300 group-hover:text-slate-800 transition-colors">${dischargedCount} Archived</span>
+                            <span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dischargedCount} Archived</span>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 grid.appendChild(dcCard);
             }
 
@@ -682,17 +663,15 @@
                 selectedDate = new Date(dateStr);
                 const prettyDate = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' });
                 title.innerText = prettyDate;
-                // Calendar click: Show only active (non-discharged) records
+                // Calendar view: Hide discharged
                 filteredRecords = records.filter(r => r.timestamp.startsWith(dateStr) && !r.isDischarged);
                 footer.classList.remove('hidden');
             } else {
                 title.innerText = wardFilter === 'DISCHARGED' ? 'Discharged Cases' : wardFilter;
                 
                 if (wardFilter === 'DISCHARGED') {
-                    // Show all discharged
                     filteredRecords = records.filter(r => r.isDischarged);
                 } else {
-                    // Show active in this ward
                     filteredRecords = records.filter(r => (r.ward || 'Unassigned') === wardFilter && !r.isDischarged);
                 }
                 footer.classList.add('hidden');
@@ -708,7 +687,6 @@
                 const shortContent = rec.content.substring(0, 120) + (rec.content.length > 120 ? '...' : '');
 
                 const item = document.createElement('div');
-                // Dim style for discharged items in list
                 const opacityClass = rec.isDischarged ? 'opacity-75 grayscale-[0.5]' : '';
                 item.className = `bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer relative group ${opacityClass}`;
                 
@@ -776,7 +754,7 @@
                 document.getElementById('editWard').value = rec.ward;
                 document.getElementById('editName').value = rec.name || '';
                 document.getElementById('editContent').value = rec.content;
-                document.getElementById('editDischarged').checked = !!rec.isDischarged; // Load D/C State
+                document.getElementById('editDischarged').checked = !!rec.isDischarged;
                 
                 selectIcon(rec.icon);
                 selectColor(rec.color);
@@ -799,7 +777,7 @@
                 document.getElementById('editWard').value = '';
                 document.getElementById('editName').value = smartName;
                 document.getElementById('editContent').value = '';
-                document.getElementById('editDischarged').checked = false; // Default unchecked
+                document.getElementById('editDischarged').checked = false;
                 selectIcon(ICONS[0].id);
                 selectColor(COLORS[0].id);
             }
@@ -870,7 +848,7 @@
                 icon: document.getElementById('editIcon').value,
                 color: document.getElementById('editColor').value,
                 content: document.getElementById('editContent').value,
-                isDischarged: document.getElementById('editDischarged').checked // Capture D/C State
+                isDischarged: document.getElementById('editDischarged').checked
             };
 
             try {
