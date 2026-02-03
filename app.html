@@ -67,6 +67,7 @@
             <div id="authLoading">
                 <span class="loader mx-auto"></span>
                 <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
+                <p id="loadingMsg" class="text-xs text-slate-400 mt-2"></p>
             </div>
 
             <div id="authError" class="hidden">
@@ -177,7 +178,6 @@
     </div>
 
     <script>
-        // *** CONFIGURATION ***
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
         
         let USER_PASSWORD = "";
@@ -292,7 +292,16 @@
             try {
                 const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
                 if(json.error) throw new Error(json.error);
-                records = json.map(r => ({ ...r, isDischarged: (String(r.isDischarged)==='true') })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                // CRITICAL FIX: Ensure 'isDischarged' is read correctly
+                records = json.map(r => {
+                    // Check all possible case variations from Sheets
+                    const rawVal = r.is_discharged || r.isDischarged;
+                    // Strict boolean conversion
+                    const isDC = (rawVal === true || rawVal === "true" || rawVal === "TRUE");
+                    return { ...r, isDischarged: isDC };
+                }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
                 renderCalendar(); renderWards(); updateWardSuggestions();
                 updateSyncStatus('Live', 'emerald');
             } catch (e) { 
