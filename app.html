@@ -2,132 +2,448 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConsultationDB Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ConsultationDB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>body{font-family:'Plus Jakarta Sans',sans-serif;background:#0f172a;color:white;}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'] },
+                    colors: {
+                        primary: { 50: 'var(--p-50)', 100: 'var(--p-100)', 500: 'var(--p-500)', 600: 'var(--p-600)', 700: 'var(--p-700)' },
+                        surface: '#ffffff', background: '#f8fafc',
+                    },
+                    boxShadow: { soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', glow: '0 0 15px var(--p-glow)' },
+                    transitionProperty: { colors: 'background-color, border-color, color, fill, stroke, box-shadow' }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS VARIABLES ROOT - Hardcoded defaults to ensure visibility before load */
+        :root { 
+            --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); 
+            transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; 
+        }
+
+        body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
+        
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Custom Checkbox */
+        .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
+        .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
+        .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
+
+        .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
+        
+        /* High Contrast Inputs */
+        .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
+        
+        /* High Contrast Textarea */
+        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; }
+        
+        /* Expanded Note Focus Mode */
+        .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 90vw !important; height: 90vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
+        .hidden { display: none !important; }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
+<body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
 
-    <div class="w-full max-w-2xl bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-        <div class="bg-indigo-600 p-6 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl text-white"><i class="fa-solid fa-server"></i></div>
-                <div>
-                    <h1 class="text-xl font-bold">ConsultationDB Platform</h1>
-                    <p class="text-indigo-200 text-sm">Mother Interface (Admin)</p>
-                </div>
-            </div>
-            <button onclick="fetchUsers()" class="text-white hover:bg-white/10 p-2 rounded-lg transition"><i class="fa-solid fa-rotate"></i></button>
-        </div>
-
-        <div class="p-6 space-y-8">
-            <!-- CREATE USER -->
-            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
-                <label class="block text-xs font-bold text-slate-400 uppercase mb-3"><i class="fa-solid fa-lock text-indigo-500 mr-1"></i> Admin Controls (Requires Master Key)</label>
-                <div class="flex gap-2">
-                    <input type="text" id="newUserName" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition text-white" placeholder="New Database Name (e.g. Resident_A)">
-                    <button onclick="triggerAdminAction('create')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-lg flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Create
-                    </button>
-                </div>
+    <!-- AUTH OVERLAY -->
+    <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative">
+            <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
+            
+            <div id="authSetup" class="hidden">
+                <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
+                <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
+                <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="New PIN">
+                <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
 
-            <!-- DB LIST -->
-            <div>
-                <div class="flex justify-between items-end mb-3">
-                    <label class="block text-xs font-bold text-slate-400 uppercase">Available Databases</label>
-                    <span class="text-xs text-slate-500" id="dbCount">Loading...</span>
-                </div>
-                <div id="userList" class="bg-slate-900 rounded-xl border border-slate-700 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                    <div class="p-8 text-center text-slate-500 text-sm">
-                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Connecting to System...
-                    </div>
-                </div>
+            <div id="authLogin" class="hidden">
+                <h2 class="text-xl font-bold text-slate-800">Locked</h2>
+                <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
+                <input type="password" id="loginPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="PIN">
+                <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
+                <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
+            </div>
+            
+            <div id="authLoading">
+                <span class="loader mx-auto"></span>
+                <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
+                <p id="loadingMsg" class="text-xs text-slate-400 mt-2"></p>
+            </div>
+
+            <div id="authError" class="hidden">
+                <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
+                <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
+                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p>
+                <button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN MODAL -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/90 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-2xl w-80 text-center animate-bounce-in">
-            <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-shield-halved"></i></div>
-            <h3 class="text-white font-bold mb-1">Admin Authorization</h3>
-            <p class="text-slate-400 text-xs mb-4">Enter Master Key to proceed</p>
-            <input type="password" id="adminPin" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-3 text-center tracking-widest text-lg mb-4 text-white focus:border-indigo-500 outline-none" placeholder="PIN">
-            <div class="flex gap-2">
-                <button onclick="closeAdminModal()" class="flex-1 py-2 text-slate-400 hover:text-white text-sm font-bold">Cancel</button>
-                <button onclick="submitAdminAction()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-bold transition shadow-lg">Confirm</button>
+    <!-- MAIN APP CONTAINER -->
+    <div id="appContainer" class="h-full flex flex-col hidden">
+        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
+            <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
+        </button>
+
+        <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 text-white transition-all duration-500"><i class="fa-solid fa-user-doctor text-lg"></i></div>
+                <div>
+                    <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1>
+                    <div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div>
+                </div>
+            </div>
+            <div class="flex bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+                <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50"><i class="fa-regular fa-calendar"></i></button>
+                <button onclick="switchView('wards')" id="btnViewWard" class="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600"><i class="fa-solid fa-layer-group"></i></button>
+                <div class="w-px bg-slate-200 my-1 mx-1"></div>
+                <button onclick="manualRefresh()" id="btnRefresh" class="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-primary-600 hover:bg-slate-50"><i class="fa-solid fa-rotate"></i></button>
+            </div>
+        </header>
+
+        <main class="flex-1 relative overflow-hidden">
+            <div id="viewCalendar" class="absolute inset-0 flex flex-col transition-transform duration-300 bg-[#f8fafc]">
+                <div class="px-6 py-4 flex justify-between items-center bg-white/50 backdrop-blur-sm border-b border-slate-100 transition-colors duration-500">
+                    <h2 id="monthLabel" class="text-2xl font-bold text-slate-800 tracking-tight transition-all">Loading...</h2>
+                    <div class="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+                        <button onclick="changeMonth(-1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button onclick="goToToday()" class="px-4 h-8 text-xs font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg uppercase tracking-wide transition-colors duration-500">Today</button>
+                        <button onclick="changeMonth(1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-7 px-4 py-2 text-center bg-white/30 border-b border-slate-100">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Sun</div>
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Mon</div>
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Tue</div>
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Wed</div>
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Thu</div>
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Fri</div>
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Sat</div>
+                </div>
+                <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 px-4 pb-4 pt-4 gap-2 overflow-y-auto"></div>
+            </div>
+
+            <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-300 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
+                <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="portalModal" class="fixed inset-0 z-40 hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
+        <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-start shrink-0 bg-white z-10">
+                <div><h3 id="portalTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Details</h3><p id="portalSubtitle" class="text-slate-500 text-sm mt-1">Select a record to view details</p></div>
+                <div class="flex gap-2"><button onclick="toggleBatchMode()" id="btnBatch" class="w-9 h-9 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition flex items-center justify-center"><i class="fa-solid fa-list-check"></i></button><button onclick="closePortal()" class="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            </div>
+            <div id="portalList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50"></div>
+            <div id="batchToolbar" class="hidden shrink-0 px-6 py-4 bg-white border-t border-slate-200 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <span class="text-sm font-medium text-slate-600"><span id="batchCount" class="text-slate-900 font-bold">0</span> selected</span>
+                <div class="flex gap-2"><button onclick="exportBatch()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 px-3 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2"><i class="fa-solid fa-download"></i> Export</button><button onclick="executeBatchDelete()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2"><i class="fa-regular fa-trash-can"></i> Delete</button></div>
+            </div>
+            <div class="p-6 border-t border-slate-100 bg-white shrink-0" id="portalFooter"><button onclick="openEditor()" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2 transition transform active:scale-[0.99] transition-colors duration-500"><i class="fa-solid fa-plus"></i> New Consultation Record</button></div>
+        </div>
+    </div>
+
+    <div id="editorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/30 backdrop-blur-md" onclick="closeEditor()"></div>
+        <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-zoomIn border border-white/50">
+            <div class="px-6 py-4 border-b border-slate-100 bg-white flex justify-between items-center">
+                <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center transition-colors duration-500"><i class="fa-solid fa-pen-to-square"></i></div><h3 class="text-lg font-bold text-slate-800"><span id="editorMode">New</span> Record</h3></div>
+                <div class="flex gap-2"><button onclick="exportCurrentRecord()" id="btnExportSingle" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"><i class="fa-solid fa-file-export"></i> Export</button><button onclick="closeEditor()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 bg-slate-50/30">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">Date</label><input type="date" id="editTimestamp" class="input-modern"></div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5 ml-1"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Ward / Unit</label><div class="flex items-center gap-2"><input type="checkbox" id="editDischarged" class="check-box !w-4 !h-4 !border-rose-300 checked:!bg-rose-500 checked:!border-rose-500"><label for="editDischarged" class="text-xs font-bold text-rose-500 cursor-pointer">Discharge (D/C)</label></div></div>
+                        <div class="relative"><input type="text" id="editWard" list="wardSuggestions" placeholder="Select or type..." class="input-modern pl-10"><i class="fa-solid fa-hospital absolute left-3.5 top-3.5 text-slate-400"></i><datalist id="wardSuggestions"></datalist></div>
+                    </div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Context</label><div class="grid grid-cols-6 sm:grid-cols-12 gap-2" id="iconPicker"></div><input type="hidden" id="editIcon"></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Color</label><div class="flex gap-2" id="colorPicker"></div><input type="hidden" id="editColor"></div>
+                <div class="flex-1 flex flex-col min-h-[400px]"> 
+                    <div class="flex justify-between items-end mb-1.5 ml-1"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Record Name & Note</label><button id="btnLabelExpand" onclick="toggleExpandNote()" class="text-xs text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1 transition"><i class="fa-solid fa-expand"></i> <span>Expand</span></button></div>
+                    <div class="mb-2"><input type="text" id="editName" class="input-contrast" placeholder="Data_001"></div>
+                    <div class="relative flex-1 group"><textarea id="editContent" ondblclick="toggleExpandNote()" class="textarea-contrast" placeholder="Detailed progress note..."></textarea></div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-white flex justify-between items-center">
+                <button type="button" onclick="deleteRecord()" id="btnDeleteRecord" class="text-rose-500 hover:text-rose-700 text-sm font-bold px-4 py-2 rounded-lg hover:bg-rose-50 hidden transition flex items-center gap-2"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                <div class="flex gap-3 ml-auto"><button onclick="closeEditor()" class="px-5 py-2.5 text-slate-500 hover:text-slate-800 font-semibold transition">Cancel</button><button onclick="saveRecord()" id="btnSave" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold shadow-lg shadow-primary-600/20 transition flex items-center gap-2 transition-colors duration-500"><i class="fa-solid fa-check"></i> <span>Save Record</span></button></div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIG
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
-        const APP_BASE_URL = "https://wasupon-sri.github.io/clinicalDB/app.html"; 
         
-        let pendingAction = null; let pendingPayload = null;
-        window.onload = () => { fetchUsers(); };
+        let USER_PASSWORD = "";
+        const POLLING_INTERVAL = 5000; 
+        
+        const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
+        const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
+        const COLORS = [{id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'}];
+        
+        let records=[]; let currentMonth=new Date(); 
+        
+        // --- TIMEZONE FIX: LOCAL DATE ---
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000;
+        const localDate = new Date(now.getTime() - offset);
+        let selectedDateStr = localDate.toISOString().split('T')[0];
 
-        async function fetchUsers() {
-            const list = document.getElementById('userList');
-            const count = document.getElementById('dbCount');
+        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let isDemoMode=false; let pollTimer=null; let isNoteExpanded=false;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const TARGET_SHEET = urlParams.get('db') || 'Sheet1'; 
+
+        function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
+
+        window.onload = function() {
+            applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker();
+            if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML = `ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`;
+            document.getElementById('dbNameSetup').innerText = TARGET_SHEET;
+            document.getElementById('dbNameLogin').innerText = TARGET_SHEET;
+            checkAuth();
+        };
+
+        function toggleElement(id, show) {
+            const el = document.getElementById(id);
+            if(el) { if(show) el.classList.remove('hidden'); else el.classList.add('hidden'); }
+        }
+
+        async function robustFetch(payload) {
             try {
-                const res = await fetch(API_URL + "?action=admin_list_users");
-                const json = await res.json();
-                if(json.users) {
-                    list.innerHTML = '';
-                    count.innerText = `${json.users.length} Active`;
-                    json.users.forEach(u => {
-                        const link = u === 'Sheet1' ? `${APP_BASE_URL}?db=Sheet1` : `${APP_BASE_URL}?db=${u}`;
-                        const isMe = u === 'Sheet1';
-                        const displayName = isMe ? 'Main Database (Sheet1)' : u;
-                        const iconClass = isMe ? 'text-emerald-400 bg-emerald-500/10' : 'text-indigo-400 bg-indigo-500/10';
-                        
-                        const item = document.createElement('div');
-                        item.className = "flex items-center justify-between p-4 border-b border-slate-800 hover:bg-slate-800/50 transition last:border-0";
-                        item.innerHTML = `<div class="flex items-center gap-4 min-w-0"><div class="w-10 h-10 rounded-lg ${iconClass} flex items-center justify-center shrink-0"><i class="fa-solid fa-database"></i></div><div class="truncate"><h3 class="font-bold text-slate-200 truncate">${displayName}</h3><div class="text-xs text-slate-500 font-mono truncate flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Online</div></div></div><div class="flex gap-2 shrink-0"><a href="${link}" target="_blank" class="px-4 py-2 bg-slate-700 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open App</a><button onclick="copyLink('${link}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-white hover:text-slate-900 text-slate-400 border border-slate-700 transition" title="Copy Link"><i class="fa-regular fa-copy"></i></button>${!isMe ? `<button onclick="triggerAdminAction('delete', '${u}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-rose-500 hover:text-white text-rose-500 border border-slate-700 transition" title="Delete Database"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
-                        list.appendChild(item);
-                    });
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
+                const text = await res.text();
+                try { return JSON.parse(text); } 
+                catch (e) { 
+                    if(text.trim().startsWith("<")) throw new Error("Server returned HTML error");
+                    throw new Error("Invalid Server Response"); 
                 }
-            } catch(e) { list.innerHTML = `<div class="p-8 text-center text-rose-400 text-sm">Connection Failed.<br>${e.message}</div>`; }
+            } catch (e) { throw e; }
         }
 
-        function triggerAdminAction(type, targetName = null) {
-            if (type === 'create') {
-                const name = document.getElementById('newUserName').value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
-                if (!name) return alert("Enter a valid name (Letters, Numbers, _ only)");
-                pendingAction = 'admin_create_user'; pendingPayload = { dbName: name };
-            } else if (type === 'delete') {
-                if(!confirm(`PERMANENTLY DELETE database "${targetName}"? Data will be lost.`)) return;
-                pendingAction = 'admin_delete_user'; pendingPayload = { dbName: targetName };
-            }
-            document.getElementById('adminPin').value = '';
-            document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminModal').classList.add('flex'); document.getElementById('adminPin').focus();
-        }
-
-        function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('flex'); pendingAction = null; }
-
-        async function submitAdminAction() {
-            const pin = document.getElementById('adminPin').value; if(!pin) return;
-            const btn = document.querySelector('#adminModal button:last-child'); const originalText = btn.innerText;
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+        async function checkAuth() {
+            toggleElement('authOverlay', true); toggleElement('authLoading', true);
+            toggleElement('authSetup', false); toggleElement('authLogin', false); toggleElement('authError', false);
             try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: pendingAction, adminKey: pin, ...pendingPayload }) });
-                const json = await res.json();
-                if(json.status === 'success') { closeAdminModal(); if(pendingAction === 'admin_create_user') document.getElementById('newUserName').value = ''; fetchUsers(); }
-                else { alert(json.error || "Action Failed"); document.getElementById('adminPin').value = ''; }
-            } catch(e) { alert("Network Error"); } finally { btn.disabled = false; btn.innerText = originalText; }
+                const json = await robustFetch({ action: 'auth_check_status', db: TARGET_SHEET });
+                toggleElement('authLoading', false);
+                if(json.status === 'setup_needed') toggleElement('authSetup', true);
+                else if (json.status === 'locked') toggleElement('authLogin', true);
+                else if (json.error) showAuthError(json.error);
+            } catch(e) { showAuthError(e.message || "Connection Failed"); }
         }
 
-        function copyLink(url) {
-            navigator.clipboard.writeText(url);
-            const btn = event.currentTarget; const icon = btn.querySelector('i');
-            icon.className = "fa-solid fa-check text-emerald-400"; setTimeout(() => icon.className = "fa-regular fa-copy", 1500);
+        function showAuthError(msg) {
+            toggleElement('authLoading', false); toggleElement('authError', true);
+            const el = document.getElementById('errorDetail'); if(el) el.innerText = msg;
         }
+
+        async function setupPassword() {
+            const pin = document.getElementById('createPin').value;
+            if(pin.length < 4) return alert("PIN must be at least 4 digits");
+            const btn = document.getElementById('btnSetup'); const orgText = btn.innerText;
+            btn.disabled=true; btn.innerText="Creating...";
+            try {
+                const json = await robustFetch({ action: 'auth_set_password', db: TARGET_SHEET, password: pin });
+                if(json.status === 'success') {
+                    USER_PASSWORD = pin;
+                    toggleElement('authOverlay', false);
+                    startApp();
+                } else alert(json.error);
+            } catch(e) { alert(e.message); }
+            finally { btn.disabled=false; btn.innerText=orgText; }
+        }
+
+        async function verifyPassword() {
+            const pin = document.getElementById('loginPin').value;
+            const btn = document.getElementById('btnLogin'); const orgText = btn.innerText;
+            btn.disabled=true; btn.innerText="Verifying...";
+            try {
+                const json = await robustFetch({ action: 'auth_verify', db: TARGET_SHEET, password: pin });
+                if(json.status === 'success') {
+                    USER_PASSWORD = pin;
+                    toggleElement('authOverlay', false);
+                    startApp();
+                } else {
+                    toggleElement('loginError', true);
+                    document.getElementById('loginPin').value = '';
+                }
+            } catch(e) { alert("Network Error: " + e.message); }
+            finally { btn.disabled=false; btn.innerText=orgText; }
+        }
+
+        function startApp() {
+            toggleElement('appContainer', true); toggleElement('appLoader', false);
+            fetchData();
+            pollTimer = setInterval(() => fetchData(true), POLLING_INTERVAL);
+        }
+
+        async function fetchData(silent = false) {
+            if(!silent) updateSyncStatus('Syncing...', 'amber');
+            try {
+                const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
+                if(json.error) throw new Error(json.error);
+                
+                // CRITICAL FIX: Normalize isDischarged Boolean
+                records = json.map(r => {
+                    const rawVal = r.is_discharged ?? r.isDischarged; // Check both keys
+                    const isDC = (rawVal === true || String(rawVal).toLowerCase() === 'true');
+                    return { ...r, isDischarged: isDC };
+                }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                renderCalendar(); renderWards(); updateWardSuggestions();
+                updateSyncStatus('Live', 'emerald');
+            } catch (e) { 
+                if(!silent) { console.warn(e); updateSyncStatus('Offline', 'rose'); }
+            }
+        }
+        
+        function manualRefresh() { const btn=document.getElementById('btnRefresh'); btn.classList.add('animate-spin'); fetchData(false).then(() => setTimeout(() => btn.classList.remove('animate-spin'), 1000)); }
+        function updateSyncStatus(msg, c) { const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const colors={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=msg; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${colors[c]||'bg-slate-400'} shadow-sm ${msg==='Live'?'animate-pulse':''}`; }
+        
+        async function saveToBackend(payload, action = "save") {
+            return await robustFetch({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD });
+        }
+
+        function formatDateDMY(iso) { 
+            if(!iso) return '';
+            if (iso.match(/^\d{4}-\d{2}-\d{2}$/)) { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
+            const d = new Date(iso); if(isNaN(d.getTime())) return iso; 
+            return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; 
+        }
+
+        function generateTxtContent(r) { return `Name: ${r.name||'Untitled'}\nDate: ${formatDateDMY(r.timestamp)}\nWard: ${r.ward||'Unassigned'}\n\nNote:\n${r.content||''}`; }
+        function downloadFile(n, t) { const b=new Blob([t],{type:"text/plain"}); const u=window.URL.createObjectURL(b); const a=document.createElement("a"); a.href=u; a.download=n; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(u); }
+        function exportCurrentRecord() { if(!editingId)return; const t={name:document.getElementById('editName').value, timestamp:document.getElementById('editTimestamp').value, ward:document.getElementById('editWard').value, content:document.getElementById('editContent').value}; downloadFile((t.name||'Untitled')+".txt", generateTxtContent(t)); }
+        async function exportBatch() { if(selectedBatchIds.size===0)return; const rs=records.filter(r=>selectedBatchIds.has(r.id)); const u={}; for(const r of rs){ let b=r.name||'Untitled'; b=b.replace(/[/\\?%*:|"<>]/g,'-'); let f=b; if(u[b]){u[b]++;f=`${b} (${u[b]})`;}else{u[b]=1;} downloadFile(f+".txt", generateTxtContent(r)); await new Promise(x=>setTimeout(x,200)); } }
+
+        function renderCalendar() {
+            const g=document.getElementById('calendarGrid'); g.innerHTML=''; const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); applyTheme(m);
+            document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});
+            const fd=new Date(y,m,1).getDay(); const dim=new Date(y,m+1,0).getDate();
+            for(let i=0;i<fd;i++) g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';
+            for(let d=1;d<=dim;d++){
+                const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                // CALENDAR: Hide D/C
+                const dr=records.filter(r=>r.timestamp.startsWith(ds)&&!r.isDischarged);
+                // CALENDAR: Today Highlight (Local Time Fix)
+                const now=new Date(); const off=now.getTimezoneOffset()*60000; const loc=new Date(now.getTime()-off).toISOString().split('T')[0];
+                const isT=loc===ds;
+
+                const c=document.createElement('div'); c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;
+                c.onclick=()=>openPortal(ds);
+                let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;
+                dr.slice(0,3).forEach(r=>{ const co=COLORS.find(x=>x.id===r.color)||COLORS[0]; const ic=ICONS.find(x=>x.id===r.icon)||ICONS[0]; html+=`<div class="h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${co.bg} text-white truncate"><i class="fa-solid ${ic.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${r.name||r.ward||'Case'}</span></div>`; });
+                if(dr.length>3) html+=`<div class="text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5">+${dr.length-3}</div>`;
+                c.innerHTML=html+'</div>'; g.appendChild(c);
+            }
+        }
+        function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth()+d); renderCalendar(); }
+        function goToToday() { currentMonth=new Date(); renderCalendar(); }
+
+        function renderWards() {
+            const g=document.getElementById('wardGrid'); g.innerHTML=''; const wm={}; let dc=0;
+            records.forEach(r=>{ if(r.isDischarged) dc++; else { const w=r.ward?r.ward.trim():'Unassigned'; if(!wm[w])wm[w]=0; wm[w]++; } });
+            
+            // ACTIVE WARDS
+            Object.entries(wm).sort().forEach(([n,c])=>{
+                g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;
+            });
+            
+            // DISCHARGED FOLDER
+            if(dc>0) g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;
+            
+            if(Object.keys(wm).length===0 && dc===0) g.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
+        }
+        function updateWardSuggestions() { document.getElementById('wardSuggestions').innerHTML = Array.from(new Set(records.map(r=>r.ward).filter(Boolean))).map(w=>`<option value="${w}">`).join(''); }
+
+        function openPortal(ds, wf=null) {
+            toggleElement('portalModal', true); setTimeout(()=>document.getElementById('portalPanel').classList.remove('translate-x-full'),10);
+            let fr=[]; 
+            if(ds) { 
+                selectedDateStr=ds; const [y, m, d] = ds.split('-'); document.getElementById('portalTitle').innerText=`${d}/${m}/${y}`; 
+                fr=records.filter(r=>r.timestamp.startsWith(ds)&&!r.isDischarged); toggleElement('portalFooter', true); 
+            }
+            else { 
+                document.getElementById('portalTitle').innerText=wf==='DISCHARGED'?'Discharged Cases':wf; 
+                fr=wf==='DISCHARGED'?records.filter(r=>r.isDischarged):records.filter(r=>(r.ward||'Unassigned')===wf&&!r.isDischarged); 
+                toggleElement('portalFooter', false); 
+            }
+            renderPortalList(fr); isBatchMode=false; selectedBatchIds.clear(); updateBatchUI();
+        }
+        function renderPortalList(fr) {
+            const l=document.getElementById('portalList'); document.getElementById('portalSubtitle').innerText=`${fr.length} records`; l.innerHTML='';
+            fr.forEach(r=>{
+                const c=COLORS.find(x=>x.id===r.color)||COLORS[0]; const i=ICONS.find(x=>x.id===r.icon)||ICONS[0]; const op=r.isDischarged?'opacity-75 grayscale-[0.5]':'';
+                l.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer relative group ${op}"><div class="flex items-start gap-4"><div class="w-11 h-11 shrink-0 rounded-xl ${c.bg} text-white flex items-center justify-center shadow-sm"><i class="fa-solid ${i.icon} text-lg"></i></div><div class="flex-1 min-w-0" onclick="openEditor('${r.id}')"><div class="flex justify-between items-center mb-1.5"><div><span class="block text-sm font-bold text-slate-800">${r.name||'Untitled'}</span><span class="text-[10px] font-bold text-slate-400">${formatDateDMY(r.timestamp)} &bull; ${r.ward||'Gen'}</span></div>${r.isDischarged?'<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>':''}</div><p class="text-slate-600 text-sm leading-relaxed font-sans line-clamp-3">${r.content.substring(0,120)+(r.content.length>120?'...':'')}</p></div></div><div class="absolute top-4 right-4 ${isBatchMode?'block':'hidden'} batch-check z-10 bg-white p-1 rounded"><input type="checkbox" class="check-box" onchange="toggleBatchSelect('${r.id}',this)" ${selectedBatchIds.has(r.id)?'checked':''}></div></div>`;
+            });
+        }
+        function closePortal() { document.getElementById('portalPanel').classList.add('translate-x-full'); setTimeout(()=>toggleElement('portalModal', false),300); }
+
+        function openEditor(id=null) {
+            toggleElement('editorModal', true); editingId=id; isNoteExpanded=false; toggleExpandNote(false);
+            if(id) {
+                const r=records.find(x=>x.id===id); document.getElementById('editorMode').innerText="Edit"; toggleElement('btnDeleteRecord', true); document.getElementById('btnDeleteRecord').classList.add('flex'); toggleElement('btnExportSingle', true); document.getElementById('btnExportSingle').classList.add('flex');
+                let st=r.timestamp; if(st&&st.indexOf('T')>-1)st=st.split('T')[0]; document.getElementById('editTimestamp').value=st;
+                document.getElementById('editWard').value=r.ward; document.getElementById('editName').value=r.name||''; document.getElementById('editContent').value=r.content; document.getElementById('editDischarged').checked=!!r.isDischarged;
+                selectIcon(r.icon); selectColor(r.color);
+            } else {
+                document.getElementById('editorMode').innerText="New"; toggleElement('btnDeleteRecord', false); document.getElementById('btnDeleteRecord').classList.remove('flex'); toggleElement('btnExportSingle', false); document.getElementById('btnExportSingle').classList.remove('flex');
+                document.getElementById('editTimestamp').value=selectedDateStr;
+                const count=records.length+1; document.getElementById('editWard').value=''; document.getElementById('editName').value=`Data_${String(count).padStart(3,'0')}`; document.getElementById('editContent').value=''; document.getElementById('editDischarged').checked=false;
+                selectIcon(ICONS[0].id); selectColor(COLORS[0].id);
+            }
+        }
+        function closeEditor() { toggleElement('editorModal', false); editingId=null; }
+
+        function toggleExpandNote(fs) {
+            const t=document.getElementById('editContent'); const b=document.getElementById('btnLabelExpand'); const be=document.getElementById('btnExitExpand'); if(!b)return; const i=b.querySelector('i'); const txt=b.querySelector('span');
+            if(typeof fs==='boolean') isNoteExpanded=fs; else isNoteExpanded=!isNoteExpanded;
+            if(isNoteExpanded){ t.classList.add('expanded-note'); i.className='fa-solid fa-compress'; if(txt)txt.innerText="Collapse"; toggleElement('btnExitExpand', true); }
+            else{ t.classList.remove('expanded-note'); i.className='fa-solid fa-expand'; if(txt)txt.innerText="Expand"; toggleElement('btnExitExpand', false); }
+        }
+
+        function renderIconPicker() { document.getElementById('iconPicker').innerHTML=ICONS.map(i=>`<button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600 transition flex flex-col items-center justify-center gap-1 icon-option group" data-value="${i.id}" onclick="selectIcon('${i.id}')"><i class="fa-solid ${i.icon} text-lg group-hover:scale-110 transition-transform"></i></button>`).join(''); }
+        function selectIcon(id) { document.getElementById('editIcon').value=id; document.querySelectorAll('.icon-option').forEach(b=>{ if(b.dataset.value===id) b.className="aspect-square rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/30 flex flex-col items-center justify-center gap-1 icon-option transform scale-105 transition-all"; else b.className="aspect-square rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-slate-300 transition flex flex-col items-center justify-center gap-1 icon-option"; }); }
+        
+        function renderColorPicker() { document.getElementById('colorPicker').innerHTML=COLORS.map(c=>`<button class="w-6 h-6 rounded-full ${c.bg} ring-2 ring-offset-2 ring-transparent transition-all color-option hover:scale-110" data-value="${c.id}" onclick="selectColor('${c.id}')"></button>`).join(''); }
+        function selectColor(id) { document.getElementById('editColor').value=id; const o=COLORS.find(c=>c.id===id); document.querySelectorAll('.color-option').forEach(b=>{ if(b.dataset.value===id){b.classList.add(o.ring,'ring-offset-2');b.classList.remove('ring-transparent');}else{b.classList.remove(o.ring,'ring-offset-2');b.classList.add('ring-transparent');} }); }
+
+        async function saveRecord() {
+            const btn=document.getElementById('btnSave'); const originalHtml = btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; btn.disabled=true;
+            const p = { id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5), timestamp:document.getElementById('editTimestamp').value, ward:document.getElementById('editWard').value, name:document.getElementById('editName').value, icon:document.getElementById('editIcon').value, color:document.getElementById('editColor').value, content:document.getElementById('editContent').value, isDischarged:document.getElementById('editDischarged').checked };
+            try { await saveToBackend(p,'save'); closeEditor(); closePortal(); await fetchData(false); } catch(e){ alert("Save Failed: "+e.message); } finally { btn.innerHTML=originalHtml; btn.disabled=false; }
+        }
+        async function deleteRecord() { if(!confirm("Delete?"))return; try{ await saveToBackend({ids:[editingId]},'delete'); closeEditor(); closePortal(); await fetchData(false); }catch(e){alert("Delete failed");} }
+        function toggleBatchMode() { isBatchMode=!isBatchMode; document.querySelectorAll('.batch-check').forEach(e=>e.style.display=isBatchMode?'block':'none'); updateBatchUI(); }
+        function toggleBatchSelect(id,cb) { if(cb.checked)selectedBatchIds.add(id); else selectedBatchIds.delete(id); updateBatchUI(); }
+        function updateBatchUI() { const t=document.getElementById('batchToolbar'); const c=document.getElementById('batchCount'); const b=document.getElementById('btnBatch'); if(isBatchMode){t.classList.remove('hidden');b.classList.add('text-primary-600','bg-primary-50');b.classList.remove('text-slate-400');}else{t.classList.add('hidden');b.classList.remove('text-primary-600','bg-primary-50');b.classList.add('text-slate-400');} c.innerText=selectedBatchIds.size; }
+        async function executeBatchDelete() { if(selectedBatchIds.size===0)return; if(!confirm("Delete selected?"))return; try{ await saveToBackend({ids:Array.from(selectedBatchIds)},'delete'); toggleBatchMode(); closePortal(); await fetchData(false); }catch(e){alert("Failed");} }
+        function switchView(m) { viewMode=m; const c=document.getElementById('viewCalendar'); const w=document.getElementById('viewWards'); const bc=document.getElementById('btnViewCal'); const bw=document.getElementById('btnViewWard'); if(m==='calendar'){c.classList.remove('-translate-x-full');w.classList.add('translate-x-full');bc.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";bw.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}else{c.classList.add('-translate-x-full');w.classList.remove('translate-x-full');bw.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";bc.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";} }
     </script>
 </body>
 </html>
