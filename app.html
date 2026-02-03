@@ -24,7 +24,6 @@
         }
     </script>
     <style>
-        /* CSS VARIABLES ROOT - Hardcoded defaults to ensure visibility */
         :root { 
             --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); 
             transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; 
@@ -32,15 +31,40 @@
 
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
+
         .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
         .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; }
-        .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 90vw !important; height: 90vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
+        
+        /* EXPANDED NOTE FIXED */
+        .expanded-note { 
+            position: fixed !important; 
+            top: 50% !important; 
+            left: 50% !important; 
+            transform: translate(-50%, -50%) !important;
+            width: 90vw !important; 
+            height: 90vh !important; 
+            z-index: 9999 !important; 
+            font-size: 1.5rem !important; 
+            border-radius: 1rem !important; 
+            box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; 
+            border-color: var(--p-600) !important; 
+            border-width: 4px !important;
+            padding: 3rem !important; 
+            margin: 0 !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -190,7 +214,12 @@
         const COLORS = [{id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'}];
         
         let records=[]; let currentMonth=new Date(); 
-        let selectedDateStr = ""; // Will be set by "Today" or calendar click
+        
+        // --- TIMEZONE FIX: INITIALIZE TODAY AS LOCAL YMD ---
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000;
+        const localDate = new Date(now.getTime() - offset);
+        let selectedDateStr = localDate.toISOString().split('T')[0];
 
         let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let isDemoMode=false; let pollTimer=null; let isNoteExpanded=false;
         
@@ -200,7 +229,6 @@
         function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
 
         window.onload = function() {
-            goToToday(); // Initialize selectedDateStr
             applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker();
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML = `ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`;
             document.getElementById('dbNameSetup').innerText = TARGET_SHEET;
@@ -292,15 +320,24 @@
                 const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
                 if(json.error) throw new Error(json.error);
                 
-                // DATA NORMALIZATION (SIMPLE STRING & D/C LOGIC)
+                // CRITICAL FIX: DATE PARSING & D/C LOGIC
                 records = json.map(r => {
-                    // D/C Normalization: Robust boolean check
+                    // D/C Fix: Check multiple potential truthy values
                     const rawDC = r.is_discharged ?? r.isDischarged;
-                    const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true');
+                    const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true' || rawDC === 1 || rawDC === "1");
                     
-                    // Date Normalization: Strip time/timezone if present
-                    let dateStr = r.timestamp || "";
-                    if(dateStr.length > 10) dateStr = dateStr.substring(0, 10);
+                    // Date Fix: PARSE AS LOCAL DATE
+                    let dateStr = r.timestamp;
+                    if(dateStr && typeof dateStr === 'string' && dateStr.includes('T')) {
+                        // If standard ISO (UTC), convert to local date object then to string
+                        const d = new Date(dateStr);
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        dateStr = `${y}-${m}-${day}`;
+                    } else if (dateStr && dateStr.length > 10) {
+                        dateStr = dateStr.substring(0, 10);
+                    }
                     
                     return { ...r, isDischarged: isDC, timestamp: dateStr };
                 }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -313,7 +350,6 @@
         }
         
         function manualRefresh() { const btn=document.getElementById('btnRefresh'); btn.classList.add('animate-spin'); fetchData(false).then(() => setTimeout(() => btn.classList.remove('animate-spin'), 1000)); }
-        function startDemoMode() { /* Removed auto demo */ }
         function updateSyncStatus(msg, c) { const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const colors={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=msg; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${colors[c]||'bg-slate-400'} shadow-sm ${msg==='Live'?'animate-pulse':''}`; }
         
         async function saveToBackend(payload, action = "save") {
@@ -323,12 +359,8 @@
         // --- EXPORT & HELPERS ---
         function formatDateDMY(iso) { 
             if(!iso) return '';
-            // Simple string splitting, no Date object math
-            if(iso.length === 10 && iso.includes('-')) {
-                const [y, m, d] = iso.split('-');
-                return `${d}/${m}/${y}`;
-            }
-            return iso;
+            if (iso.match(/^\d{4}-\d{2}-\d{2}$/)) { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
+            return iso; 
         }
 
         function generateTxtContent(r) { return `Name: ${r.name||'Untitled'}\nDate: ${formatDateDMY(r.timestamp)}\nWard: ${r.ward||'Unassigned'}\n\nNote:\n${r.content||''}`; }
@@ -341,20 +373,19 @@
             const g=document.getElementById('calendarGrid'); g.innerHTML=''; const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); applyTheme(m);
             document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});
             const fd=new Date(y,m,1).getDay(); const dim=new Date(y,m+1,0).getDate();
-            
-            // Build Today String manually (Local)
-            const now = new Date();
-            const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-
             for(let i=0;i<fd;i++) g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';
             for(let d=1;d<=dim;d++){
-                // Build cell date string manually
+                // Build cell date string manually (YYYY-MM-DD)
                 const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 
-                // STRING COMPARISON for Filtering
+                // FILTER: Hide D/C patients from Calendar (Using strict text comparison)
                 const dr=records.filter(r=> r.timestamp === ds && !r.isDischarged);
                 
+                // Today Check (Using Local Time initialized at start)
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
                 const isT = todayStr === ds;
+
                 const c=document.createElement('div'); c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;
                 c.onclick=()=>openPortal(ds);
                 let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;
@@ -366,7 +397,6 @@
         function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth()+d); renderCalendar(); }
         function goToToday() { 
             currentMonth=new Date(); 
-            // Update Global Selected Date String to "Today"
             const now = new Date();
             selectedDateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
             renderCalendar(); 
@@ -385,6 +415,7 @@
                 g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;
             });
             if(dc>0) g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;
+            if(Object.keys(wm).length===0 && dc===0) g.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
         }
         function updateWardSuggestions() { document.getElementById('wardSuggestions').innerHTML = Array.from(new Set(records.map(r=>r.ward).filter(Boolean))).map(w=>`<option value="${w}">`).join(''); }
 
@@ -392,9 +423,9 @@
             toggleElement('portalModal', true); setTimeout(()=>document.getElementById('portalPanel').classList.remove('translate-x-full'),10);
             let fr=[]; 
             if(ds) { 
-                selectedDateStr=ds; // Keep clicked YYYY-MM-DD
+                selectedDateStr=ds; // Keep exact clicked date
                 const [y, m, d] = ds.split('-'); document.getElementById('portalTitle').innerText=`${d}/${m}/${y}`; 
-                // FILTER: Strict string comparison
+                // FILTER: Use Strict String Compare
                 fr=records.filter(r=> r.timestamp === ds && !r.isDischarged); 
                 toggleElement('portalFooter', true); 
             }
@@ -419,7 +450,7 @@
             if(id) {
                 const r=records.find(x=>x.id===id); document.getElementById('editorMode').innerText="Edit"; toggleElement('btnDeleteRecord', true); document.getElementById('btnDeleteRecord').classList.add('flex'); toggleElement('btnExportSingle', true); document.getElementById('btnExportSingle').classList.add('flex');
                 
-                document.getElementById('editTimestamp').value = r.timestamp; // Use raw YYYY-MM-DD
+                document.getElementById('editTimestamp').value = r.timestamp; // Raw YYYY-MM-DD
                 
                 document.getElementById('editWard').value=r.ward; document.getElementById('editName').value=r.name||''; document.getElementById('editContent').value=r.content; document.getElementById('editDischarged').checked=!!r.isDischarged;
                 selectIcon(r.icon); selectColor(r.color);
