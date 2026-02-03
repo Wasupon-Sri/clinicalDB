@@ -205,7 +205,15 @@
                         <input type="datetime-local" id="editTimestamp" class="input-modern">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">Ward / Unit</label>
+                        <div class="flex justify-between items-center mb-1.5 ml-1">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Ward / Unit</label>
+                            
+                            <!-- D/C Checkbox -->
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="editDischarged" class="check-box !w-4 !h-4 !border-rose-300 checked:!bg-rose-500 checked:!border-rose-500">
+                                <label for="editDischarged" class="text-xs font-bold text-rose-500 cursor-pointer">Discharge (D/C)</label>
+                            </div>
+                        </div>
                         <div class="relative">
                             <input type="text" id="editWard" list="wardSuggestions" placeholder="Select or type..." class="input-modern pl-10">
                             <i class="fa-solid fa-hospital absolute left-3.5 top-3.5 text-slate-400"></i>
@@ -464,7 +472,7 @@
         // --- EXPORT LOGIC ---
         function exportRecord(record) {
             const filename = (record.name || 'Untitled') + ".txt";
-            const text = `ID: ${record.id}\nName: ${record.name}\nTimestamp: ${record.timestamp}\nWard: ${record.ward}\nStatus: ${record.color}\n\n--- CLINICAL NOTE ---\n\n${record.content}`;
+            const text = `ID: ${record.id}\nName: ${record.name}\nTimestamp: ${record.timestamp}\nWard: ${record.ward}\nStatus: ${record.color}\nDischarged: ${record.isDischarged ? 'Yes' : 'No'}\n\n--- CLINICAL NOTE ---\n\n${record.content}`;
             
             const blob = new Blob([text], { type: "text/plain" });
             const url = window.URL.createObjectURL(blob);
@@ -485,7 +493,8 @@
                 timestamp: document.getElementById('editTimestamp').value,
                 ward: document.getElementById('editWard').value,
                 color: document.getElementById('editColor').value,
-                content: document.getElementById('editContent').value
+                content: document.getElementById('editContent').value,
+                isDischarged: document.getElementById('editDischarged').checked
             };
             exportRecord(tempRec);
         }
@@ -502,7 +511,7 @@
             let combinedText = "--- EXPORT BATCH ---\n\n";
             selectedRecs.forEach(r => {
                 combinedText += `=== RECORD START: ${r.name || r.id} ===\n`;
-                combinedText += `Timestamp: ${r.timestamp}\nWard: ${r.ward}\n\n${r.content}\n\n=== RECORD END ===\n\n`;
+                combinedText += `Timestamp: ${r.timestamp}\nWard: ${r.ward}\nDischarged: ${r.isDischarged ? 'Yes' : 'No'}\n\n${r.content}\n\n=== RECORD END ===\n\n`;
             });
 
             const blob = new Blob([combinedText], { type: "text/plain" });
@@ -540,7 +549,10 @@
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dayRecords = records.filter(r => r.timestamp.startsWith(dateStr));
+                
+                // FILTER: Exclude Discharged Patients from Calendar
+                const dayRecords = records.filter(r => r.timestamp.startsWith(dateStr) && !r.isDischarged);
+                
                 const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
                 const cell = document.createElement('div');
@@ -590,17 +602,19 @@
             grid.innerHTML = '';
             
             const wardMap = {};
+            let dischargedCount = 0;
+
             records.forEach(r => {
-                const w = r.ward ? r.ward.trim() : 'Unassigned';
-                if(!wardMap[w]) wardMap[w] = 0;
-                wardMap[w]++;
+                if (r.isDischarged) {
+                    dischargedCount++;
+                } else {
+                    const w = r.ward ? r.ward.trim() : 'Unassigned';
+                    if(!wardMap[w]) wardMap[w] = 0;
+                    wardMap[w]++;
+                }
             });
 
-            if (Object.keys(wardMap).length === 0) {
-                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
-                return;
-            }
-
+            // 1. Render Normal Wards
             Object.entries(wardMap).sort().forEach(([name, count]) => {
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden";
@@ -611,12 +625,37 @@
                     <div class="relative">
                         <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${name}</h3>
                         <div class="flex items-center gap-2">
-                            <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${count} Cases</span>
+                            <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${count} Active Cases</span>
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+
+            // 2. Render DISCHARGED Card
+            if (dischargedCount > 0) {
+                const dcCard = document.createElement('div');
+                dcCard.className = "bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-slate-300 cursor-pointer transition-all duration-300 group relative overflow-hidden";
+                dcCard.onclick = () => openPortal(null, 'DISCHARGED');
+
+                dcCard.innerHTML = `
+                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full group-hover:from-slate-200 group-hover:to-slate-300 transition-colors duration-300"></div>
+                    <div class="relative">
+                        <div class="flex items-center gap-2 mb-2">
+                            <h3 class="text-xl font-bold text-slate-700 group-hover:text-slate-900 transition-colors">Discharged</h3>
+                            <i class="fa-solid fa-check-double text-slate-400"></i>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-slate-200 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-slate-300 group-hover:text-slate-800 transition-colors">${dischargedCount} Archived</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(dcCard);
+            }
+
+            if (Object.keys(wardMap).length === 0 && dischargedCount === 0) {
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
+            }
         }
 
         function updateWardSuggestions() {
@@ -643,11 +682,19 @@
                 selectedDate = new Date(dateStr);
                 const prettyDate = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' });
                 title.innerText = prettyDate;
-                filteredRecords = records.filter(r => r.timestamp.startsWith(dateStr));
+                // Calendar click: Show only active (non-discharged) records
+                filteredRecords = records.filter(r => r.timestamp.startsWith(dateStr) && !r.isDischarged);
                 footer.classList.remove('hidden');
             } else {
-                title.innerText = wardFilter;
-                filteredRecords = records.filter(r => (r.ward || 'Unassigned') === wardFilter);
+                title.innerText = wardFilter === 'DISCHARGED' ? 'Discharged Cases' : wardFilter;
+                
+                if (wardFilter === 'DISCHARGED') {
+                    // Show all discharged
+                    filteredRecords = records.filter(r => r.isDischarged);
+                } else {
+                    // Show active in this ward
+                    filteredRecords = records.filter(r => (r.ward || 'Unassigned') === wardFilter && !r.isDischarged);
+                }
                 footer.classList.add('hidden');
             }
 
@@ -661,7 +708,9 @@
                 const shortContent = rec.content.substring(0, 120) + (rec.content.length > 120 ? '...' : '');
 
                 const item = document.createElement('div');
-                item.className = "bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer relative group";
+                // Dim style for discharged items in list
+                const opacityClass = rec.isDischarged ? 'opacity-75 grayscale-[0.5]' : '';
+                item.className = `bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer relative group ${opacityClass}`;
                 
                 let html = `
                     <div class="flex items-start gap-4">
@@ -674,6 +723,7 @@
                                     <span class="block text-sm font-bold text-slate-800">${rec.name || 'Untitled'}</span>
                                     <span class="text-[10px] font-bold text-slate-400">${timeStr} &bull; ${rec.ward || 'Gen'}</span>
                                 </div>
+                                ${rec.isDischarged ? '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>' : ''}
                             </div>
                             <p class="text-slate-600 text-sm leading-relaxed font-sans line-clamp-3">${shortContent}</p>
                         </div>
@@ -717,10 +767,17 @@
                 btnDel.classList.remove('hidden'); btnDel.classList.add('flex');
                 btnExp.classList.remove('hidden'); btnExp.classList.add('flex');
                 
-                document.getElementById('editTimestamp').value = rec.timestamp;
+                let safeTime = rec.timestamp;
+                if(safeTime && safeTime.indexOf('T') > -1 && safeTime.length > 16) {
+                    safeTime = safeTime.substring(0, 16);
+                }
+                document.getElementById('editTimestamp').value = safeTime;
+                
                 document.getElementById('editWard').value = rec.ward;
                 document.getElementById('editName').value = rec.name || '';
                 document.getElementById('editContent').value = rec.content;
+                document.getElementById('editDischarged').checked = !!rec.isDischarged; // Load D/C State
+                
                 selectIcon(rec.icon);
                 selectColor(rec.color);
             } else {
@@ -742,6 +799,7 @@
                 document.getElementById('editWard').value = '';
                 document.getElementById('editName').value = smartName;
                 document.getElementById('editContent').value = '';
+                document.getElementById('editDischarged').checked = false; // Default unchecked
                 selectIcon(ICONS[0].id);
                 selectColor(COLORS[0].id);
             }
@@ -811,7 +869,8 @@
                 name: document.getElementById('editName').value,
                 icon: document.getElementById('editIcon').value,
                 color: document.getElementById('editColor').value,
-                content: document.getElementById('editContent').value
+                content: document.getElementById('editContent').value,
+                isDischarged: document.getElementById('editDischarged').checked // Capture D/C State
             };
 
             try {
