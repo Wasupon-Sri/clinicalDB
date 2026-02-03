@@ -24,11 +24,14 @@
         }
     </script>
     <style>
-        :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
+        /* CSS VARIABLES ROOT - Hardcoded defaults to ensure visibility */
+        :root { 
+            --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); 
+            transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; 
+        }
+
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -48,7 +51,6 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative">
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
             
-            <!-- SETUP MODE -->
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
@@ -56,7 +58,6 @@
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
 
-            <!-- LOGIN MODE -->
             <div id="authLogin" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Locked</h2>
                 <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
@@ -68,6 +69,7 @@
             <div id="authLoading">
                 <span class="loader mx-auto"></span>
                 <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
+                <p id="loadingMsg" class="text-xs text-slate-400 mt-2"></p>
             </div>
 
             <div id="authError" class="hidden">
@@ -130,6 +132,7 @@
         </main>
     </div>
 
+    <!-- MODALS -->
     <div id="portalModal" class="fixed inset-0 z-40 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
         <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
@@ -187,12 +190,7 @@
         const COLORS = [{id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'}];
         
         let records=[]; let currentMonth=new Date(); 
-        
-        // --- TIMEZONE FIX: LOCAL DATE ---
-        const now = new Date();
-        const offset = now.getTimezoneOffset() * 60000;
-        const localDate = new Date(now.getTime() - offset);
-        let selectedDateStr = localDate.toISOString().split('T')[0];
+        let selectedDateStr = ""; // Will be set by "Today" or calendar click
 
         let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let isDemoMode=false; let pollTimer=null; let isNoteExpanded=false;
         
@@ -202,6 +200,7 @@
         function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
 
         window.onload = function() {
+            goToToday(); // Initialize selectedDateStr
             applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker();
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML = `ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`;
             document.getElementById('dbNameSetup').innerText = TARGET_SHEET;
@@ -293,11 +292,17 @@
                 const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
                 if(json.error) throw new Error(json.error);
                 
-                // CRITICAL FIX: Normalize isDischarged AND Local Date
+                // DATA NORMALIZATION (SIMPLE STRING & D/C LOGIC)
                 records = json.map(r => {
-                    const rawVal = r.is_discharged ?? r.isDischarged;
-                    const isDC = (rawVal === true || String(rawVal).toLowerCase() === 'true');
-                    return { ...r, isDischarged: isDC };
+                    // D/C Normalization: Robust boolean check
+                    const rawDC = r.is_discharged ?? r.isDischarged;
+                    const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true');
+                    
+                    // Date Normalization: Strip time/timezone if present
+                    let dateStr = r.timestamp || "";
+                    if(dateStr.length > 10) dateStr = dateStr.substring(0, 10);
+                    
+                    return { ...r, isDischarged: isDC, timestamp: dateStr };
                 }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                 renderCalendar(); renderWards(); updateWardSuggestions();
@@ -308,32 +313,22 @@
         }
         
         function manualRefresh() { const btn=document.getElementById('btnRefresh'); btn.classList.add('animate-spin'); fetchData(false).then(() => setTimeout(() => btn.classList.remove('animate-spin'), 1000)); }
+        function startDemoMode() { /* Removed auto demo */ }
         function updateSyncStatus(msg, c) { const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const colors={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=msg; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${colors[c]||'bg-slate-400'} shadow-sm ${msg==='Live'?'animate-pulse':''}`; }
         
         async function saveToBackend(payload, action = "save") {
             return await robustFetch({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD });
         }
 
-        // --- HELPER: LOCAL DATE ---
-        function getLocalYMD(isoString) {
-            if (!isoString) return "";
-            if (isoString.length === 10 && isoString.includes('-')) return isoString; // Already YYYY-MM-DD
-            
-            // Manual parse to avoid UTC shift
-            const d = new Date(isoString);
-            if(isNaN(d.getTime())) return isoString;
-            
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${day}`;
-        }
-
+        // --- EXPORT & HELPERS ---
         function formatDateDMY(iso) { 
-            const ymd = getLocalYMD(iso);
-            if (!ymd) return '';
-            const [y, m, d] = ymd.split('-');
-            return `${d}/${m}/${y}`;
+            if(!iso) return '';
+            // Simple string splitting, no Date object math
+            if(iso.length === 10 && iso.includes('-')) {
+                const [y, m, d] = iso.split('-');
+                return `${d}/${m}/${y}`;
+            }
+            return iso;
         }
 
         function generateTxtContent(r) { return `Name: ${r.name||'Untitled'}\nDate: ${formatDateDMY(r.timestamp)}\nWard: ${r.ward||'Unassigned'}\n\nNote:\n${r.content||''}`; }
@@ -346,17 +341,20 @@
             const g=document.getElementById('calendarGrid'); g.innerHTML=''; const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); applyTheme(m);
             document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});
             const fd=new Date(y,m,1).getDay(); const dim=new Date(y,m+1,0).getDate();
+            
+            // Build Today String manually (Local)
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
             for(let i=0;i<fd;i++) g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';
             for(let d=1;d<=dim;d++){
-                // Use strict YYYY-MM-DD
+                // Build cell date string manually
                 const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 
-                // FIXED COMPARISON
-                const dr=records.filter(r=> getLocalYMD(r.timestamp) === ds && !r.isDischarged);
+                // STRING COMPARISON for Filtering
+                const dr=records.filter(r=> r.timestamp === ds && !r.isDischarged);
                 
-                // Local Today Check
-                const isT = getLocalYMD(new Date().toISOString()) === ds;
-
+                const isT = todayStr === ds;
                 const c=document.createElement('div'); c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;
                 c.onclick=()=>openPortal(ds);
                 let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;
@@ -366,19 +364,27 @@
             }
         }
         function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth()+d); renderCalendar(); }
-        function goToToday() { currentMonth=new Date(); renderCalendar(); }
+        function goToToday() { 
+            currentMonth=new Date(); 
+            // Update Global Selected Date String to "Today"
+            const now = new Date();
+            selectedDateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            renderCalendar(); 
+        }
 
         function renderWards() {
             const g=document.getElementById('wardGrid'); g.innerHTML=''; const wm={}; let dc=0;
-            records.forEach(r=>{ if(r.isDischarged) dc++; else { const w=r.ward?r.ward.trim():'Unassigned'; if(!wm[w])wm[w]=0; wm[w]++; } });
-            
+            records.forEach(r=>{ 
+                if(r.isDischarged) {
+                    dc++; 
+                } else { 
+                    const w=r.ward?r.ward.trim():'Unassigned'; if(!wm[w])wm[w]=0; wm[w]++; 
+                } 
+            });
             Object.entries(wm).sort().forEach(([n,c])=>{
                 g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;
             });
-            
             if(dc>0) g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;
-            
-            if(Object.keys(wm).length===0 && dc===0) g.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
         }
         function updateWardSuggestions() { document.getElementById('wardSuggestions').innerHTML = Array.from(new Set(records.map(r=>r.ward).filter(Boolean))).map(w=>`<option value="${w}">`).join(''); }
 
@@ -388,8 +394,8 @@
             if(ds) { 
                 selectedDateStr=ds; // Keep clicked YYYY-MM-DD
                 const [y, m, d] = ds.split('-'); document.getElementById('portalTitle').innerText=`${d}/${m}/${y}`; 
-                // FIXED FILTER
-                fr=records.filter(r=> getLocalYMD(r.timestamp) === ds && !r.isDischarged); 
+                // FILTER: Strict string comparison
+                fr=records.filter(r=> r.timestamp === ds && !r.isDischarged); 
                 toggleElement('portalFooter', true); 
             }
             else { 
@@ -413,8 +419,7 @@
             if(id) {
                 const r=records.find(x=>x.id===id); document.getElementById('editorMode').innerText="Edit"; toggleElement('btnDeleteRecord', true); document.getElementById('btnDeleteRecord').classList.add('flex'); toggleElement('btnExportSingle', true); document.getElementById('btnExportSingle').classList.add('flex');
                 
-                // USE LOCAL YMD HELPER FOR EDIT
-                document.getElementById('editTimestamp').value = getLocalYMD(r.timestamp);
+                document.getElementById('editTimestamp').value = r.timestamp; // Use raw YYYY-MM-DD
                 
                 document.getElementById('editWard').value=r.ward; document.getElementById('editName').value=r.name||''; document.getElementById('editContent').value=r.content; document.getElementById('editDischarged').checked=!!r.isDischarged;
                 selectIcon(r.icon); selectColor(r.color);
@@ -441,9 +446,9 @@
         function selectColor(id) { document.getElementById('editColor').value=id; const o=COLORS.find(c=>c.id===id); document.querySelectorAll('.color-option').forEach(b=>{ if(b.dataset.value===id){b.classList.add(o.ring,'ring-offset-2');b.classList.remove('ring-transparent');}else{b.classList.remove(o.ring,'ring-offset-2');b.classList.add('ring-transparent');} }); }
 
         async function saveRecord() {
-            const btn=document.getElementById('btnSave'); const org=btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; btn.disabled=true;
+            const btn=document.getElementById('btnSave'); const originalHtml = btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; btn.disabled=true;
             const p = { id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5), timestamp:document.getElementById('editTimestamp').value, ward:document.getElementById('editWard').value, name:document.getElementById('editName').value, icon:document.getElementById('editIcon').value, color:document.getElementById('editColor').value, content:document.getElementById('editContent').value, isDischarged:document.getElementById('editDischarged').checked };
-            try { await saveToBackend(p,'save'); closeEditor(); closePortal(); await fetchData(false); } catch(e){ alert("Save Failed: "+e.message); } finally { btn.innerHTML=org; btn.disabled=false; }
+            try { await saveToBackend(p,'save'); closeEditor(); closePortal(); await fetchData(false); } catch(e){ alert("Save Failed: "+e.message); } finally { btn.innerHTML=originalHtml; btn.disabled=false; }
         }
         async function deleteRecord() { if(!confirm("Delete?"))return; try{ await saveToBackend({ids:[editingId]},'delete'); closeEditor(); closePortal(); await fetchData(false); }catch(e){alert("Delete failed");} }
         function toggleBatchMode() { isBatchMode=!isBatchMode; document.querySelectorAll('.batch-check').forEach(e=>e.style.display=isBatchMode?'block':'none'); updateBatchUI(); }
