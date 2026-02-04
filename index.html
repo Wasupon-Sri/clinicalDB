@@ -153,6 +153,10 @@
 
             sortedUsers.forEach(u => {
                 const isMain = u === 'Sheet1';
+                
+                // --- VISIBILITY LOGIC: Hide Sheet1 unless Admin ---
+                if (isMain && !isAdmin) return; 
+
                 const displayName = isMain ? 'Main Database' : u;
                 const link = isMain ? `${APP_BASE_URL}?db=Sheet1` : `${APP_BASE_URL}?db=${u}`;
                 const initial = displayName.charAt(0).toUpperCase();
@@ -223,6 +227,8 @@
                 document.body.classList.add('admin-mode');
                 document.getElementById('btnAdminToggle').classList.add('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/20');
                 document.getElementById('btnAdminToggle').onclick = logoutAdmin; // Change click to logout
+                // Refresh grid to show Sheet1
+                renderGrid(allUsers);
             } else {
                 alert("Access Denied");
                 document.getElementById('adminPin').value = '';
@@ -236,6 +242,8 @@
             const btn = document.getElementById('btnAdminToggle');
             btn.classList.remove('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/20');
             btn.onclick = toggleAdminLogin;
+            // Refresh grid to hide Sheet1
+            renderGrid(allUsers);
         }
 
         function updateAdminView() {
@@ -283,7 +291,7 @@
 
         function copyLink(url) {
             navigator.clipboard.writeText(url);
-            // Toast feedback could go here
+            // Toast feedback
             const btn = event.currentTarget;
             const icon = btn.querySelector('i');
             icon.className = "fa-solid fa-check text-emerald-400";
