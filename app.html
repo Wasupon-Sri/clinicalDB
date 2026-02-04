@@ -35,10 +35,10 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
+        .textarea-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
-        
+
         /* Lightbox */
         .lightbox-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .lightbox-img { max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); z-index: 20; transition: opacity 0.2s; }
@@ -48,6 +48,7 @@
         .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; opacity: 0.7; }
         .lightbox-close:hover { opacity: 1; }
         .lightbox-loader { position: absolute; z-index: 10; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rotation 1s linear infinite; }
+        
         .img-delete-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10; transition: transform 0.2s; border: 2px solid white; }
         .img-delete-btn:hover { transform: scale(1.1); background: #dc2626; }
     </style>
@@ -58,6 +59,7 @@
     <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative">
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
+            
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
@@ -71,8 +73,17 @@
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
                 <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
-            <div id="authLoading"><span class="loader mx-auto"></span><p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p></div>
-            <div id="authError" class="hidden"><h3 class="text-lg font-bold text-slate-800">Connection Failed</h3><p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p><button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button></div>
+            <div id="authLoading">
+                <span class="loader mx-auto"></span>
+                <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
+                <p id="loadingMsg" class="text-xs text-slate-400 mt-2"></p>
+            </div>
+            <div id="authError" class="hidden">
+                <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
+                <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
+                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p>
+                <button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button>
+            </div>
         </div>
     </div>
 
@@ -135,7 +146,7 @@
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
         <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
             <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-start shrink-0 bg-white z-10">
-                <div><h3 id="portalTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Details</h3><p id="portalSubtitle" class="text-slate-500 text-sm mt-1">Select a record</p></div>
+                <div><h3 id="portalTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Details</h3><p id="portalSubtitle" class="text-slate-500 text-sm mt-1">Select a record to view details</p></div>
                 <div class="flex gap-2"><button onclick="toggleBatchMode()" id="btnBatch" class="w-9 h-9 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition flex items-center justify-center"><i class="fa-solid fa-list-check"></i></button><button onclick="closePortal()" class="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             </div>
             <div id="portalList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50"></div>
@@ -189,6 +200,7 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
+        
         let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
@@ -221,8 +233,7 @@
         window.onload = function() { 
             applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker(); 
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; 
-            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; 
-            document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
+            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
             
             // ATTACH LIGHTBOX IMAGE LISTENERS VIA JS
             const lbImg = document.getElementById('lightboxImg');
@@ -234,35 +245,79 @@
         };
 
         function toggleElement(id,show){const e=document.getElementById(id);if(e){if(show)e.classList.remove('hidden');else e.classList.add('hidden');}}
-        async function robustFetch(p){try{const r=await fetch(API_URL,{method:'POST',body:JSON.stringify(p),headers:{"Content-Type":"text/plain;charset=utf-8"}});const t=await r.text();try{return JSON.parse(t);}catch(e){if(t.trim().startsWith("<"))throw new Error("Server Error");throw new Error("Invalid Response");}}catch(e){throw e;}}
-        async function checkAuth(){toggleElement('authOverlay',true);toggleElement('authLoading',true);toggleElement('authSetup',false);toggleElement('authLogin',false);toggleElement('authError',false);try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET});toggleElement('authLoading',false);if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");}}
+        
+        // --- HYBRID FETCH STRATEGY ---
+        // READ = GET, WRITE = POST
+        async function robustFetch(payload, useGet = false) {
+            try {
+                let res;
+                if (useGet) {
+                    // Convert payload to query params
+                    const params = new URLSearchParams();
+                    for (const key in payload) {
+                        params.append(key, payload[key]);
+                    }
+                    // Add cache buster
+                    params.append('_t', Date.now());
+                    
+                    res = await fetch(`${API_URL}?${params.toString()}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    });
+                } else {
+                    res = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                        headers: { "Content-Type": "text/plain;charset=utf-8" }
+                    });
+                }
+
+                const text = await res.text();
+                try { return JSON.parse(text); } 
+                catch (e) { 
+                    if(text.trim().startsWith("<")) throw new Error("Server returned HTML error (Auth/Script)");
+                    throw new Error("Invalid Server Response"); 
+                }
+            } catch (e) { throw e; }
+        }
+
+        async function checkAuth() {
+            toggleElement('authOverlay',true);toggleElement('authLoading',true);toggleElement('authSetup',false);toggleElement('authLogin',false);toggleElement('authError',false);
+            try {
+                // Use GET for initial check (safer)
+                const json = await robustFetch({ action: 'auth_check_status', db: TARGET_SHEET }, true);
+                toggleElement('authLoading',false);
+                if(json.status==='setup_needed')toggleElement('authSetup',true);
+                else if(json.status==='locked')toggleElement('authLogin',true);
+                else if(json.error)showAuthError(json.error);
+            } catch(e) { showAuthError(e.message || "Connection Failed"); }
+        }
+
         function showAuthError(m){toggleElement('authLoading',false);toggleElement('authError',true);document.getElementById('errorDetail').innerText=m;}
         async function setupPassword(){const p=document.getElementById('createPin').value;if(p.length<4)return alert("4+ digits");const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating...";try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;}}
         async function verifyPassword(){const p=document.getElementById('loginPin').value;const b=document.getElementById('btnLogin');const o=b.innerText;b.disabled=true;b.innerText="Verifying...";try{const j=await robustFetch({action:'auth_verify',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else{toggleElement('loginError',true);document.getElementById('loginPin').value='';}}catch(e){alert("Network Error");}finally{b.disabled=false;b.innerText=o;}}
+        
         function startApp(){toggleElement('appContainer',true);toggleElement('appLoader',false);fetchData();pollTimer=setInterval(()=>fetchData(true),POLLING_INTERVAL);}
         
-        async function fetchData(s=false){if(!s)updateSyncStatus('Syncing...','amber');try{
-            // USE GET REQUEST FOR READ (RESTORED)
-            const params = new URLSearchParams({
-                action: 'read',
-                db: TARGET_SHEET,
-                password: USER_PASSWORD,
-                _t: Date.now()
-            });
-            const res = await fetch(`${API_URL}?${params.toString()}`, { method: 'GET', redirect: 'follow' });
-            
-            if(!res.ok) throw new Error("HTTP Error");
-            const json = await res.json();
-            if(json.error) throw new Error(json.error);
-            
-            records = json.map(r => {
-                const rawDC = r.is_discharged ?? r.isDischarged;
-                const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true' || rawDC === 1 || rawDC === "1");
-                let ds = String(r.timestamp).replace(/'/g,''); if(ds.includes('T'))ds=ds.split('T')[0];
-                let imgs = []; try { imgs = JSON.parse(r.images); } catch(e) { imgs = []; } 
-                return{...r,isDischarged:isDC,timestamp:ds, images: imgs};
-            }).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-            renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');}catch(e){if(!s){console.warn(e);updateSyncStatus('Offline','rose');}}}
+        async function fetchData(s=false){
+            if(!s)updateSyncStatus('Syncing...','amber');
+            try {
+                // Use GET for reading data (Fast & Robust)
+                const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD }, true);
+                if(json.error) throw new Error(json.error);
+                
+                records = json.map(r => {
+                    const rawDC = r.is_discharged ?? r.isDischarged;
+                    const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true' || rawDC === 1 || rawDC === "1");
+                    let ds = String(r.timestamp).replace(/'/g,''); if(ds.includes('T'))ds=ds.split('T')[0];
+                    let imgs = []; try { imgs = JSON.parse(r.images); } catch(e) { imgs = []; } 
+                    return{...r,isDischarged:isDC,timestamp:ds, images: imgs};
+                }).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+                renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');
+            } catch(e) { 
+                if(!s) { console.warn(e); updateSyncStatus('Offline','rose'); }
+            }
+        }
         
         function manualRefresh(){const b=document.getElementById('btnRefresh');b.classList.add('animate-spin');fetchData(false).then(()=>setTimeout(()=>b.classList.remove('animate-spin'),1000));}
         function updateSyncStatus(m,c){const l=document.getElementById('syncStatus');const d=document.getElementById('statusDot');const cl={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'};l.innerText=m;l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`;d.className=`w-2 h-2 rounded-full ${cl[c]||'bg-slate-400'} shadow-sm ${m==='Live'?'animate-pulse':''}`;}
@@ -296,6 +351,7 @@
         
         function renderImagePreviews() {
             const container = document.getElementById('imagePreviewContainer'); container.innerHTML = '';
+            
             keptImages.forEach((url, idx) => {
                  let src = url; 
                  // Fix: Google Drive thumbnail logic
@@ -303,12 +359,12 @@
                  
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
-                 // Note: 'src' here works if browser has access. If strict org policy, bg might be blank but clickable.
                  div.style.backgroundImage = `url(${src})`;
                  div.onclick = () => openLightbox(idx, 'kept');
                  const del = document.createElement('div'); del.className = "img-delete-btn opacity-0 group-hover:opacity-100"; del.innerHTML = '<i class="fa-solid fa-xmark"></i>'; del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
                  div.appendChild(del); container.appendChild(div);
             });
+            
             pendingImages.forEach((img, idx) => {
                  const div = document.createElement('div'); div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
                  div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
@@ -324,7 +380,7 @@
 
         async function saveToBackend(payload, action="save") {
             if(action==='save') payload.timestamp="'"+payload.timestamp;
-            // Uses POST for saving (works fine with text/plain)
+            // Use POST for writing
             return await robustFetch({...payload,action:action,db:TARGET_SHEET,password:USER_PASSWORD});
         }
         function formatDateDMY(iso){if(!iso)return'';if(iso.length===10&&iso.includes('-')){const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}return iso;}
@@ -385,7 +441,6 @@
             if (typeof mode === 'string' && mode !== 'kept' && mode !== 'pending') {
                  const rec = records.find(r => r.id === mode);
                  if(!rec || !rec.images) return;
-                 // Use raw URL for img src
                  currentLightboxImages = rec.images;
             } else if (mode === 'kept') {
                  currentLightboxImages = keptImages;
