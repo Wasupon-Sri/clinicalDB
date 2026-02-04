@@ -7,26 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'] },
-                    colors: {
-                        primary: { 50: 'var(--p-50)', 100: 'var(--p-100)', 500: 'var(--p-500)', 600: 'var(--p-600)', 700: 'var(--p-700)' },
-                        surface: '#ffffff', background: '#f8fafc',
-                    },
-                    boxShadow: { soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', glow: '0 0 15px var(--p-glow)' },
-                    transitionProperty: { colors: 'background-color, border-color, color, fill, stroke, box-shadow' }
-                }
-            }
-        }
-    </script>
     <style>
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -48,6 +33,11 @@
         .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; opacity: 0.7; }
         .lightbox-close:hover { opacity: 1; }
         .lightbox-loader { position: absolute; z-index: 10; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rotation 1s linear infinite; }
+        
+        /* Swipe Actions */
+        .swipe-item-container { position: relative; overflow: hidden; border-radius: 1rem; }
+        .swipe-content { position: relative; background: white; z-index: 20; transition: transform 0.3s ease-out; width: 100%; border: 1px solid #e2e8f0; border-radius: 1rem; }
+        .swipe-actions { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; z-index: 10; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-top-right-radius: 1rem; border-bottom-right-radius: 1rem; }
         
         .img-delete-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10; transition: transform 0.2s; border: 2px solid white; }
         .img-delete-btn:hover { transform: scale(1.1); background: #dc2626; }
@@ -82,8 +72,14 @@
         <i class="fa-solid fa-xmark lightbox-close" onclick="closeLightbox()"></i>
         <div class="lightbox-loader" id="lightboxLoader"></div>
         <div class="lightbox-nav lightbox-prev" onclick="prevImage()"><i class="fa-solid fa-chevron-left"></i></div>
-        <!-- Img Click advances to next -->
-        <img id="lightboxImg" src="" class="lightbox-img opacity-0" onload="onImageLoad()" onclick="event.stopPropagation(); nextImage();">
+        <!-- REMOVED INLINE HANDLERS to prevent ReferenceError -->
+        <img id="lightboxImg" src="" class="lightbox-img opacity-0">
+        <!-- Error Fallback Message -->
+        <div id="lightboxError" class="hidden absolute text-center text-white">
+            <i class="fa-solid fa-image-slash text-4xl mb-2 opacity-50"></i>
+            <p>Image Protected</p>
+            <a id="lightboxLink" href="#" target="_blank" class="mt-2 inline-block px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-bold">Open Externally</a>
+        </div>
         <div class="lightbox-nav lightbox-next" onclick="nextImage()"><i class="fa-solid fa-chevron-right"></i></div>
         <div class="absolute bottom-6 text-white bg-black/60 px-6 py-2 rounded-full text-sm backdrop-blur-sm font-bold tracking-widest"><span id="lightboxCounter">1/1</span></div>
     </div>
@@ -216,7 +212,22 @@
         let currentLightboxImages = []; let currentLightboxIndex = 0;
 
         function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
-        window.onload = function() { applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker(); if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; document.getElementById('dbNameSetup').innerText=TARGET_SHEET; document.getElementById('dbNameLogin').innerText=TARGET_SHEET; checkAuth(); };
+        window.onload = function() { 
+            applyTheme(currentMonth.getMonth()); 
+            renderIconPicker(); renderColorPicker(); 
+            if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; 
+            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; 
+            document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
+            
+            // ATTACH LIGHTBOX IMAGE LISTENERS VIA JS
+            const lbImg = document.getElementById('lightboxImg');
+            lbImg.onload = onImageLoad;
+            lbImg.onerror = onImageError;
+            lbImg.onclick = (e) => { e.stopPropagation(); nextImage(); };
+
+            checkAuth(); 
+        };
+
         function toggleElement(id,show){const e=document.getElementById(id);if(e){if(show)e.classList.remove('hidden');else e.classList.add('hidden');}}
         async function robustFetch(p){try{const r=await fetch(API_URL,{method:'POST',body:JSON.stringify(p),headers:{"Content-Type":"text/plain;charset=utf-8"}});const t=await r.text();try{return JSON.parse(t);}catch(e){if(t.trim().startsWith("<"))throw new Error("Server Error");throw new Error("Invalid Response");}}catch(e){throw e;}}
         async function checkAuth(){toggleElement('authOverlay',true);toggleElement('authLoading',true);toggleElement('authSetup',false);toggleElement('authLogin',false);toggleElement('authError',false);try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET});toggleElement('authLoading',false);if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");}}
@@ -274,9 +285,9 @@
             container.innerHTML = '';
             
             keptImages.forEach((url, idx) => {
-                 let src = url;
-                 if(src.includes('export=download')) src = src.replace('export=download', 'export=view');
-                 
+                 let src = url; 
+                 // If Google Drive link, no special handling needed for background-image usually, but sometimes cors issues.
+                 // We will use standard URL.
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
                  div.style.backgroundImage = `url(${src})`;
@@ -286,7 +297,6 @@
                  del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
                  del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                  del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
-                 
                  div.appendChild(del);
                  container.appendChild(div);
             });
@@ -295,17 +305,15 @@
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
                  div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
-                 div.onclick = () => openLightbox(idx, 'pending'); // Added lightbox support for pending
+                 div.onclick = () => openLightbox(idx, 'pending'); 
                  
                  const del = document.createElement('div');
                  del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
                  del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                  del.onclick = (e) => { e.stopPropagation(); removePendingImage(idx); };
-                 
                  div.appendChild(del);
                  container.appendChild(div);
             });
-            
             document.getElementById('fileCount').innerText = `${keptImages.length + pendingImages.length} images`;
         }
         
@@ -339,9 +347,8 @@
                 if(r.images && r.images.length > 0) {
                     imgHtml = `<div class="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">` + 
                         r.images.map((url, idx) => {
-                            let src = url;
-                            if(src.includes('drive.google.com') && src.includes('export=download')) src = src.replace('export=download', 'export=view');
-                            return `<img src="${src}" class="h-24 w-auto rounded-lg border border-slate-200 shadow-sm snap-center cursor-pointer hover:opacity-90 transition" onclick="event.stopPropagation(); openLightbox(${idx}, '${r.id}')" loading="lazy">`;
+                            // KEEP ORIGINAL DOWNLOAD LINK
+                            return `<img src="${url}" class="h-24 w-auto rounded-lg border border-slate-200 shadow-sm snap-center cursor-pointer hover:opacity-90 transition" onclick="event.stopPropagation(); openLightbox(${idx}, '${r.id}')" loading="lazy">`;
                         }).join('') + 
                     `</div>`;
                 }
@@ -372,14 +379,13 @@
 
         // --- LIGHTBOX LOGIC ---
         function openLightbox(index, mode) {
-            // mode = 'recordId' (from portal) OR 'kept'/'pending' (from editor)
-            // If mode is a string recordId
             if (typeof mode === 'string' && mode !== 'kept' && mode !== 'pending') {
                  const rec = records.find(r => r.id === mode);
                  if(!rec || !rec.images) return;
-                 currentLightboxImages = rec.images.map(u => u.includes('export=download') ? u.replace('export=download', 'export=view') : u);
+                 // Use raw URL
+                 currentLightboxImages = rec.images;
             } else if (mode === 'kept') {
-                 currentLightboxImages = keptImages.map(u => u.includes('export=download') ? u.replace('export=download', 'export=view') : u);
+                 currentLightboxImages = keptImages;
             } else if (mode === 'pending') {
                  currentLightboxImages = pendingImages.map(img => `data:${img.type};base64,${img.data}`);
             }
@@ -387,9 +393,8 @@
             currentLightboxIndex = index;
             updateLightbox();
             document.getElementById('lightbox').classList.remove('hidden');
-            document.getElementById('lightbox').focus(); // Focus for keyboard
+            document.getElementById('lightbox').focus();
         }
-
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextImage() { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; updateLightbox(); }
         function prevImage() { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; updateLightbox(); }
@@ -397,25 +402,43 @@
         function updateLightbox() {
             const imgEl = document.getElementById('lightboxImg');
             const loader = document.getElementById('lightboxLoader');
-            
-            // Show loader, hide image
+            const errorMsg = document.getElementById('lightboxError');
+            const link = document.getElementById('lightboxLink');
+
+            // Reset state
             imgEl.classList.add('opacity-0');
+            imgEl.classList.remove('hidden');
             loader.style.display = 'block';
+            errorMsg.classList.add('hidden');
             
-            // Load new source
+            // Set source
             imgEl.src = currentLightboxImages[currentLightboxIndex];
+            
+            // Setup Fallback Link
+            link.href = currentLightboxImages[currentLightboxIndex];
+            
             document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex + 1}/${currentLightboxImages.length}`;
+            
+            // Safety timeout for loading
+            setTimeout(() => {
+                if(imgEl.classList.contains('opacity-0') && !errorMsg.classList.contains('hidden')) {
+                     // Still loading?
+                }
+            }, 5000);
         }
         
-        // This function called by onload on img tag
+        // --- FIXED: Event Handlers defined in script ---
         function onImageLoad() {
-             const imgEl = document.getElementById('lightboxImg');
-             const loader = document.getElementById('lightboxLoader');
-             imgEl.classList.remove('opacity-0');
-             loader.style.display = 'none';
+             document.getElementById('lightboxImg').classList.remove('opacity-0');
+             document.getElementById('lightboxLoader').style.display = 'none';
         }
         
-        // Keyboard & Swipe for Lightbox
+        function onImageError() {
+             document.getElementById('lightboxLoader').style.display = 'none';
+             document.getElementById('lightboxImg').classList.add('hidden');
+             document.getElementById('lightboxError').classList.remove('hidden');
+        }
+        
         document.addEventListener('keydown', function(e) {
             if (document.getElementById('lightbox').classList.contains('hidden')) return;
             if (e.key === 'ArrowLeft') prevImage();
