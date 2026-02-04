@@ -28,19 +28,43 @@
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
+        
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
+        
         .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
+        
+        /* FIXED: Textarea Large Size */
+        .textarea-contrast { 
+            @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; 
+            font-size: 1.25rem; 
+            height: 450px !important; 
+            width: 100% !important; 
+            display: block;
+        }
+        
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
+        
+        /* Swipe Actions */
         .swipe-item-container { position: relative; overflow: hidden; border-radius: 1rem; margin-bottom: 0.75rem; }
         .swipe-content { position: relative; background: white; z-index: 20; transition: transform 0.3s ease-out; width: 100%; border: 1px solid #e2e8f0; border-radius: 1rem; }
         .swipe-actions { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; z-index: 10; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-top-right-radius: 1rem; border-bottom-right-radius: 1rem; }
+        
+        /* RESTORED: Context Icons */
+        .ctx-btn { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; background: white; color: #94a3b8; transition: all 0.2s; cursor: pointer; }
+        .ctx-btn.active { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); transform: translateY(-2px); }
+        .ctx-btn:hover:not(.active) { background: #f1f5f9; color: #64748b; }
+
+        /* RESTORED: Color Circles */
+        .color-btn { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; border: 2px solid transparent; flex-shrink: 0; }
+        .color-btn:hover { transform: scale(1.1); }
+        .color-btn.active { border-color: #e11d48; transform: scale(1.1); box-shadow: 0 0 0 2px white, 0 0 0 4px #e11d48; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
@@ -49,12 +73,16 @@
     <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center relative">
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
+            
+            <!-- SETUP MODE -->
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
                 <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
                 <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="New PIN">
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
+
+            <!-- LOGIN MODE -->
             <div id="authLogin" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Locked</h2>
                 <p class="text-slate-500 text-sm mb-4">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
@@ -62,19 +90,34 @@
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
                 <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
-            <div id="authLoading"><span class="loader mx-auto"></span><p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p></div>
-            <div id="authError" class="hidden"><h3 class="text-lg font-bold text-slate-800">Connection Failed</h3><p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p><button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button></div>
+            
+            <div id="authLoading">
+                <span class="loader mx-auto"></span>
+                <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
+            </div>
+
+            <div id="authError" class="hidden">
+                <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
+                <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
+                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p>
+                <button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button>
+            </div>
         </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="h-full flex flex-col hidden">
-        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce"><i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span></button>
+        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
+            <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
+        </button>
 
         <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 text-white transition-all duration-500"><i class="fa-solid fa-user-doctor text-lg"></i></div>
-                <div><h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1><div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div></div>
+                <div>
+                    <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1>
+                    <div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div>
+                </div>
             </div>
             <div class="flex bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
                 <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50"><i class="fa-regular fa-calendar"></i></button>
@@ -99,6 +142,7 @@
                 </div>
                 <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 px-4 pb-4 pt-4 gap-2 overflow-y-auto"></div>
             </div>
+
             <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-300 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
                 <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
                 <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
@@ -140,7 +184,6 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Context</label><div class="grid grid-cols-6 sm:grid-cols-12 gap-2" id="iconPicker"></div><input type="hidden" id="editIcon"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Color</label><div class="flex flex-wrap gap-2" id="colorPicker"></div><input type="hidden" id="editColor"></div>
-                
                 <div class="flex-1 flex flex-col min-h-[450px]"> 
                     <div class="flex justify-between items-end mb-1.5 ml-1"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Record Name & Note</label><button id="btnLabelExpand" onclick="toggleExpandNote()" class="text-xs text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1 transition"><i class="fa-solid fa-expand"></i> <span>Expand</span></button></div>
                     <div class="mb-2"><input type="text" id="editName" class="input-contrast" placeholder="Data_001"></div>
@@ -156,17 +199,33 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
-        let USER_PASSWORD = ""; const POLLING_INTERVAL = 4000; // Optimized polling
-        
+        let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
+        
+        // 15 Pastel Colors
         const COLORS = [
-            {id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},{id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},{id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},{id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},{id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},{id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},{id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},{id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}
+            {id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},
+            {id:'red',bg:'bg-red-400',text:'text-white',ring:'ring-red-200'},
+            {id:'orange',bg:'bg-orange-400',text:'text-white',ring:'ring-orange-200'},
+            {id:'amber',bg:'bg-amber-400',text:'text-white',ring:'ring-amber-200'},
+            {id:'lime',bg:'bg-lime-400',text:'text-white',ring:'ring-lime-200'},
+            {id:'green',bg:'bg-green-400',text:'text-white',ring:'ring-green-200'},
+            {id:'emerald',bg:'bg-emerald-400',text:'text-white',ring:'ring-emerald-200'},
+            {id:'teal',bg:'bg-teal-400',text:'text-white',ring:'ring-teal-200'},
+            {id:'cyan',bg:'bg-cyan-400',text:'text-white',ring:'ring-cyan-200'},
+            {id:'sky',bg:'bg-sky-400',text:'text-white',ring:'ring-sky-200'},
+            {id:'blue',bg:'bg-blue-400',text:'text-white',ring:'ring-blue-200'},
+            {id:'indigo',bg:'bg-indigo-400',text:'text-white',ring:'ring-indigo-200'},
+            {id:'violet',bg:'bg-violet-400',text:'text-white',ring:'ring-violet-200'},
+            {id:'purple',bg:'bg-purple-400',text:'text-white',ring:'ring-purple-200'},
+            {id:'fuchsia',bg:'bg-fuchsia-400',text:'text-white',ring:'ring-fuchsia-200'},
+            {id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}
         ];
         
         let records=[]; let currentMonth=new Date(); 
         const now=new Date(); const offset=now.getTimezoneOffset()*60000; let selectedDateStr=new Date(now.getTime()-offset).toISOString().split('T')[0]; 
-        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let pollTimer=null; let isNoteExpanded=false; 
+        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let pollTimer=null; let isNoteExpanded=false;
         const urlParams = new URLSearchParams(window.location.search); const TARGET_SHEET = urlParams.get('db') || 'Sheet1'; 
         let currentPortalRecords = []; 
 
@@ -182,7 +241,7 @@
             } catch(e){throw e;}
         }
 
-        async function checkAuth(){ toggleElement('authOverlay',true); toggleElement('authLoading',true); toggleElement('authSetup',false); toggleElement('authLogin',false); toggleElement('authError',false); try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET}, true); toggleElement('authLoading',false); if(j.status==='setup_needed')toggleElement('authSetup',true); else if(j.status==='locked')toggleElement('authLogin',true); else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");} }
+        async function checkAuth(){ toggleElement('authOverlay',true); toggleElement('authLoading',true); toggleElement('authSetup',false); toggleElement('authLogin',false); toggleElement('authError',false); try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET}, true); toggleElement('authLoading',false); if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");} }
         function showAuthError(m){ toggleElement('authLoading',false); toggleElement('authError',true); document.getElementById('errorDetail').innerText=m; }
         
         async function setupPassword(){ const p=document.getElementById('createPin').value; if(p.length<4)return alert("4+ digits"); const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating..."; try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;} }
@@ -194,7 +253,9 @@
             try {
                 const j=await robustFetch({action:'read',db:TARGET_SHEET,password:USER_PASSWORD}, true);
                 if(j.error)throw new Error(j.error);
-                records=j.map(r=>{const rawDC=r.is_discharged??r.isDischarged;const isDC=(rawDC===true||String(rawDC).toLowerCase()==='true'||rawDC===1||rawDC==="1");let ds=String(r.timestamp).replace(/'/g,'');if(ds.includes('T'))ds=ds.split('T')[0]; return{...r,isDischarged:isDC,timestamp:ds};}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+                records=j.map(r=>{const rawDC=r.is_discharged??r.isDischarged;const isDC=(rawDC===true||String(rawDC).toLowerCase()==='true'||rawDC===1||rawDC==="1");
+                let ds=String(r.timestamp).replace(/'/g,'');if(ds.includes('T'))ds=ds.split('T')[0];
+                return{...r,isDischarged:isDC,timestamp:ds};}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
                 renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');
             } catch(e){if(!s){console.warn(e);updateSyncStatus('Offline','rose');}}
         }
@@ -202,7 +263,7 @@
         function manualRefresh(){ const b=document.getElementById('btnRefresh'); b.classList.add('animate-spin'); fetchData(false).then(()=>setTimeout(()=>b.classList.remove('animate-spin'),1000)); }
         function updateSyncStatus(m,c){ const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const cl={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=m; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${cl[c]||'bg-slate-400'} shadow-sm ${m==='Live'?'animate-pulse':''}`; }
         
-        async function saveToBackend(payload, action="save") { if(action==='save') payload.timestamp="'"+payload.timestamp; return await robustFetch({...payload,action:action,db:TARGET_SHEET,password:USER_PASSWORD}); } // POST for Save
+        async function saveToBackend(payload, action="save") { if(action==='save') payload.timestamp="'"+payload.timestamp; return await robustFetch({...payload,action:action,db:TARGET_SHEET,password:USER_PASSWORD}); }
         
         function formatDateDMY(iso){if(!iso)return'';if(iso.length===10&&iso.includes('-')){const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}return iso;}
         function generateTxtContent(r){return `Name: ${r.name||'Untitled'}\nDate: ${formatDateDMY(r.timestamp)}\nWard: ${r.ward||'Unassigned'}\n\nNote:\n${r.content||''}`;}
@@ -210,7 +271,6 @@
         function exportCurrentRecord(){if(!editingId)return;const t={name:document.getElementById('editName').value,timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,content:document.getElementById('editContent').value};downloadFile((t.name||'Untitled')+".txt",generateTxtContent(t));}
         async function exportBatch(){if(selectedBatchIds.size===0)return;const rs=records.filter(r=>selectedBatchIds.has(r.id));for(const r of rs){let b=(r.name||'Untitled').replace(/[/\\?%*:|"<>]/g,'-');downloadFile(b+".txt",generateTxtContent(r));await new Promise(x=>setTimeout(x,200));}}
         
-        // RENDERERS & LOGIC (OPTIMISTIC UI ADDED)
         function renderCalendar(){
             const g=document.getElementById('calendarGrid'); g.innerHTML=''; 
             const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); 
@@ -289,7 +349,7 @@
         function toggleBatchMode(){ isBatchMode=!isBatchMode; renderPortalList(); updateBatchUI(); }
         function toggleBatchSelect(id){ if(selectedBatchIds.has(id))selectedBatchIds.delete(id); else selectedBatchIds.add(id); renderPortalList(); updateBatchUI(); }
         function updateBatchUI(){const t=document.getElementById('batchToolbar');const c=document.getElementById('batchCount');const b=document.getElementById('btnBatch');if(isBatchMode){t.classList.remove('hidden');b.classList.add('text-indigo-600','bg-indigo-50');b.classList.remove('text-slate-400');}else{t.classList.add('hidden');b.classList.remove('text-indigo-600','bg-indigo-50');b.classList.add('text-slate-400');}c.innerText=selectedBatchIds.size;}
-        
+
         let xDown=null;let yDown=null;let isSwiping=false;let activeSwipeEl=null;
         function handleTouchStart(e,l){xDown=e.touches[0].clientX;yDown=e.touches[0].clientY;isSwiping=false;if(activeSwipeEl&&activeSwipeEl!==l){activeSwipeEl.style.transform="translateX(0px)";activeSwipeEl=null;}}
         function handleTouchMove(e,l){if(!xDown||!yDown)return;const xU=e.touches[0].clientX;const yU=e.touches[0].clientY;const xD=xDown-xU;const yD=yDown-yU;if(Math.abs(xD)>Math.abs(yD)){if(Math.abs(xD)>10){isSwiping=true;if(xD>0){const t=Math.min(xD,80);l.style.transform=`translateX(-${t}px)`;}else{l.style.transform=`translateX(0px)`;}}}}
