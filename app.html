@@ -24,27 +24,26 @@
         }
     </script>
     <style>
-        :root { 
-            --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); 
-            transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; 
-        }
-
-        body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; overscroll-behavior-y: none; }
+        :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
+        body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Custom Checkbox */
-        .check-box { appearance: none; width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; z-index: 50; }
-        .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 14px; color: white; transform: scale(0); transition: 0.2s; }
+        .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
+        .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
-
         .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; }
+        
+        /* FIXED: Textarea full width and height */
+        .textarea-contrast { 
+            @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; 
+            font-size: 1.25rem; 
+            height: 100%;
+            width: 100% !important; /* Force full width */
+            display: block;
+        }
         
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 90vw !important; height: 90vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
@@ -57,11 +56,9 @@
         .lightbox-prev { left: 1rem; }
         .lightbox-next { right: 1rem; }
         .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; }
-
-        /* Swipe Actions */
-        .swipe-item-container { position: relative; overflow: hidden; border-radius: 1rem; }
-        .swipe-content { position: relative; background: white; z-index: 20; transition: transform 0.3s ease-out; width: 100%; border: 1px solid #e2e8f0; border-radius: 1rem; }
-        .swipe-actions { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; z-index: 10; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-top-right-radius: 1rem; border-bottom-right-radius: 1rem; }
+        
+        .img-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10; transition: transform 0.2s; }
+        .img-delete-btn:hover { transform: scale(1.1); }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
@@ -83,8 +80,8 @@
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
                 <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
-            <div id="authLoading"><span class="loader mx-auto"></span><p class="text-slate-500 text-sm mt-4">Connecting...</p></div>
-            <div id="authError" class="hidden"><h3 class="text-lg font-bold text-slate-800">Connection Failed</h3><button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mt-4">Retry</button></div>
+            <div id="authLoading"><span class="loader mx-auto"></span><p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p></div>
+            <div id="authError" class="hidden"><h3 class="text-lg font-bold text-slate-800">Connection Failed</h3><p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p><button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button></div>
         </div>
     </div>
 
@@ -99,17 +96,12 @@
 
     <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="h-full flex flex-col hidden">
-        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
-            <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
-        </button>
+        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce"><i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span></button>
 
         <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 text-white transition-all duration-500"><i class="fa-solid fa-user-doctor text-lg"></i></div>
-                <div>
-                    <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1>
-                    <div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div>
-                </div>
+                <div><h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1><div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div></div>
             </div>
             <div class="flex bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
                 <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50"><i class="fa-regular fa-calendar"></i></button>
@@ -142,7 +134,6 @@
         </main>
     </div>
 
-    <!-- PORTAL MODAL -->
     <div id="portalModal" class="fixed inset-0 z-40 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
         <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
@@ -159,7 +150,6 @@
         </div>
     </div>
 
-    <!-- EDITOR MODAL -->
     <div id="editorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/30 backdrop-blur-md" onclick="closeEditor()"></div>
         <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-zoomIn border border-white/50">
@@ -205,30 +195,11 @@
         let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
-        
-        // 15 Pastel Colors + Default Slate
-        const COLORS = [
-            {id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},
-            {id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},
-            {id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},
-            {id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},
-            {id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},
-            {id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},
-            {id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},
-            {id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},
-            {id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},
-            {id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},
-            {id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},
-            {id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},
-            {id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},
-            {id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},
-            {id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},
-            {id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}
-        ];
+        const COLORS = [{id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},{id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},{id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},{id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},{id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},{id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},{id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},{id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}];
         
         let records=[]; let currentMonth=new Date(); 
         const now=new Date(); const offset=now.getTimezoneOffset()*60000; let selectedDateStr=new Date(now.getTime()-offset).toISOString().split('T')[0]; 
-        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let pollTimer=null; let isNoteExpanded=false; let pendingImages=[];
+        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let pollTimer=null; let isNoteExpanded=false; let pendingImages=[]; let keptImages=[]; 
         const urlParams = new URLSearchParams(window.location.search); const TARGET_SHEET = urlParams.get('db') || 'Sheet1'; 
         let currentLightboxImages = []; let currentLightboxIndex = 0;
 
@@ -254,23 +225,16 @@
             const originalText = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...`;
             btn.disabled = true;
-            const container = document.getElementById('imagePreviewContainer');
-            container.innerHTML = '';
-            pendingImages = []; 
+            
             const promises = files.map(file => compressImage(file, 1000, 0.7));
             Promise.all(promises).then(compressedResults => {
-                pendingImages = compressedResults;
-                document.getElementById('fileCount').innerText = `${pendingImages.length} attached`;
-                pendingImages.forEach(img => {
-                    const div = document.createElement('div');
-                    div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm";
-                    div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
-                    container.appendChild(div);
-                });
+                pendingImages = pendingImages.concat(compressedResults);
+                renderImagePreviews(); 
                 btn.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i> Done`;
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
             }).catch(err => { console.error(err); alert("Error processing images."); btn.innerHTML = originalText; btn.disabled = false; });
         }
+
         function compressImage(file, maxWidth, quality) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -285,12 +249,61 @@
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve({ name: file.name, type: file.type, data: canvas.toDataURL(file.type, quality).split(',')[1] });
+                        resolve({ name: file.name, type: file.type, data: canvas.toDataURL(file.type, quality).split(',')[1], preview: event.target.result });
                     };
                     img.onerror = (e) => reject(e);
                 };
                 reader.onerror = (e) => reject(e);
             });
+        }
+        
+        function renderImagePreviews() {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '';
+            
+            keptImages.forEach((url, idx) => {
+                 let src = url;
+                 if(src.includes('export=download')) src = src.replace('export=download', 'export=view');
+                 
+                 const div = document.createElement('div');
+                 div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
+                 div.style.backgroundImage = `url(${src})`;
+                 div.onclick = () => window.open(url, '_blank');
+                 
+                 const del = document.createElement('div');
+                 del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
+                 del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                 del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
+                 
+                 div.appendChild(del);
+                 container.appendChild(div);
+            });
+            
+            pendingImages.forEach((img, idx) => {
+                 const div = document.createElement('div');
+                 div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
+                 div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
+                 
+                 const del = document.createElement('div');
+                 del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
+                 del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                 del.onclick = (e) => { e.stopPropagation(); removePendingImage(idx); };
+                 
+                 div.appendChild(del);
+                 container.appendChild(div);
+            });
+            
+            document.getElementById('fileCount').innerText = `${keptImages.length + pendingImages.length} images`;
+        }
+        
+        function removeKeptImage(index) {
+            keptImages.splice(index, 1);
+            renderImagePreviews();
+        }
+        
+        function removePendingImage(index) {
+            pendingImages.splice(index, 1);
+            renderImagePreviews();
         }
 
         async function saveToBackend(payload, action="save") {
@@ -460,6 +473,7 @@
         function openEditor(id=null){
             toggleElement('editorModal',true);editingId=id;isNoteExpanded=false;toggleExpandNote(false);
             pendingImages = [];
+            keptImages = []; // Reset kept images
             document.getElementById('fileCount').innerText = "";
             document.getElementById('imagePreviewContainer').innerHTML = "";
             document.getElementById('fileInput').value = "";
@@ -470,17 +484,8 @@
                 selectIcon(r.icon);selectColor(r.color);
                 
                 if(r.images && r.images.length > 0) {
-                     const container = document.getElementById('imagePreviewContainer');
-                     r.images.forEach(url => {
-                        let src = url;
-                        if(src.includes('export=download')) src = src.replace('export=download', 'export=view');
-                        const div = document.createElement('div');
-                        div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer";
-                        div.style.backgroundImage = `url(${src})`;
-                        div.onclick = () => window.open(url, '_blank'); 
-                        container.appendChild(div);
-                     });
-                     document.getElementById('fileCount').innerText = `${r.images.length} stored`;
+                     keptImages = [...r.images]; // Deep copy to local state
+                     renderImagePreviews();
                 }
 
             }else{
@@ -497,7 +502,7 @@
         function selectColor(id){document.getElementById('editColor').value=id;const o=COLORS.find(c=>c.id===id);document.querySelectorAll('.color-option').forEach(b=>{if(b.dataset.value===id){b.classList.add(o.ring,'ring-offset-2');b.classList.remove('ring-transparent');}else{b.classList.remove(o.ring,'ring-offset-2');b.classList.add('ring-transparent');}});}
         async function saveRecord(){
             const btn=document.getElementById('btnSave');const org=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';btn.disabled=true;
-            const p={id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5),timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,name:document.getElementById('editName').value,icon:document.getElementById('editIcon').value,color:document.getElementById('editColor').value,content:document.getElementById('editContent').value,isDischarged:document.getElementById('editDischarged').checked, images: pendingImages};
+            const p={id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5),timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,name:document.getElementById('editName').value,icon:document.getElementById('editIcon').value,color:document.getElementById('editColor').value,content:document.getElementById('editContent').value,isDischarged:document.getElementById('editDischarged').checked, images: pendingImages, currentImages: keptImages};
             try{await saveToBackend(p,'save');closeEditor();closePortal();await fetchData(false);}catch(e){alert("Save Failed: "+e.message);}finally{btn.innerHTML=org;btn.disabled=false;}
         }
         async function deleteRecord(){if(!confirm("Delete?"))return;try{await saveToBackend({ids:[editingId]},'delete');closeEditor();closePortal();await fetchData(false);}catch(e){alert("Delete failed");} }
