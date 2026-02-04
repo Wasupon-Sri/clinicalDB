@@ -19,7 +19,7 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
+        .textarea-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
 
@@ -33,11 +33,6 @@
         .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; opacity: 0.7; }
         .lightbox-close:hover { opacity: 1; }
         .lightbox-loader { position: absolute; z-index: 10; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rotation 1s linear infinite; }
-        
-        /* Swipe Actions */
-        .swipe-item-container { position: relative; overflow: hidden; border-radius: 1rem; }
-        .swipe-content { position: relative; background: white; z-index: 20; transition: transform 0.3s ease-out; width: 100%; border: 1px solid #e2e8f0; border-radius: 1rem; }
-        .swipe-actions { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; z-index: 10; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-top-right-radius: 1rem; border-bottom-right-radius: 1rem; }
         
         .img-delete-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10; transition: transform 0.2s; border: 2px solid white; }
         .img-delete-btn:hover { transform: scale(1.1); background: #dc2626; }
@@ -72,13 +67,13 @@
         <i class="fa-solid fa-xmark lightbox-close" onclick="closeLightbox()"></i>
         <div class="lightbox-loader" id="lightboxLoader"></div>
         <div class="lightbox-nav lightbox-prev" onclick="prevImage()"><i class="fa-solid fa-chevron-left"></i></div>
-        <!-- REMOVED INLINE HANDLERS to prevent ReferenceError -->
-        <img id="lightboxImg" src="" class="lightbox-img opacity-0">
+        <!-- FIXED: Removed replacement logic, loads original export=download link -->
+        <img id="lightboxImg" src="" class="lightbox-img opacity-0" referrerpolicy="no-referrer">
         <!-- Error Fallback Message -->
-        <div id="lightboxError" class="hidden absolute text-center text-white">
+        <div id="lightboxError" class="hidden absolute text-center text-white z-50">
             <i class="fa-solid fa-image-slash text-4xl mb-2 opacity-50"></i>
             <p>Image Protected</p>
-            <a id="lightboxLink" href="#" target="_blank" class="mt-2 inline-block px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-bold">Open Externally</a>
+            <a id="lightboxLink" href="#" target="_blank" class="mt-2 inline-block px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-bold hover:bg-slate-100">Open Externally</a>
         </div>
         <div class="lightbox-nav lightbox-next" onclick="nextImage()"><i class="fa-solid fa-chevron-right"></i></div>
         <div class="absolute bottom-6 text-white bg-black/60 px-6 py-2 rounded-full text-sm backdrop-blur-sm font-bold tracking-widest"><span id="lightboxCounter">1/1</span></div>
@@ -286,8 +281,7 @@
             
             keptImages.forEach((url, idx) => {
                  let src = url; 
-                 // If Google Drive link, no special handling needed for background-image usually, but sometimes cors issues.
-                 // We will use standard URL.
+                 // FIXED: NO REPLACEMENT OF EXPORT=DOWNLOAD for IMG TAG
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
                  div.style.backgroundImage = `url(${src})`;
@@ -347,7 +341,7 @@
                 if(r.images && r.images.length > 0) {
                     imgHtml = `<div class="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">` + 
                         r.images.map((url, idx) => {
-                            // KEEP ORIGINAL DOWNLOAD LINK
+                            // KEEP ORIGINAL DOWNLOAD LINK - FIX FOR FROZEN LOADING
                             return `<img src="${url}" class="h-24 w-auto rounded-lg border border-slate-200 shadow-sm snap-center cursor-pointer hover:opacity-90 transition" onclick="event.stopPropagation(); openLightbox(${idx}, '${r.id}')" loading="lazy">`;
                         }).join('') + 
                     `</div>`;
@@ -382,7 +376,7 @@
             if (typeof mode === 'string' && mode !== 'kept' && mode !== 'pending') {
                  const rec = records.find(r => r.id === mode);
                  if(!rec || !rec.images) return;
-                 // Use raw URL
+                 // Use raw URL for img src
                  currentLightboxImages = rec.images;
             } else if (mode === 'kept') {
                  currentLightboxImages = keptImages;
@@ -411,11 +405,14 @@
             loader.style.display = 'block';
             errorMsg.classList.add('hidden');
             
-            // Set source
-            imgEl.src = currentLightboxImages[currentLightboxIndex];
+            // Set source (Raw download URL for img tag)
+            let src = currentLightboxImages[currentLightboxIndex];
+            imgEl.src = src;
             
-            // Setup Fallback Link
-            link.href = currentLightboxImages[currentLightboxIndex];
+            // Generate View URL for the fallback button (replacing download with view)
+            let viewSrc = src;
+            if(viewSrc.includes('export=download')) viewSrc = viewSrc.replace('export=download', 'export=view');
+            link.href = viewSrc;
             
             document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex + 1}/${currentLightboxImages.length}`;
             
