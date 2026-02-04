@@ -27,7 +27,6 @@
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -36,16 +35,16 @@
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
         
-        /* FIXED: Textarea full width and height */
+        /* FIXED: Textarea Large Size by Default */
         .textarea-contrast { 
             @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; 
             font-size: 1.25rem; 
-            height: 100%;
-            width: 100% !important; /* Force full width */
+            height: 450px !important; /* Default Large Height */
+            width: 100% !important;
             display: block;
         }
         
-        .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 90vw !important; height: 90vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
+        .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
 
         /* Lightbox */
@@ -94,7 +93,7 @@
         <div class="absolute bottom-6 text-white bg-black/50 px-4 py-1 rounded-full text-sm backdrop-blur-sm"><span id="lightboxCounter">1/1</span></div>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
+    <!-- MAIN APP -->
     <div id="appContainer" class="h-full flex flex-col hidden">
         <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce"><i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span></button>
 
@@ -126,7 +125,6 @@
                 </div>
                 <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 px-4 pb-4 pt-4 gap-2 overflow-y-auto"></div>
             </div>
-
             <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-300 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
                 <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
                 <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
@@ -134,6 +132,7 @@
         </main>
     </div>
 
+    <!-- MODALS -->
     <div id="portalModal" class="fixed inset-0 z-40 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
         <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
@@ -167,7 +166,6 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Context</label><div class="grid grid-cols-6 sm:grid-cols-12 gap-2" id="iconPicker"></div><input type="hidden" id="editIcon"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Color</label><div class="flex flex-wrap gap-2" id="colorPicker"></div><input type="hidden" id="editColor"></div>
-                <!-- IMAGE UPLOAD -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Images (Labs/X-rays)</label>
                     <div class="flex gap-3 items-center mb-2">
@@ -177,7 +175,7 @@
                     </div>
                     <div id="imagePreviewContainer" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div class="flex-1 flex flex-col min-h-[400px]"> 
+                <div class="flex-1 flex flex-col min-h-[450px]"> 
                     <div class="flex justify-between items-end mb-1.5 ml-1"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Record Name & Note</label><button id="btnLabelExpand" onclick="toggleExpandNote()" class="text-xs text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1 transition"><i class="fa-solid fa-expand"></i> <span>Expand</span></button></div>
                     <div class="mb-2"><input type="text" id="editName" class="input-contrast" placeholder="Data_001"></div>
                     <div class="relative flex-1 group"><textarea id="editContent" ondblclick="toggleExpandNote()" class="textarea-contrast" placeholder="Detailed progress note..."></textarea></div>
@@ -195,7 +193,24 @@
         let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
-        const COLORS = [{id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},{id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},{id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},{id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},{id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},{id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},{id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},{id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}];
+        const COLORS = [
+            {id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},
+            {id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},
+            {id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},
+            {id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},
+            {id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},
+            {id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},
+            {id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},
+            {id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},
+            {id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},
+            {id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},
+            {id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},
+            {id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},
+            {id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},
+            {id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},
+            {id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},
+            {id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}
+        ];
         
         let records=[]; let currentMonth=new Date(); 
         const now=new Date(); const offset=now.getTimezoneOffset()*60000; let selectedDateStr=new Date(now.getTime()-offset).toISOString().split('T')[0]; 
@@ -316,7 +331,10 @@
         function exportCurrentRecord(){if(!editingId)return;const t={name:document.getElementById('editName').value,timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,content:document.getElementById('editContent').value};downloadFile((t.name||'Untitled')+".txt",generateTxtContent(t));}
         async function exportBatch(){if(selectedBatchIds.size===0)return;const rs=records.filter(r=>selectedBatchIds.has(r.id));for(const r of rs){let b=(r.name||'Untitled').replace(/[/\\?%*:|"<>]/g,'-');downloadFile(b+".txt",generateTxtContent(r));await new Promise(x=>setTimeout(x,200));}}
         
-        function renderCalendar(){const g=document.getElementById('calendarGrid');g.innerHTML='';const y=currentMonth.getFullYear();const m=currentMonth.getMonth();applyTheme(m);document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});const fd=new Date(y,m,1).getDay();const dim=new Date(y,m+1,0).getDate();const now=new Date();const offset=now.getTimezoneOffset()*60000;const todayStr=new Date(now.getTime()-offset).toISOString().split('T')[0];for(let i=0;i<fd;i++)g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dr=records.filter(r=>r.timestamp===ds&&!r.isDischarged);const isT=todayStr===ds;const c=document.createElement('div');c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;c.onclick=()=>openPortal(ds);let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;dr.slice(0,3).forEach(r=>{const co=COLORS.find(x=>x.id===r.color)||COLORS[0];const ic=ICONS.find(x=>x.id===r.icon)||ICONS[0];html+=`<div class="h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${co.bg} text-white truncate"><i class="fa-solid ${ic.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${r.name||r.ward||'Case'}</span></div>`;});if(dr.length>3)html+=`<div class="text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5">+${dr.length-3}</div>`;c.innerHTML=html+'</div>';g.appendChild(c);}}
+        function renderCalendar(){const g=document.getElementById('calendarGrid');g.innerHTML='';const y=currentMonth.getFullYear();const m=currentMonth.getMonth();applyTheme(m);document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});const fd=new Date(y,m,1).getDay();const dim=new Date(y,m+1,0).getDate();
+        // FORCE LOCAL TIME STRING FOR TODAY
+        const now=new Date();const offset=now.getTimezoneOffset()*60000;const todayStr=new Date(now.getTime()-offset).toISOString().split('T')[0];
+        for(let i=0;i<fd;i++)g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dr=records.filter(r=>r.timestamp===ds&&!r.isDischarged);const isT=todayStr===ds;const c=document.createElement('div');c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;c.onclick=()=>openPortal(ds);let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;dr.slice(0,3).forEach(r=>{const co=COLORS.find(x=>x.id===r.color)||COLORS[0];const ic=ICONS.find(x=>x.id===r.icon)||ICONS[0];html+=`<div class="h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${co.bg} text-white truncate"><i class="fa-solid ${ic.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${r.name||r.ward||'Case'}</span></div>`;});if(dr.length>3)html+=`<div class="text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5">+${dr.length-3}</div>`;c.innerHTML=html+'</div>';g.appendChild(c);}}
         function changeMonth(d){currentMonth.setMonth(currentMonth.getMonth()+d);renderCalendar();}
         function goToToday(){currentMonth=new Date();const now=new Date();const offset=now.getTimezoneOffset()*60000;selectedDateStr=new Date(now.getTime()-offset).toISOString().split('T')[0];renderCalendar();}
         function renderWards(){const g=document.getElementById('wardGrid');g.innerHTML='';const wm={};let dc=0;records.forEach(r=>{if(r.isDischarged){dc++;}else{const w=r.ward?r.ward.trim():'Unassigned';if(!wm[w])wm[w]=0;wm[w]++;}});Object.entries(wm).sort().forEach(([n,c])=>{g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;});if(dc>0)g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;if(Object.keys(wm).length===0&&dc===0)g.innerHTML=`<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;}
