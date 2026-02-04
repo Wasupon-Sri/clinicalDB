@@ -7,11 +7,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'] },
+                    colors: {
+                        primary: { 50: 'var(--p-50)', 100: 'var(--p-100)', 500: 'var(--p-500)', 600: 'var(--p-600)', 700: 'var(--p-700)' },
+                        surface: '#ffffff', background: '#f8fafc',
+                    },
+                    boxShadow: { soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', glow: '0 0 15px var(--p-glow)' },
+                }
+            }
+        }
+    </script>
     <style>
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -19,7 +33,7 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        .textarea-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
+        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
 
@@ -28,12 +42,10 @@
         .lightbox-img { max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); z-index: 20; transition: opacity 0.2s; }
         .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 2rem; padding: 1rem; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; z-index: 30; background: rgba(0,0,0,0.3); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
         .lightbox-nav:hover { opacity: 1; background: rgba(255,255,255,0.2); }
-        .lightbox-prev { left: 1rem; }
-        .lightbox-next { right: 1rem; }
+        .lightbox-prev { left: 1rem; } .lightbox-next { right: 1rem; }
         .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; opacity: 0.7; }
         .lightbox-close:hover { opacity: 1; }
         .lightbox-loader { position: absolute; z-index: 10; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rotation 1s linear infinite; }
-        
         .img-delete-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10; transition: transform 0.2s; border: 2px solid white; }
         .img-delete-btn:hover { transform: scale(1.1); background: #dc2626; }
     </style>
@@ -46,7 +58,7 @@
             <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
             <div id="authSetup" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
-                <p class="text-slate-500 text-sm mb-4">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
+                <p class="text-slate-500 text-sm mb-4">Set PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
                 <input type="password" id="createPin" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-4 outline-none focus:border-indigo-500 transition" placeholder="New PIN">
                 <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
             </div>
@@ -57,8 +69,8 @@
                 <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
                 <p id="loginError" class="text-rose-500 text-xs mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
             </div>
-            <div id="authLoading"><span class="loader mx-auto"></span><p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p></div>
-            <div id="authError" class="hidden"><h3 class="text-lg font-bold text-slate-800">Connection Failed</h3><p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p><button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button></div>
+            <div id="authLoading"><span class="loader mx-auto"></span><p class="text-slate-500 text-sm mt-4">Connecting...</p></div>
+            <div id="authError" class="hidden"><h3 class="text-lg font-bold text-slate-800">Connection Failed</h3><p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach server.</p><button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button></div>
         </div>
     </div>
 
@@ -67,12 +79,9 @@
         <i class="fa-solid fa-xmark lightbox-close" onclick="closeLightbox()"></i>
         <div class="lightbox-loader" id="lightboxLoader"></div>
         <div class="lightbox-nav lightbox-prev" onclick="prevImage()"><i class="fa-solid fa-chevron-left"></i></div>
-        <!-- FIXED: Removed replacement logic, loads original export=download link -->
-        <img id="lightboxImg" src="" class="lightbox-img opacity-0" referrerpolicy="no-referrer">
-        <!-- Error Fallback Message -->
+        <img id="lightboxImg" src="" class="lightbox-img opacity-0">
         <div id="lightboxError" class="hidden absolute text-center text-white z-50">
-            <i class="fa-solid fa-image-slash text-4xl mb-2 opacity-50"></i>
-            <p>Image Protected</p>
+            <i class="fa-solid fa-image-slash text-4xl mb-2 opacity-50"></i><p>Image Protected</p>
             <a id="lightboxLink" href="#" target="_blank" class="mt-2 inline-block px-4 py-2 bg-white text-slate-900 rounded-lg text-sm font-bold hover:bg-slate-100">Open Externally</a>
         </div>
         <div class="lightbox-nav lightbox-next" onclick="nextImage()"><i class="fa-solid fa-chevron-right"></i></div>
@@ -111,7 +120,6 @@
                 </div>
                 <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 px-4 pb-4 pt-4 gap-2 overflow-y-auto"></div>
             </div>
-
             <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-300 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
                 <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
                 <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
@@ -119,7 +127,6 @@
         </main>
     </div>
 
-    <!-- MODALS -->
     <div id="portalModal" class="fixed inset-0 z-40 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
         <div class="absolute inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
@@ -153,7 +160,6 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Context</label><div class="grid grid-cols-6 sm:grid-cols-12 gap-2" id="iconPicker"></div><input type="hidden" id="editIcon"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Color</label><div class="flex flex-wrap gap-2" id="colorPicker"></div><input type="hidden" id="editColor"></div>
-                <!-- IMAGE UPLOAD -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Images (Labs/X-rays)</label>
                     <div class="flex gap-3 items-center mb-2">
@@ -177,27 +183,14 @@
     </div>
 
     <script>
+        // CONFIGURATION: Replace with your actual Script URL
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
+        
         let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
         const COLORS = [
-            {id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},
-            {id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},
-            {id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},
-            {id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},
-            {id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},
-            {id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},
-            {id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},
-            {id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},
-            {id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},
-            {id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},
-            {id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},
-            {id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},
-            {id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},
-            {id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},
-            {id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},
-            {id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}
+            {id:'slate',bg:'bg-slate-500',text:'text-white',ring:'ring-slate-200'},{id:'red',bg:'bg-red-500',text:'text-white',ring:'ring-red-200'},{id:'orange',bg:'bg-orange-500',text:'text-white',ring:'ring-orange-200'},{id:'amber',bg:'bg-amber-500',text:'text-white',ring:'ring-amber-200'},{id:'lime',bg:'bg-lime-500',text:'text-white',ring:'ring-lime-200'},{id:'green',bg:'bg-green-500',text:'text-white',ring:'ring-green-200'},{id:'emerald',bg:'bg-emerald-500',text:'text-white',ring:'ring-emerald-200'},{id:'teal',bg:'bg-teal-500',text:'text-white',ring:'ring-teal-200'},{id:'cyan',bg:'bg-cyan-500',text:'text-white',ring:'ring-cyan-200'},{id:'sky',bg:'bg-sky-500',text:'text-white',ring:'ring-sky-200'},{id:'blue',bg:'bg-blue-500',text:'text-white',ring:'ring-blue-200'},{id:'indigo',bg:'bg-indigo-500',text:'text-white',ring:'ring-indigo-200'},{id:'violet',bg:'bg-violet-500',text:'text-white',ring:'ring-violet-200'},{id:'purple',bg:'bg-purple-500',text:'text-white',ring:'ring-purple-200'},{id:'fuchsia',bg:'bg-fuchsia-500',text:'text-white',ring:'ring-fuchsia-200'},{id:'rose',bg:'bg-rose-500',text:'text-white',ring:'ring-rose-200'}
         ];
         
         let records=[]; let currentMonth=new Date(); 
@@ -208,18 +201,10 @@
 
         function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
         window.onload = function() { 
-            applyTheme(currentMonth.getMonth()); 
-            renderIconPicker(); renderColorPicker(); 
+            applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker(); 
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; 
-            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; 
-            document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
-            
-            // ATTACH LIGHTBOX IMAGE LISTENERS VIA JS
-            const lbImg = document.getElementById('lightboxImg');
-            lbImg.onload = onImageLoad;
-            lbImg.onerror = onImageError;
-            lbImg.onclick = (e) => { e.stopPropagation(); nextImage(); };
-
+            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
+            const lbImg=document.getElementById('lightboxImg'); lbImg.onload=onImageLoad; lbImg.onerror=onImageError; lbImg.onclick=(e)=>{e.stopPropagation();nextImage();};
             checkAuth(); 
         };
 
@@ -230,24 +215,21 @@
         async function setupPassword(){const p=document.getElementById('createPin').value;if(p.length<4)return alert("4+ digits");const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating...";try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;}}
         async function verifyPassword(){const p=document.getElementById('loginPin').value;const b=document.getElementById('btnLogin');const o=b.innerText;b.disabled=true;b.innerText="Verifying...";try{const j=await robustFetch({action:'auth_verify',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else{toggleElement('loginError',true);document.getElementById('loginPin').value='';}}catch(e){alert("Network Error");}finally{b.disabled=false;b.innerText=o;}}
         function startApp(){toggleElement('appContainer',true);toggleElement('appLoader',false);fetchData();pollTimer=setInterval(()=>fetchData(true),POLLING_INTERVAL);}
+        
         async function fetchData(s=false){if(!s)updateSyncStatus('Syncing...','amber');try{const j=await robustFetch({action:'read',db:TARGET_SHEET,password:USER_PASSWORD});if(j.error)throw new Error(j.error);records=j.map(r=>{const rawDC=r.is_discharged??r.isDischarged;const isDC=(rawDC===true||String(rawDC).toLowerCase()==='true'||rawDC===1||rawDC==="1");let ds=String(r.timestamp).replace(/'/g,'');if(ds.includes('T'))ds=ds.split('T')[0];
         let imgs = []; try { imgs = JSON.parse(r.images); } catch(e) { imgs = []; } 
         return{...r,isDischarged:isDC,timestamp:ds, images: imgs};}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');}catch(e){if(!s){console.warn(e);updateSyncStatus('Offline','rose');}}}
+        
         function manualRefresh(){const b=document.getElementById('btnRefresh');b.classList.add('animate-spin');fetchData(false).then(()=>setTimeout(()=>b.classList.remove('animate-spin'),1000));}
         function updateSyncStatus(m,c){const l=document.getElementById('syncStatus');const d=document.getElementById('statusDot');const cl={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'};l.innerText=m;l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`;d.className=`w-2 h-2 rounded-full ${cl[c]||'bg-slate-400'} shadow-sm ${m==='Live'?'animate-pulse':''}`;}
         
-        // --- IMAGE HANDLING ---
         function handleFileSelect(input) {
             const files = Array.from(input.files);
-            const btn = document.getElementById('btnUpload');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...`;
-            btn.disabled = true;
-            
+            const btn = document.getElementById('btnUpload'); const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...`; btn.disabled = true;
             const promises = files.map(file => compressImage(file, 1000, 0.7));
             Promise.all(promises).then(compressedResults => {
-                pendingImages = pendingImages.concat(compressedResults);
-                renderImagePreviews(); 
+                pendingImages = pendingImages.concat(compressedResults); renderImagePreviews(); 
                 btn.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i> Done`;
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
             }).catch(err => { console.error(err); alert("Error processing images."); btn.innerHTML = originalText; btn.disabled = false; });
@@ -255,58 +237,38 @@
 
         function compressImage(file, maxWidth, quality) {
             return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
+                const reader = new FileReader(); reader.readAsDataURL(file);
                 reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
+                    const img = new Image(); img.src = event.target.result;
                     img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width; let height = img.height;
+                        const canvas = document.createElement('canvas'); let width = img.width; let height = img.height;
                         if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                        canvas.width = width; canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                         resolve({ name: file.name, type: file.type, data: canvas.toDataURL(file.type, quality).split(',')[1], preview: event.target.result });
-                    };
-                    img.onerror = (e) => reject(e);
-                };
-                reader.onerror = (e) => reject(e);
+                    }; img.onerror = (e) => reject(e);
+                }; reader.onerror = (e) => reject(e);
             });
         }
         
         function renderImagePreviews() {
-            const container = document.getElementById('imagePreviewContainer');
-            container.innerHTML = '';
-            
+            const container = document.getElementById('imagePreviewContainer'); container.innerHTML = '';
             keptImages.forEach((url, idx) => {
                  let src = url; 
-                 // FIXED: NO REPLACEMENT OF EXPORT=DOWNLOAD for IMG TAG
+                 // Fix: Ensure we use the raw URL for thumbnails if possible, but Google Drive needs care.
+                 // We will just use the URL as is for the background-image.
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
                  div.style.backgroundImage = `url(${src})`;
                  div.onclick = () => openLightbox(idx, 'kept');
-                 
-                 const del = document.createElement('div');
-                 del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
-                 del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                 del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
-                 div.appendChild(del);
-                 container.appendChild(div);
+                 const del = document.createElement('div'); del.className = "img-delete-btn opacity-0 group-hover:opacity-100"; del.innerHTML = '<i class="fa-solid fa-xmark"></i>'; del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
+                 div.appendChild(del); container.appendChild(div);
             });
-            
             pendingImages.forEach((img, idx) => {
-                 const div = document.createElement('div');
-                 div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
+                 const div = document.createElement('div'); div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
                  div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
                  div.onclick = () => openLightbox(idx, 'pending'); 
-                 
-                 const del = document.createElement('div');
-                 del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
-                 del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                 del.onclick = (e) => { e.stopPropagation(); removePendingImage(idx); };
-                 div.appendChild(del);
-                 container.appendChild(div);
+                 const del = document.createElement('div'); del.className = "img-delete-btn opacity-0 group-hover:opacity-100"; del.innerHTML = '<i class="fa-solid fa-xmark"></i>'; del.onclick = (e) => { e.stopPropagation(); removePendingImage(idx); };
+                 div.appendChild(del); container.appendChild(div);
             });
             document.getElementById('fileCount').innerText = `${keptImages.length + pendingImages.length} images`;
         }
@@ -376,7 +338,6 @@
             if (typeof mode === 'string' && mode !== 'kept' && mode !== 'pending') {
                  const rec = records.find(r => r.id === mode);
                  if(!rec || !rec.images) return;
-                 // Use raw URL for img src
                  currentLightboxImages = rec.images;
             } else if (mode === 'kept') {
                  currentLightboxImages = keptImages;
@@ -416,15 +377,14 @@
             
             document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex + 1}/${currentLightboxImages.length}`;
             
-            // Safety timeout for loading
+            // Safety timeout
             setTimeout(() => {
                 if(imgEl.classList.contains('opacity-0') && !errorMsg.classList.contains('hidden')) {
-                     // Still loading?
+                     // Loading
                 }
             }, 5000);
         }
         
-        // --- FIXED: Event Handlers defined in script ---
         function onImageLoad() {
              document.getElementById('lightboxImg').classList.remove('opacity-0');
              document.getElementById('lightboxLoader').style.display = 'none';
