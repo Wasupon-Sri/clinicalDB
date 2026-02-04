@@ -3,190 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConsultationDB Platform</title>
+    <title>ConsultationDB Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>body{font-family:'Plus Jakarta Sans',sans-serif;background:#0f172a;color:white;}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        primary: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
+                        slate: { 850: '#1e293b', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0f172a; color: white; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5); border-color: rgba(14, 165, 233, 0.5); }
+        .admin-element { display: none !important; }
+        .admin-mode .admin-element { display: flex !important; }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
+<body class="min-h-screen flex flex-col">
 
-    <div class="w-full max-w-2xl bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-        <div class="bg-indigo-600 p-6 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl text-white"><i class="fa-solid fa-server"></i></div>
-                <div>
-                    <h1 class="text-xl font-bold">ConsultationDB Platform</h1>
-                    <p class="text-indigo-200 text-sm">Mother Interface (Admin)</p>
-                </div>
+    <!-- HEADER -->
+    <header class="h-20 glass-panel sticky top-0 z-50 px-6 flex items-center justify-between border-b border-slate-700">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
+                <i class="fa-solid fa-hospital-user text-lg"></i>
             </div>
-            <button onclick="fetchUsers()" class="text-white hover:bg-white/10 p-2 rounded-lg transition"><i class="fa-solid fa-rotate"></i></button>
-        </div>
-
-        <div class="p-6 space-y-8">
-            <!-- CREATE USER SECTION -->
-            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
-                <label class="block text-xs font-bold text-slate-400 uppercase mb-3"><i class="fa-solid fa-lock text-indigo-500 mr-1"></i> Admin Controls (Requires Master Key)</label>
-                <div class="flex gap-2">
-                    <input type="text" id="newUserName" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition text-white" placeholder="New Database Name (e.g. Resident_A)">
-                    <button onclick="triggerAdminAction('create')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-lg flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Create
-                    </button>
-                </div>
-            </div>
-
-            <!-- DATABASE LIST -->
             <div>
-                <div class="flex justify-between items-end mb-3">
-                    <label class="block text-xs font-bold text-slate-400 uppercase">Available Databases</label>
-                    <span class="text-xs text-slate-500" id="dbCount">Loading...</span>
+                <h1 class="text-xl font-bold tracking-tight text-white">ConsultationDB</h1>
+                <p class="text-xs text-slate-400 font-medium">Internal Medicine Directory</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+             <!-- Search Bar -->
+            <div class="relative hidden sm:block">
+                <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-sm"></i>
+                <input type="text" id="searchInput" onkeyup="filterUsers()" placeholder="Search user..." class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-indigo-500 transition w-64">
+            </div>
+            <!-- Admin Toggle -->
+            <button onclick="toggleAdminLogin()" id="btnAdminToggle" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition flex items-center justify-center border border-slate-700" title="Admin Access">
+                <i class="fa-solid fa-lock"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="flex-1 container mx-auto p-6 max-w-6xl">
+        
+        <!-- ADMIN DASHBOARD (Hidden by default) -->
+        <div id="adminPanel" class="admin-element hidden mb-8 bg-indigo-900/20 border border-indigo-500/30 rounded-2xl p-6 animate-fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-indigo-400"></i> Admin Controls</h2>
+                    <p class="text-indigo-300 text-xs mt-1">Manage database instances</p>
                 </div>
-                <div id="userList" class="bg-slate-900 rounded-xl border border-slate-700 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                    <div class="p-8 text-center text-slate-500 text-sm">
-                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Connecting to System...
-                    </div>
+                <div class="flex w-full md:w-auto gap-2">
+                    <input type="text" id="newUserName" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:border-indigo-500 outline-none" placeholder="New DB Name">
+                    <button onclick="triggerAdminAction('create')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-lg shadow-indigo-900/50 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i> Create DB
+                    </button>
+                    <button onclick="logoutAdmin()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg font-bold text-sm border border-slate-600">Logout</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ADMIN PASSWORD MODAL -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/90 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-2xl w-80 text-center animate-bounce-in">
-            <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-shield-halved"></i></div>
-            <h3 class="text-white font-bold mb-1">Admin Authorization</h3>
-            <p class="text-slate-400 text-xs mb-4">Enter Master Key to proceed</p>
-            <input type="password" id="adminPin" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-3 text-center tracking-widest text-lg mb-4 text-white focus:border-indigo-500 outline-none" placeholder="PIN">
+        <!-- SEARCH (Mobile Only) -->
+        <div class="mb-6 sm:hidden">
+            <input type="text" id="searchInputMobile" onkeyup="filterUsers(this.value)" placeholder="Search user..." class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition">
+        </div>
+
+        <!-- DATABASE GRID -->
+        <div id="loadingState" class="text-center py-20">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-500 mb-4"></i>
+            <p class="text-slate-400">Loading Directory...</p>
+        </div>
+
+        <div id="dbGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 hidden">
+            <!-- Cards Injected Here -->
+        </div>
+
+    </main>
+
+    <footer class="p-6 text-center text-xs text-slate-600">
+        Rajavithi Hospital Internal Medicine • ConsultationDB Platform
+    </footer>
+
+    <!-- PASSWORD MODAL -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-80 text-center">
+            <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-xl text-white border border-slate-600"><i class="fa-solid fa-lock"></i></div>
+            <h3 class="text-white font-bold mb-1">Admin Access</h3>
+            <p class="text-slate-400 text-xs mb-5">Enter Master Key to unlock management tools.</p>
+            <input type="password" id="adminPin" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-3 text-center tracking-widest text-lg mb-4 text-white focus:border-indigo-500 outline-none transition" placeholder="PIN">
             <div class="flex gap-2">
-                <button onclick="closeAdminModal()" class="flex-1 py-2 text-slate-400 hover:text-white text-sm font-bold">Cancel</button>
-                <button onclick="submitAdminAction()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-bold transition shadow-lg">Confirm</button>
+                <button onclick="toggleAdminLogin()" class="flex-1 py-2 text-slate-400 hover:text-white text-sm font-bold transition">Cancel</button>
+                <button onclick="checkAdmin()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-bold transition shadow-lg">Unlock</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION
+        // *** CONFIGURATION ***
+        // 1. Your Google Script URL (Backend)
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
+        // 2. Your GitHub Pages URL for the App (Child Interface)
         const APP_BASE_URL = "https://wasupon-sri.github.io/clinicalDB/app.html"; 
         
-        let pendingAction = null;
-        let pendingPayload = null;
+        const MASTER_KEY = "1415"; // Only used for frontend gate, real check is on backend
+        let allUsers = [];
+        let isAdmin = false;
 
         window.onload = () => { fetchUsers(); };
 
+        // --- DATA FETCHING ---
         async function fetchUsers() {
-            const list = document.getElementById('userList');
-            const count = document.getElementById('dbCount');
-            
             try {
                 const res = await fetch(API_URL + "?action=admin_list_users");
                 const json = await res.json();
                 
                 if(json.users) {
-                    list.innerHTML = '';
-                    count.innerText = `${json.users.length} Active`;
-                    
-                    json.users.forEach(u => {
-                        const link = u === 'Sheet1' ? `${APP_BASE_URL}?db=Sheet1` : `${APP_BASE_URL}?db=${u}`;
-                        const isMe = u === 'Sheet1';
-                        const displayName = isMe ? 'Main Database (Sheet1)' : u;
-                        const iconClass = isMe ? 'text-emerald-400 bg-emerald-500/10' : 'text-indigo-400 bg-indigo-500/10';
-                        
-                        const item = document.createElement('div');
-                        item.className = "flex items-center justify-between p-4 border-b border-slate-800 hover:bg-slate-800/50 transition last:border-0";
-                        
-                        item.innerHTML = `
-                            <div class="flex items-center gap-4 min-w-0">
-                                <div class="w-10 h-10 rounded-lg ${iconClass} flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-database"></i>
-                                </div>
-                                <div class="truncate">
-                                    <h3 class="font-bold text-slate-200 truncate">${displayName}</h3>
-                                    <div class="text-xs text-slate-500 font-mono truncate flex items-center gap-1">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Online
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                <a href="${link}" target="_blank" class="px-4 py-2 bg-slate-700 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center gap-2">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open App
-                                </a>
-                                <button onclick="copyLink('${link}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-white hover:text-slate-900 text-slate-400 border border-slate-700 transition" title="Copy Link">
-                                    <i class="fa-regular fa-copy"></i>
-                                </button>
-                                ${!isMe ? `<button onclick="triggerAdminAction('delete', '${u}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-rose-500 hover:text-white text-rose-500 border border-slate-700 transition" title="Delete Database"><i class="fa-solid fa-trash"></i></button>` : ''}
-                            </div>
-                        `;
-                        list.appendChild(item);
-                    });
+                    allUsers = json.users;
+                    renderGrid(allUsers);
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('dbGrid').classList.remove('hidden');
                 }
             } catch(e) {
-                list.innerHTML = `<div class="p-8 text-center text-rose-400 text-sm">Connection Failed. Check URL.<br>${e.message}</div>`;
+                document.getElementById('loadingState').innerHTML = `<p class="text-rose-400">Connection Failed. Please refresh.</p>`;
             }
         }
 
-        function triggerAdminAction(type, targetName = null) {
-            if (type === 'create') {
-                const name = document.getElementById('newUserName').value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
-                if (!name) return alert("Enter a valid name (Letters, Numbers, _ only)");
-                pendingAction = 'admin_create_user';
-                pendingPayload = { dbName: name };
-            } else if (type === 'delete') {
-                if(!confirm(`PERMANENTLY DELETE database "${targetName}"? Data will be lost.`)) return;
-                pendingAction = 'admin_delete_user';
-                pendingPayload = { dbName: targetName };
-            }
+        // --- RENDERING ---
+        function renderGrid(users) {
+            const grid = document.getElementById('dbGrid');
+            grid.innerHTML = '';
+
+            // Ensure Sheet1 (Admin/Main) is always first
+            const sortedUsers = users.sort((a,b) => {
+                if(a === 'Sheet1') return -1;
+                if(b === 'Sheet1') return 1;
+                return a.localeCompare(b);
+            });
+
+            sortedUsers.forEach(u => {
+                const isMain = u === 'Sheet1';
+                const displayName = isMain ? 'Main Database' : u;
+                const link = isMain ? `${APP_BASE_URL}?db=Sheet1` : `${APP_BASE_URL}?db=${u}`;
+                const initial = displayName.charAt(0).toUpperCase();
+                
+                // Card Color Logic
+                let iconBg = isMain ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-700 text-slate-300 border-slate-600';
+                let iconContent = isMain ? '<i class="fa-solid fa-database"></i>' : `<span class="font-bold text-lg">${initial}</span>`;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 border border-slate-700 rounded-2xl p-5 card-hover transition-all duration-300 relative group flex flex-col justify-between h-40";
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 rounded-xl ${iconBg} border flex items-center justify-center shadow-inner">
+                            ${iconContent}
+                        </div>
+                        
+                        <!-- ADMIN DELETE BUTTON (Hidden by default) -->
+                        <button onclick="deleteDB('${u}')" class="admin-element hidden w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white items-center justify-center transition border border-rose-500/20" title="Delete Database">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg text-white truncate mb-1">${displayName}</h3>
+                        <div class="flex gap-2 mt-3">
+                            <a href="${link}" target="_blank" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 rounded-lg text-center shadow-lg shadow-indigo-900/50 transition">
+                                Launch
+                            </a>
+                            <button onclick="copyLink('${link}')" class="px-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 transition" title="Copy Link">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
             
-            document.getElementById('adminPin').value = '';
-            document.getElementById('adminModal').classList.remove('hidden');
-            document.getElementById('adminModal').classList.add('flex');
-            document.getElementById('adminPin').focus();
+            updateAdminView();
         }
 
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.add('hidden');
-            document.getElementById('adminModal').classList.remove('flex');
-            pendingAction = null;
+        // --- FILTER ---
+        function filterUsers(val) {
+            const query = (val || document.getElementById('searchInput').value).toLowerCase();
+            const filtered = allUsers.filter(u => u.toLowerCase().includes(query) || (u==='Sheet1' && 'main database'.includes(query)));
+            renderGrid(filtered);
         }
 
-        async function submitAdminAction() {
+        // --- ADMIN LOGIC ---
+        function toggleAdminLogin() {
+            const modal = document.getElementById('adminModal');
+            if(modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.getElementById('adminPin').value = '';
+                document.getElementById('adminPin').focus();
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function checkAdmin() {
             const pin = document.getElementById('adminPin').value;
-            if(!pin) return;
-            
-            const btn = document.querySelector('#adminModal button:last-child');
-            const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
-            
+            if(pin === MASTER_KEY) {
+                isAdmin = true;
+                toggleAdminLogin();
+                document.body.classList.add('admin-mode');
+                document.getElementById('btnAdminToggle').classList.add('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/20');
+                document.getElementById('btnAdminToggle').onclick = logoutAdmin; // Change click to logout
+            } else {
+                alert("Access Denied");
+                document.getElementById('adminPin').value = '';
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            document.body.classList.remove('admin-mode');
+            // Reset Toggle Button
+            const btn = document.getElementById('btnAdminToggle');
+            btn.classList.remove('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/20');
+            btn.onclick = toggleAdminLogin;
+        }
+
+        function updateAdminView() {
+            // Re-applies admin class if sorting/filtering redraws the grid
+            if(isAdmin) document.body.classList.add('admin-mode');
+            else document.body.classList.remove('admin-mode');
+        }
+
+        // --- ACTIONS ---
+        async function triggerAdminAction(type) {
+            if(type === 'create') {
+                const name = document.getElementById('newUserName').value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+                if(!name) return alert("Enter valid name");
+                if(!confirm(`Create database for "${name}"?`)) return;
+                
+                await sendAdminRequest('admin_create_user', { dbName: name });
+                document.getElementById('newUserName').value = '';
+                fetchUsers();
+            }
+        }
+
+        async function deleteDB(name) {
+            if(!confirm(`PERMANENTLY DELETE "${name}"?\nAll data will be lost.`)) return;
+            await sendAdminRequest('admin_delete_user', { dbName: name });
+            fetchUsers();
+        }
+
+        async function sendAdminRequest(action, payload) {
+            // Simple visual feedback
+            document.body.style.cursor = 'wait';
             try {
                 const res = await fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ 
-                        action: pendingAction, 
-                        adminKey: pin, 
-                        ...pendingPayload 
-                    })
+                    body: JSON.stringify({ action: action, adminKey: MASTER_KEY, ...payload }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
                 });
                 const json = await res.json();
-                
-                if(json.status === 'success') {
-                    closeAdminModal();
-                    if(pendingAction === 'admin_create_user') document.getElementById('newUserName').value = '';
-                    fetchUsers();
-                } else {
-                    alert(json.error || "Action Failed");
-                    document.getElementById('adminPin').value = '';
-                }
+                if(json.status !== 'success') alert(json.error || "Failed");
             } catch(e) {
-                alert("Network Error: " + e.message);
+                alert("Network Error");
             } finally {
-                btn.disabled = false;
-                btn.innerText = originalText;
+                document.body.style.cursor = 'default';
             }
         }
 
         function copyLink(url) {
             navigator.clipboard.writeText(url);
+            // Toast feedback could go here
             const btn = event.currentTarget;
             const icon = btn.querySelector('i');
             icon.className = "fa-solid fa-check text-emerald-400";
