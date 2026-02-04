@@ -7,22 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'] },
-                    colors: {
-                        primary: { 50: 'var(--p-50)', 100: 'var(--p-100)', 500: 'var(--p-500)', 600: 'var(--p-600)', 700: 'var(--p-700)' },
-                        surface: '#ffffff', background: '#f8fafc',
-                    },
-                    boxShadow: { soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', glow: '0 0 15px var(--p-glow)' },
-                    transitionProperty: { colors: 'background-color, border-color, color, fill, stroke, box-shadow' }
-                }
-            }
-        }
-    </script>
     <style>
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
@@ -35,10 +19,10 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        .textarea-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
+        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
-
+        
         /* Lightbox */
         .lightbox-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .lightbox-img { max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); z-index: 20; transition: opacity 0.2s; }
@@ -48,6 +32,7 @@
         .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; opacity: 0.7; }
         .lightbox-close:hover { opacity: 1; }
         .lightbox-loader { position: absolute; z-index: 10; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rotation 1s linear infinite; }
+        
         .img-delete-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10; transition: transform 0.2s; border: 2px solid white; }
         .img-delete-btn:hover { transform: scale(1.1); background: #dc2626; }
     </style>
@@ -189,6 +174,7 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
+        
         let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
         const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
         const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse',label:'Cardio'},{id:'lungs',icon:'fa-lungs',label:'Pulmo'},{id:'brain',icon:'fa-brain',label:'Neuro'},{id:'kidneys',icon:'fa-bacterium',label:'Nephro'},{id:'pills',icon:'fa-pills',label:'Meds'},{id:'syringe',icon:'fa-syringe',label:'Proc'},{id:'user-doctor',icon:'fa-user-doctor',label:'Consult'},{id:'clipboard',icon:'fa-clipboard-list',label:'Rounds'},{id:'skull',icon:'fa-skull',label:'Crit/Exp'},{id:'flask',icon:'fa-flask',label:'Lab'},{id:'file-medical',icon:'fa-file-medical',label:'Admin'},{id:'bed',icon:'fa-bed',label:'Admit'}];
@@ -219,9 +205,11 @@
 
         function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
         window.onload = function() { 
-            applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker(); 
+            applyTheme(currentMonth.getMonth()); 
+            renderIconPicker(); renderColorPicker(); 
             if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; 
-            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
+            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; 
+            document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
             
             // ATTACH LIGHTBOX IMAGE LISTENERS VIA JS
             const lbImg = document.getElementById('lightboxImg');
@@ -233,73 +221,30 @@
         };
 
         function toggleElement(id,show){const e=document.getElementById(id);if(e){if(show)e.classList.remove('hidden');else e.classList.add('hidden');}}
-        
-        // --- HYBRID FETCH STRATEGY ---
-        // READ = POST (Reverted to POST because GET length limits can break auth)
-        // Note: text/plain is used for all to avoid CORS preflight options
-        async function robustFetch(payload) {
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }
-                });
-                const text = await res.text();
-                try { return JSON.parse(text); } 
-                catch (e) { 
-                    if(text.trim().startsWith("<")) throw new Error("Server returned HTML error (Auth/Script)");
-                    throw new Error("Invalid Server Response"); 
-                }
-            } catch (e) { throw e; }
-        }
-
-        async function checkAuth() {
-            toggleElement('authOverlay',true);toggleElement('authLoading',true);toggleElement('authSetup',false);toggleElement('authLogin',false);toggleElement('authError',false);
-            try {
-                const json = await robustFetch({ action: 'auth_check_status', db: TARGET_SHEET });
-                toggleElement('authLoading',false);
-                if(json.status==='setup_needed')toggleElement('authSetup',true);
-                else if(json.status==='locked')toggleElement('authLogin',true);
-                else if(json.error)showAuthError(json.error);
-            } catch(e) { showAuthError(e.message || "Connection Failed"); }
-        }
-
+        async function robustFetch(p){try{const r=await fetch(API_URL,{method:'POST',body:JSON.stringify(p),headers:{"Content-Type":"text/plain;charset=utf-8"}});const t=await r.text();try{return JSON.parse(t);}catch(e){if(t.trim().startsWith("<"))throw new Error("Server Error");throw new Error("Invalid Response");}}catch(e){throw e;}}
+        async function checkAuth(){toggleElement('authOverlay',true);toggleElement('authLoading',true);toggleElement('authSetup',false);toggleElement('authLogin',false);toggleElement('authError',false);try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET});toggleElement('authLoading',false);if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");}}
         function showAuthError(m){toggleElement('authLoading',false);toggleElement('authError',true);document.getElementById('errorDetail').innerText=m;}
         async function setupPassword(){const p=document.getElementById('createPin').value;if(p.length<4)return alert("4+ digits");const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating...";try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;}}
         async function verifyPassword(){const p=document.getElementById('loginPin').value;const b=document.getElementById('btnLogin');const o=b.innerText;b.disabled=true;b.innerText="Verifying...";try{const j=await robustFetch({action:'auth_verify',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else{toggleElement('loginError',true);document.getElementById('loginPin').value='';}}catch(e){alert("Network Error");}finally{b.disabled=false;b.innerText=o;}}
-        
         function startApp(){toggleElement('appContainer',true);toggleElement('appLoader',false);fetchData();pollTimer=setInterval(()=>fetchData(true),POLLING_INTERVAL);}
-        
-        async function fetchData(s=false){
-            if(!s)updateSyncStatus('Syncing...','amber');
-            try {
-                // Read via POST to ensure password security and avoid URL length issues
-                const json = await robustFetch({ action: 'read', db: TARGET_SHEET, password: USER_PASSWORD });
-                if(json.error) throw new Error(json.error);
-                
-                records = json.map(r => {
-                    const rawDC = r.is_discharged ?? r.isDischarged;
-                    const isDC = (rawDC === true || String(rawDC).toLowerCase() === 'true' || rawDC === 1 || rawDC === "1");
-                    let ds = String(r.timestamp).replace(/'/g,''); if(ds.includes('T'))ds=ds.split('T')[0];
-                    let imgs = []; try { imgs = JSON.parse(r.images); } catch(e) { imgs = []; } 
-                    return{...r,isDischarged:isDC,timestamp:ds, images: imgs};
-                }).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-                renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');
-            } catch(e) { 
-                if(!s) { console.warn(e); updateSyncStatus('Offline', 'rose'); }
-            }
-        }
-        
+        async function fetchData(s=false){if(!s)updateSyncStatus('Syncing...','amber');try{const j=await robustFetch({action:'read',db:TARGET_SHEET,password:USER_PASSWORD});if(j.error)throw new Error(j.error);records=j.map(r=>{const rawDC=r.is_discharged??r.isDischarged;const isDC=(rawDC===true||String(rawDC).toLowerCase()==='true'||rawDC===1||rawDC==="1");let ds=String(r.timestamp).replace(/'/g,'');if(ds.includes('T'))ds=ds.split('T')[0];
+        let imgs = []; try { imgs = JSON.parse(r.images); } catch(e) { imgs = []; } 
+        return{...r,isDischarged:isDC,timestamp:ds, images: imgs};}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');}catch(e){if(!s){console.warn(e);updateSyncStatus('Offline','rose');}}}
         function manualRefresh(){const b=document.getElementById('btnRefresh');b.classList.add('animate-spin');fetchData(false).then(()=>setTimeout(()=>b.classList.remove('animate-spin'),1000));}
-        function updateSyncStatus(msg, c) { const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const colors={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=msg; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${colors[c]||'bg-slate-400'} shadow-sm ${msg==='Live'?'animate-pulse':''}`; }
+        function updateSyncStatus(m,c){const l=document.getElementById('syncStatus');const d=document.getElementById('statusDot');const cl={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'};l.innerText=m;l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`;d.className=`w-2 h-2 rounded-full ${cl[c]||'bg-slate-400'} shadow-sm ${m==='Live'?'animate-pulse':''}`;}
         
+        // --- IMAGE HANDLING ---
         function handleFileSelect(input) {
             const files = Array.from(input.files);
-            const btn = document.getElementById('btnUpload'); const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...`; btn.disabled = true;
+            const btn = document.getElementById('btnUpload');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...`;
+            btn.disabled = true;
+            
             const promises = files.map(file => compressImage(file, 1000, 0.7));
             Promise.all(promises).then(compressedResults => {
-                pendingImages = pendingImages.concat(compressedResults); renderImagePreviews(); 
+                pendingImages = pendingImages.concat(compressedResults);
+                renderImagePreviews(); 
                 btn.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i> Done`;
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
             }).catch(err => { console.error(err); alert("Error processing images."); btn.innerHTML = originalText; btn.disabled = false; });
@@ -307,21 +252,29 @@
 
         function compressImage(file, maxWidth, quality) {
             return new Promise((resolve, reject) => {
-                const reader = new FileReader(); reader.readAsDataURL(file);
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
                 reader.onload = (event) => {
-                    const img = new Image(); img.src = event.target.result;
+                    const img = new Image();
+                    img.src = event.target.result;
                     img.onload = () => {
-                        const canvas = document.createElement('canvas'); let width = img.width; let height = img.height;
+                        const canvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
                         if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                        canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
                         resolve({ name: file.name, type: file.type, data: canvas.toDataURL(file.type, quality).split(',')[1], preview: event.target.result });
-                    }; img.onerror = (e) => reject(e);
-                }; reader.onerror = (e) => reject(e);
+                    };
+                    img.onerror = (e) => reject(e);
+                };
+                reader.onerror = (e) => reject(e);
             });
         }
         
         function renderImagePreviews() {
-            const container = document.getElementById('imagePreviewContainer'); container.innerHTML = '';
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '';
             
             keptImages.forEach((url, idx) => {
                  let src = url; 
@@ -332,16 +285,27 @@
                  div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
                  div.style.backgroundImage = `url(${src})`;
                  div.onclick = () => openLightbox(idx, 'kept');
-                 const del = document.createElement('div'); del.className = "img-delete-btn opacity-0 group-hover:opacity-100"; del.innerHTML = '<i class="fa-solid fa-xmark"></i>'; del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
-                 div.appendChild(del); container.appendChild(div);
+                 
+                 const del = document.createElement('div');
+                 del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
+                 del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                 del.onclick = (e) => { e.stopPropagation(); removeKeptImage(idx); };
+                 div.appendChild(del);
+                 container.appendChild(div);
             });
             
             pendingImages.forEach((img, idx) => {
-                 const div = document.createElement('div'); div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
+                 const div = document.createElement('div');
+                 div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
                  div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
                  div.onclick = () => openLightbox(idx, 'pending'); 
-                 const del = document.createElement('div'); del.className = "img-delete-btn opacity-0 group-hover:opacity-100"; del.innerHTML = '<i class="fa-solid fa-xmark"></i>'; del.onclick = (e) => { e.stopPropagation(); removePendingImage(idx); };
-                 div.appendChild(del); container.appendChild(div);
+                 
+                 const del = document.createElement('div');
+                 del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
+                 del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                 del.onclick = (e) => { e.stopPropagation(); removePendingImage(idx); };
+                 div.appendChild(del);
+                 container.appendChild(div);
             });
             document.getElementById('fileCount').innerText = `${keptImages.length + pendingImages.length} images`;
         }
@@ -350,145 +314,185 @@
         function removePendingImage(index) { pendingImages.splice(index, 1); renderImagePreviews(); }
 
         async function saveToBackend(payload, action="save") {
-            return await robustFetch({ ...payload, action: action, db: TARGET_SHEET, password: USER_PASSWORD });
+            if(action==='save') payload.timestamp="'"+payload.timestamp;
+            return await robustFetch({...payload,action:action,db:TARGET_SHEET,password:USER_PASSWORD});
         }
-
-        // --- EXPORT & HELPERS ---
-        function formatDateDMY(iso) { 
-            if(!iso) return '';
-            if (iso.match(/^\d{4}-\d{2}-\d{2}$/)) { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
-            const d = new Date(iso); if(isNaN(d.getTime())) return iso; 
-            return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; 
-        }
-
-        function generateTxtContent(r) { return `Name: ${r.name||'Untitled'}\nDate: ${formatDateDMY(r.timestamp)}\nWard: ${r.ward||'Unassigned'}\n\nNote:\n${r.content||''}`; }
-        function downloadFile(n, t) { const b=new Blob([t],{type:"text/plain"}); const u=window.URL.createObjectURL(b); const a=document.createElement("a"); a.href=u; a.download=n; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(u); }
-        function exportCurrentRecord() { if(!editingId)return; const t={name:document.getElementById('editName').value, timestamp:document.getElementById('editTimestamp').value, ward:document.getElementById('editWard').value, content:document.getElementById('editContent').value}; downloadFile((t.name||'Untitled')+".txt", generateTxtContent(t)); }
-        async function exportBatch() { if(selectedBatchIds.size===0)return; const rs=records.filter(r=>selectedBatchIds.has(r.id)); const u={}; for(const r of rs){ let b=r.name||'Untitled'; b=b.replace(/[/\\?%*:|"<>]/g,'-'); let f=b; if(u[b]){u[b]++;f=`${b} (${u[b]})`;}else{u[b]=1;} downloadFile(f+".txt", generateTxtContent(r)); await new Promise(x=>setTimeout(x,200)); } }
-
-        // --- UI RENDERERS ---
-        function renderCalendar() {
-            const g=document.getElementById('calendarGrid'); g.innerHTML=''; const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); applyTheme(m);
-            document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});
-            const fd=new Date(y,m,1).getDay(); const dim=new Date(y,m+1,0).getDate();
-            
-            // Build Today String manually (Local)
-            const now = new Date();
-            const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-
-            for(let i=0;i<fd;i++) g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';
-            for(let d=1;d<=dim;d++){
-                // Build cell date string manually (YYYY-MM-DD)
-                const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                
-                // FILTER: Strict string comparison (Fixes UTC shift)
-                const dr=records.filter(r=> r.timestamp === ds && !r.isDischarged);
-                
-                const isT = todayStr === ds;
-                const c=document.createElement('div'); c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;
-                c.onclick=()=>openPortal(ds);
-                let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;
-                dr.slice(0,3).forEach(r=>{ const co=COLORS.find(x=>x.id===r.color)||COLORS[0]; const ic=ICONS.find(x=>x.id===r.icon)||ICONS[0]; html+=`<div class="h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${co.bg} text-white truncate"><i class="fa-solid ${ic.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${r.name||r.ward||'Case'}</span></div>`; });
-                if(dr.length>3) html+=`<div class="text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5">+${dr.length-3}</div>`;
-                c.innerHTML=html+'</div>'; g.appendChild(c);
-            }
-        }
-        function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth()+d); renderCalendar(); }
-        function goToToday() { 
-            currentMonth=new Date(); 
-            const now = new Date();
-            selectedDateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-            renderCalendar(); 
-        }
-
-        function renderWards() {
-            const g=document.getElementById('wardGrid'); g.innerHTML=''; const wm={}; let dc=0;
-            records.forEach(r=>{ 
-                if(r.isDischarged) {
-                    dc++; 
-                } else { 
-                    const w=r.ward?r.ward.trim():'Unassigned'; if(!wm[w])wm[w]=0; wm[w]++; 
-                } 
-            });
-            
-            Object.entries(wm).sort().forEach(([n,c])=>{
-                g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;
-            });
-            
-            if(dc>0) g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;
-            
-            if(Object.keys(wm).length===0 && dc===0) g.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;
-        }
-        function updateWardSuggestions() { document.getElementById('wardSuggestions').innerHTML = Array.from(new Set(records.map(r=>r.ward).filter(Boolean))).map(w=>`<option value="${w}">`).join(''); }
-
-        function openPortal(ds, wf=null) {
-            toggleElement('portalModal', true); setTimeout(()=>document.getElementById('portalPanel').classList.remove('translate-x-full'),10);
-            let fr=[]; 
-            if(ds) { 
-                selectedDateStr=ds; // Keep exact clicked date
-                const [y, m, d] = ds.split('-'); document.getElementById('portalTitle').innerText=`${d}/${m}/${y}`; 
-                // FILTER: Use Strict String Compare
-                fr=records.filter(r=> r.timestamp === ds && !r.isDischarged); 
-                toggleElement('portalFooter', true); 
-            }
-            else { 
-                document.getElementById('portalTitle').innerText=wf==='DISCHARGED'?'Discharged Cases':wf; 
-                fr=wf==='DISCHARGED'?records.filter(r=>r.isDischarged):records.filter(r=>(r.ward||'Unassigned')===wf&&!r.isDischarged); 
-                toggleElement('portalFooter', false); 
-            }
-            renderPortalList(fr); isBatchMode=false; selectedBatchIds.clear(); updateBatchUI();
-        }
-        function renderPortalList(fr) {
-            const l=document.getElementById('portalList'); document.getElementById('portalSubtitle').innerText=`${fr.length} records`; l.innerHTML='';
-            fr.forEach(r=>{
-                const c=COLORS.find(x=>x.id===r.color)||COLORS[0]; const i=ICONS.find(x=>x.id===r.icon)||ICONS[0]; const op=r.isDischarged?'opacity-75 grayscale-[0.5]':'';
-                l.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-primary-200 transition-all duration-200 cursor-pointer relative group ${op}"><div class="flex items-start gap-4"><div class="w-11 h-11 shrink-0 rounded-xl ${c.bg} text-white flex items-center justify-center shadow-sm"><i class="fa-solid ${i.icon} text-lg"></i></div><div class="flex-1 min-w-0" onclick="openEditor('${r.id}')"><div class="flex justify-between items-center mb-1.5"><div><span class="block text-sm font-bold text-slate-800">${r.name||'Untitled'}</span><span class="text-[10px] font-bold text-slate-400">${formatDateDMY(r.timestamp)} &bull; ${r.ward||'Gen'}</span></div>${r.isDischarged?'<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>':''}</div><p class="text-slate-600 text-sm leading-relaxed font-sans line-clamp-3">${r.content.substring(0,120)+(r.content.length>120?'...':'')}</p></div></div><div class="absolute top-4 right-4 ${isBatchMode?'block':'hidden'} batch-check z-10 bg-white p-1 rounded"><input type="checkbox" class="check-box" onchange="toggleBatchSelect('${r.id}',this)" ${selectedBatchIds.has(r.id)?'checked':''}></div></div>`;
-            });
-        }
-        function closePortal() { document.getElementById('portalPanel').classList.add('translate-x-full'); setTimeout(()=>toggleElement('portalModal', false),300); }
-
-        function openEditor(id=null) {
-            toggleElement('editorModal', true); editingId=id; isNoteExpanded=false; toggleExpandNote(false);
-            if(id) {
-                const r=records.find(x=>x.id===id); document.getElementById('editorMode').innerText="Edit"; toggleElement('btnDeleteRecord', true); document.getElementById('btnDeleteRecord').classList.add('flex'); toggleElement('btnExportSingle', true); document.getElementById('btnExportSingle').classList.add('flex');
-                
-                document.getElementById('editTimestamp').value = r.timestamp; // Raw YYYY-MM-DD
-                
-                document.getElementById('editWard').value=r.ward; document.getElementById('editName').value=r.name||''; document.getElementById('editContent').value=r.content; document.getElementById('editDischarged').checked=!!r.isDischarged;
-                selectIcon(r.icon); selectColor(r.color);
-            } else {
-                document.getElementById('editorMode').innerText="New"; toggleElement('btnDeleteRecord', false); document.getElementById('btnDeleteRecord').classList.remove('flex'); toggleElement('btnExportSingle', false); document.getElementById('btnExportSingle').classList.remove('flex');
-                document.getElementById('editTimestamp').value=selectedDateStr;
-                const count=records.length+1; document.getElementById('editWard').value=''; document.getElementById('editName').value=`Data_${String(count).padStart(3,'0')}`; document.getElementById('editContent').value=''; document.getElementById('editDischarged').checked=false;
-                selectIcon(ICONS[0].id); selectColor(COLORS[0].id);
-            }
-        }
-        function closeEditor() { toggleElement('editorModal', false); editingId=null; }
-
-        function toggleExpandNote(fs) {
-            const t=document.getElementById('editContent'); const b=document.getElementById('btnLabelExpand'); const be=document.getElementById('btnExitExpand'); if(!b)return; const i=b.querySelector('i'); const txt=b.querySelector('span');
-            if(typeof fs==='boolean') isNoteExpanded=fs; else isNoteExpanded=!isNoteExpanded;
-            if(isNoteExpanded){ t.classList.add('expanded-note'); i.className='fa-solid fa-compress'; if(txt)txt.innerText="Collapse"; toggleElement('btnExitExpand', true); }
-            else{ t.classList.remove('expanded-note'); i.className='fa-solid fa-expand'; if(txt)txt.innerText="Expand"; toggleElement('btnExitExpand', false); }
-        }
-
-        function renderIconPicker() { document.getElementById('iconPicker').innerHTML=ICONS.map(i=>`<button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600 transition flex flex-col items-center justify-center gap-1 icon-option group" data-value="${i.id}" onclick="selectIcon('${i.id}')"><i class="fa-solid ${i.icon} text-lg group-hover:scale-110 transition-transform"></i></button>`).join(''); }
-        function selectIcon(id) { document.getElementById('editIcon').value=id; document.querySelectorAll('.icon-option').forEach(b=>{ if(b.dataset.value===id) b.className="aspect-square rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/30 flex flex-col items-center justify-center gap-1 icon-option transform scale-105 transition-all"; else b.className="aspect-square rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-slate-300 transition flex flex-col items-center justify-center gap-1 icon-option"; }); }
+        function formatDateDMY(iso){if(!iso)return'';if(iso.length===10&&iso.includes('-')){const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}return iso;}
+        function generateTxtContent(r){return `Name: ${r.name||'Untitled'}\nDate: ${formatDateDMY(r.timestamp)}\nWard: ${r.ward||'Unassigned'}\n\nNote:\n${r.content||''}`;}
+        function downloadFile(n,t){const b=new Blob([t],{type:"text/plain"});const u=window.URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);window.URL.revokeObjectURL(u);}
+        function exportCurrentRecord(){if(!editingId)return;const t={name:document.getElementById('editName').value,timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,content:document.getElementById('editContent').value};downloadFile((t.name||'Untitled')+".txt",generateTxtContent(t));}
+        async function exportBatch(){if(selectedBatchIds.size===0)return;const rs=records.filter(r=>selectedBatchIds.has(r.id));for(const r of rs){let b=(r.name||'Untitled').replace(/[/\\?%*:|"<>]/g,'-');downloadFile(b+".txt",generateTxtContent(r));await new Promise(x=>setTimeout(x,200));}}
         
-        function renderColorPicker() { document.getElementById('colorPicker').innerHTML=COLORS.map(c=>`<button class="w-6 h-6 rounded-full ${c.bg} ring-2 ring-offset-2 ring-transparent transition-all color-option hover:scale-110" data-value="${c.id}" onclick="selectColor('${c.id}')"></button>`).join(''); }
-        function selectColor(id) { document.getElementById('editColor').value=id; const o=COLORS.find(c=>c.id===id); document.querySelectorAll('.color-option').forEach(b=>{ if(b.dataset.value===id){b.classList.add(o.ring,'ring-offset-2');b.classList.remove('ring-transparent');}else{b.classList.remove(o.ring,'ring-offset-2');b.classList.add('ring-transparent');} }); }
-
-        async function saveRecord() {
-            const btn=document.getElementById('btnSave'); const originalHtml = btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; btn.disabled=true;
-            const p = { id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5), timestamp:document.getElementById('editTimestamp').value, ward:document.getElementById('editWard').value, name:document.getElementById('editName').value, icon:document.getElementById('editIcon').value, color:document.getElementById('editColor').value, content:document.getElementById('editContent').value, isDischarged:document.getElementById('editDischarged').checked };
-            try { await saveToBackend(p,'save'); closeEditor(); closePortal(); await fetchData(false); } catch(e){ alert("Save Failed: "+e.message); } finally { btn.innerHTML=originalHtml; btn.disabled=false; }
+        function renderCalendar(){const g=document.getElementById('calendarGrid');g.innerHTML='';const y=currentMonth.getFullYear();const m=currentMonth.getMonth();applyTheme(m);document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});const fd=new Date(y,m,1).getDay();const dim=new Date(y,m+1,0).getDate();
+        const now=new Date();const offset=now.getTimezoneOffset()*60000;const todayStr=new Date(now.getTime()-offset).toISOString().split('T')[0];
+        for(let i=0;i<fd;i++)g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dr=records.filter(r=>r.timestamp===ds&&!r.isDischarged);const isT=todayStr===ds;const c=document.createElement('div');c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;c.onclick=()=>openPortal(ds);let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;dr.slice(0,3).forEach(r=>{const co=COLORS.find(x=>x.id===r.color)||COLORS[0];const ic=ICONS.find(x=>x.id===r.icon)||ICONS[0];html+=`<div class="h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${co.bg} text-white truncate"><i class="fa-solid ${ic.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${r.name||r.ward||'Case'}</span></div>`;});if(dr.length>3)html+=`<div class="text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5">+${dr.length-3}</div>`;c.innerHTML=html+'</div>';g.appendChild(c);}}
+        function changeMonth(d){currentMonth.setMonth(currentMonth.getMonth()+d);renderCalendar();}
+        function goToToday(){currentMonth=new Date();const now=new Date();const offset=now.getTimezoneOffset()*60000;selectedDateStr=new Date(now.getTime()-offset).toISOString().split('T')[0];renderCalendar();}
+        function renderWards(){const g=document.getElementById('wardGrid');g.innerHTML='';const wm={};let dc=0;records.forEach(r=>{if(r.isDischarged){dc++;}else{const w=r.ward?r.ward.trim():'Unassigned';if(!wm[w])wm[w]=0;wm[w]++;}});Object.entries(wm).sort().forEach(([n,c])=>{g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-primary-200 cursor-pointer transition-all duration-300 group relative overflow-hidden" onclick="openPortal(null,'${n}')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full group-hover:from-primary-50 group-hover:to-primary-100 transition-colors duration-300"></div><div class="relative"><h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary-600 transition-colors">${n}</h3><div class="flex items-center gap-2"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">${c} Active Cases</span></div></div></div>`;});if(dc>0)g.innerHTML+=`<div class="bg-rose-50 border border-rose-100 rounded-2xl p-6 hover:shadow-lg hover:border-rose-300 cursor-pointer transition-all duration-300 group relative overflow-hidden ring-1 ring-rose-100/50" onclick="openPortal(null,'DISCHARGED')"><div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-rose-100 to-rose-200 rounded-full group-hover:from-rose-200 group-hover:to-rose-300 transition-colors duration-300"></div><div class="relative"><div class="flex items-center gap-2 mb-2"><h3 class="text-xl font-bold text-rose-800 group-hover:text-rose-900 transition-colors">Discharged Cases</h3><i class="fa-solid fa-file-export text-rose-400"></i></div><div class="flex items-center gap-2"><span class="bg-white text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm border border-rose-100">${dc} Archived</span></div></div></div>`;if(Object.keys(wm).length===0&&dc===0)g.innerHTML=`<div class="col-span-full flex flex-col items-center justify-center text-slate-400 mt-20"><i class="fa-regular fa-folder-open text-4xl mb-4 opacity-20"></i><p>No records found.</p></div>`;}
+        function updateWardSuggestions(){document.getElementById('wardSuggestions').innerHTML=Array.from(new Set(records.map(r=>r.ward).filter(Boolean))).map(w=>`<option value="${w}">`).join('');}
+        function openPortal(ds,wf=null){toggleElement('portalModal',true);setTimeout(()=>document.getElementById('portalPanel').classList.remove('translate-x-full'),10);let fr=[];if(ds){selectedDateStr=ds;const[y,m,d]=ds.split('-');document.getElementById('portalTitle').innerText=`${d}/${m}/${y}`;fr=records.filter(r=>r.timestamp===ds&&!r.isDischarged);toggleElement('portalFooter',true);}else{document.getElementById('portalTitle').innerText=wf==='DISCHARGED'?'Discharged Cases':wf;fr=wf==='DISCHARGED'?records.filter(r=>r.isDischarged):records.filter(r=>(r.ward||'Unassigned')===wf&&!r.isDischarged);toggleElement('portalFooter',false);}renderPortalList(fr);isBatchMode=false;selectedBatchIds.clear();updateBatchUI();}
+        
+        function renderPortalList(fr){
+            const l=document.getElementById('portalList');document.getElementById('portalSubtitle').innerText=`${fr.length} records`;l.innerHTML='';
+            fr.forEach(r=>{
+                const c=COLORS.find(x=>x.id===r.color)||COLORS[0];const i=ICONS.find(x=>x.id===r.icon)||ICONS[0];const op=r.isDischarged?'opacity-75 grayscale-[0.5]':'';
+                let imgHtml = '';
+                if(r.images && r.images.length > 0) {
+                    imgHtml = `<div class="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">` + 
+                        r.images.map((url, idx) => {
+                            // KEEP ORIGINAL DOWNLOAD LINK - FIX FOR FROZEN LOADING
+                            return `<img src="${url}" class="h-24 w-auto rounded-lg border border-slate-200 shadow-sm snap-center cursor-pointer hover:opacity-90 transition" onclick="event.stopPropagation(); openLightbox(${idx}, '${r.id}')" loading="lazy">`;
+                        }).join('') + 
+                    `</div>`;
+                }
+                
+                l.innerHTML+=`<div class="swipe-item-container mb-3 relative">
+                    <div class="swipe-actions"><button onclick="confirmDelete('${r.id}')" class="text-white font-bold flex flex-col items-center"><i class="fa-regular fa-trash-can text-lg"></i><span class="text-[10px]">Delete</span></button></div>
+                    <div class="swipe-content p-4 bg-white ${op}" ontouchstart="handleTouchStart(event, this)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this)">
+                        <div class="absolute top-4 right-4 ${isBatchMode?'block':'hidden'} batch-check z-30"><input type="checkbox" class="check-box !border-slate-400" onchange="toggleBatchSelect('${r.id}',this)" ${selectedBatchIds.has(r.id)?'checked':''}></div>
+                        <div class="flex items-start gap-4" onclick="if(!isSwiping) openEditor('${r.id}')">
+                            <div class="w-11 h-11 shrink-0 rounded-xl ${c.bg} text-white flex items-center justify-center shadow-sm"><i class="fa-solid ${i.icon} text-lg"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-1.5"><div><span class="block text-sm font-bold text-slate-800">${r.name||'Untitled'}</span><span class="text-[10px] font-bold text-slate-400">${formatDateDMY(r.timestamp)} &bull; ${r.ward||'Gen'}</span></div>${r.isDischarged?'<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>':''}</div>
+                                <p class="text-slate-600 text-sm leading-relaxed font-sans line-clamp-3">${r.content.substring(0,120)+(r.content.length>120?'...':'')}</p>
+                            </div>
+                        </div>
+                        ${imgHtml}
+                    </div>
+                </div>`;
+            });
         }
-        async function deleteRecord() { if(!confirm("Delete?"))return; try{ await saveToBackend({ids:[editingId]},'delete'); closeEditor(); closePortal(); await fetchData(false); }catch(e){alert("Delete failed");} }
-        function toggleBatchMode() { isBatchMode=!isBatchMode; document.querySelectorAll('.batch-check').forEach(e=>e.style.display=isBatchMode?'block':'none'); updateBatchUI(); }
-        function toggleBatchSelect(id,cb) { if(cb.checked)selectedBatchIds.add(id); else selectedBatchIds.delete(id); updateBatchUI(); }
-        function updateBatchUI() { const t=document.getElementById('batchToolbar'); const c=document.getElementById('batchCount'); const b=document.getElementById('btnBatch'); if(isBatchMode){t.classList.remove('hidden');b.classList.add('text-primary-600','bg-primary-50');b.classList.remove('text-slate-400');}else{t.classList.add('hidden');b.classList.remove('text-primary-600','bg-primary-50');b.classList.add('text-slate-400');} c.innerText=selectedBatchIds.size; }
-        async function executeBatchDelete() { if(selectedBatchIds.size===0)return; if(!confirm("Delete selected?"))return; try{ await saveToBackend({ids:Array.from(selectedBatchIds)},'delete'); toggleBatchMode(); closePortal(); await fetchData(false); }catch(e){alert("Failed");} }
-        function switchView(m) { viewMode=m; const c=document.getElementById('viewCalendar'); const w=document.getElementById('viewWards'); const bc=document.getElementById('btnViewCal'); const bw=document.getElementById('btnViewWard'); if(m==='calendar'){c.classList.remove('-translate-x-full');w.classList.add('translate-x-full');bc.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";bw.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}else{c.classList.add('-translate-x-full');w.classList.remove('translate-x-full');bw.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";bc.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";} }
+        
+        // --- SWIPE LOGIC ---
+        let xDown = null; let yDown = null; let isSwiping = false; let activeSwipeEl = null;
+        function handleTouchStart(evt, el) { xDown = evt.touches[0].clientX; yDown = evt.touches[0].clientY; isSwiping = false; if (activeSwipeEl && activeSwipeEl !== el) { activeSwipeEl.style.transform = "translateX(0px)"; activeSwipeEl = null; } }
+        function handleTouchMove(evt, el) { if (!xDown || !yDown) return; const xUp = evt.touches[0].clientX; const yUp = evt.touches[0].clientY; const xDiff = xDown - xUp; const yDiff = yDown - yUp; if (Math.abs(xDiff) > Math.abs(yDiff)) { if (Math.abs(xDiff) > 10) { isSwiping = true; if (xDiff > 0) { const translate = Math.min(xDiff, 80); el.style.transform = `translateX(-${translate}px)`; } else { el.style.transform = `translateX(0px)`; } } } }
+        function handleTouchEnd(evt, el) { if (!xDown || !yDown) return; const xUp = evt.changedTouches[0].clientX; const xDiff = xDown - xUp; if (xDiff > 50) { el.style.transform = "translateX(-80px)"; activeSwipeEl = el; } else { el.style.transform = "translateX(0px)"; activeSwipeEl = null; } xDown = null; yDown = null; setTimeout(() => isSwiping = false, 100); }
+        function confirmDelete(id) { if(confirm("Delete this record?")) { saveToBackend({ids:[id]},'delete').then(() => { fetchData(false); closePortal(); }); } else { if(activeSwipeEl) { activeSwipeEl.style.transform = "translateX(0px)"; activeSwipeEl = null; } } }
+
+        // --- LIGHTBOX LOGIC ---
+        function openLightbox(index, mode) {
+            if (typeof mode === 'string' && mode !== 'kept' && mode !== 'pending') {
+                 const rec = records.find(r => r.id === mode);
+                 if(!rec || !rec.images) return;
+                 // Use raw URL for img src
+                 currentLightboxImages = rec.images;
+            } else if (mode === 'kept') {
+                 currentLightboxImages = keptImages;
+            } else if (mode === 'pending') {
+                 currentLightboxImages = pendingImages.map(img => `data:${img.type};base64,${img.data}`);
+            }
+
+            currentLightboxIndex = index;
+            updateLightbox();
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').focus();
+        }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        function nextImage() { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; updateLightbox(); }
+        function prevImage() { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; updateLightbox(); }
+        
+        function updateLightbox() {
+            const imgEl = document.getElementById('lightboxImg');
+            const loader = document.getElementById('lightboxLoader');
+            const errorMsg = document.getElementById('lightboxError');
+            const link = document.getElementById('lightboxLink');
+
+            // Reset state
+            imgEl.classList.add('opacity-0');
+            imgEl.classList.remove('hidden');
+            loader.style.display = 'block';
+            errorMsg.classList.add('hidden');
+            
+            // Set source (Raw download URL for img tag)
+            let src = currentLightboxImages[currentLightboxIndex];
+            imgEl.src = src;
+            
+            // Generate View URL for the fallback button (replacing download with view)
+            let viewSrc = src;
+            if(viewSrc.includes('export=download')) viewSrc = viewSrc.replace('export=download', 'export=view');
+            link.href = viewSrc;
+            
+            document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex + 1}/${currentLightboxImages.length}`;
+            
+            // Safety timeout
+            setTimeout(() => {
+                if(imgEl.classList.contains('opacity-0') && !errorMsg.classList.contains('hidden')) {
+                     // Loading
+                }
+            }, 5000);
+        }
+        
+        // --- FIXED: Event Handlers defined in script ---
+        function onImageLoad() {
+             document.getElementById('lightboxImg').classList.remove('opacity-0');
+             document.getElementById('lightboxLoader').style.display = 'none';
+        }
+        
+        function onImageError() {
+             document.getElementById('lightboxLoader').style.display = 'none';
+             document.getElementById('lightboxImg').classList.add('hidden');
+             document.getElementById('lightboxError').classList.remove('hidden');
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('lightbox').classList.contains('hidden')) return;
+            if (e.key === 'ArrowLeft') prevImage();
+            if (e.key === 'ArrowRight') nextImage();
+            if (e.key === 'Escape') closeLightbox();
+        });
+        
+        let touchStartX = 0; let touchEndX = 0;
+        const lb = document.getElementById('lightbox');
+        lb.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+        lb.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipeLightbox(); });
+        function handleSwipeLightbox() {
+            if (touchEndX < touchStartX - 50) nextImage();
+            if (touchEndX > touchStartX + 50) prevImage();
+        }
+
+        function closePortal(){document.getElementById('portalPanel').classList.add('translate-x-full');setTimeout(()=>toggleElement('portalModal',false),300);}
+        function openEditor(id=null){
+            toggleElement('editorModal',true);editingId=id;isNoteExpanded=false;toggleExpandNote(false);
+            pendingImages = [];
+            keptImages = []; // Reset kept images
+            document.getElementById('fileCount').innerText = "";
+            document.getElementById('imagePreviewContainer').innerHTML = "";
+            document.getElementById('fileInput').value = "";
+
+            if(id){
+                const r=records.find(x=>x.id===id);document.getElementById('editorMode').innerText="Edit";toggleElement('btnDeleteRecord',true);document.getElementById('btnDeleteRecord').classList.add('flex');toggleElement('btnExportSingle',true);document.getElementById('btnExportSingle').classList.add('flex');
+                document.getElementById('editTimestamp').value=r.timestamp;document.getElementById('editWard').value=r.ward;document.getElementById('editName').value=r.name||'';document.getElementById('editContent').value=r.content;document.getElementById('editDischarged').checked=!!r.isDischarged;
+                selectIcon(r.icon);selectColor(r.color);
+                
+                if(r.images && r.images.length > 0) {
+                     keptImages = [...r.images]; 
+                     renderImagePreviews();
+                }
+
+            }else{
+                document.getElementById('editorMode').innerText="New";toggleElement('btnDeleteRecord',false);document.getElementById('btnDeleteRecord').classList.remove('flex');toggleElement('btnExportSingle',false);document.getElementById('btnExportSingle').classList.remove('flex');
+                document.getElementById('editTimestamp').value=selectedDateStr;const count=records.length+1;document.getElementById('editWard').value='';document.getElementById('editName').value=`Data_${String(count).padStart(3,'0')}`;document.getElementById('editContent').value='';document.getElementById('editDischarged').checked=false;
+                selectIcon(ICONS[0].id);selectColor(COLORS[0].id);
+            }
+        }
+        function closeEditor(){toggleElement('editorModal',false);editingId=null;}
+        function toggleExpandNote(fs){const t=document.getElementById('editContent');const b=document.getElementById('btnLabelExpand');const be=document.getElementById('btnExitExpand');if(!b)return;const i=b.querySelector('i');const txt=b.querySelector('span');if(typeof fs==='boolean')isNoteExpanded=fs;else isNoteExpanded=!isNoteExpanded;if(isNoteExpanded){t.classList.add('expanded-note');i.className='fa-solid fa-compress';if(txt)txt.innerText="Collapse";toggleElement('btnExitExpand',true);}else{t.classList.remove('expanded-note');i.className='fa-solid fa-expand';if(txt)txt.innerText="Expand";toggleElement('btnExitExpand',false);}}
+        function renderIconPicker(){document.getElementById('iconPicker').innerHTML=ICONS.map(i=>`<button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600 transition flex flex-col items-center justify-center gap-1 icon-option group" data-value="${i.id}" onclick="selectIcon('${i.id}')"><i class="fa-solid ${i.icon} text-lg group-hover:scale-110 transition-transform"></i></button>`).join('');}
+        function selectIcon(id){document.getElementById('editIcon').value=id;document.querySelectorAll('.icon-option').forEach(b=>{if(b.dataset.value===id)b.className="aspect-square rounded-xl bg-primary-600 text-white shadow-lg shadow-primary-500/30 flex flex-col items-center justify-center gap-1 icon-option transform scale-105 transition-all";else b.className="aspect-square rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-slate-300 transition flex flex-col items-center justify-center gap-1 icon-option";});}
+        function renderColorPicker(){document.getElementById('colorPicker').innerHTML=COLORS.map(c=>`<button class="w-6 h-6 rounded-full ${c.bg} ring-2 ring-offset-2 ring-transparent transition-all color-option hover:scale-110" data-value="${c.id}" onclick="selectColor('${c.id}')"></button>`).join('');}
+        function selectColor(id){document.getElementById('editColor').value=id;const o=COLORS.find(c=>c.id===id);document.querySelectorAll('.color-option').forEach(b=>{if(b.dataset.value===id){b.classList.add(o.ring,'ring-offset-2');b.classList.remove('ring-transparent');}else{b.classList.remove(o.ring,'ring-offset-2');b.classList.add('ring-transparent');}});}
+        async function saveRecord(){
+            const btn=document.getElementById('btnSave');const org=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';btn.disabled=true;
+            const p={id:editingId||'rec_'+Date.now()+Math.random().toString(36).substr(2,5),timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,name:document.getElementById('editName').value,icon:document.getElementById('editIcon').value,color:document.getElementById('editColor').value,content:document.getElementById('editContent').value,isDischarged:document.getElementById('editDischarged').checked, images: pendingImages, currentImages: keptImages};
+            try{await saveToBackend(p,'save');closeEditor();closePortal();await fetchData(false);}catch(e){alert("Save Failed: "+e.message);}finally{btn.innerHTML=org;btn.disabled=false;}
+        }
+        async function deleteRecord(){if(!confirm("Delete?"))return;try{await saveToBackend({ids:[editingId]},'delete');closeEditor();closePortal();await fetchData(false);}catch(e){alert("Delete failed");} }
+        function toggleBatchMode(){isBatchMode=!isBatchMode;document.querySelectorAll('.batch-check').forEach(e=>e.style.display=isBatchMode?'block':'none');updateBatchUI();}
+        function toggleBatchSelect(id,cb){if(cb.checked)selectedBatchIds.add(id);else selectedBatchIds.delete(id);updateBatchUI();}
+        function updateBatchUI(){const t=document.getElementById('batchToolbar');const c=document.getElementById('batchCount');const b=document.getElementById('btnBatch');if(isBatchMode){t.classList.remove('hidden');b.classList.add('text-primary-600','bg-primary-50');b.classList.remove('text-slate-400');}else{t.classList.add('hidden');b.classList.remove('text-primary-600','bg-primary-50');b.classList.add('text-slate-400');}c.innerText=selectedBatchIds.size;}
+        async function executeBatchDelete(){if(selectedBatchIds.size===0)return;if(!confirm("Delete selected?"))return;try{await saveToBackend({ids:Array.from(selectedBatchIds)},'delete');toggleBatchMode();closePortal();await fetchData(false);}catch(e){alert("Failed");}}
+        function switchView(m){viewMode=m;const c=document.getElementById('viewCalendar');const w=document.getElementById('viewWards');const bc=document.getElementById('btnViewCal');const bw=document.getElementById('btnViewWard');if(m==='calendar'){c.classList.remove('-translate-x-full');w.classList.add('translate-x-full');bc.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";bw.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}else{c.classList.add('-translate-x-full');w.classList.remove('translate-x-full');bw.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50";bc.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}}
     </script>
 </body>
 </html>
