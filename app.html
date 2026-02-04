@@ -27,7 +27,6 @@
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -35,30 +34,23 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-        
-        /* FIXED: Textarea Large Size by Default */
-        .textarea-contrast { 
-            @apply w-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; 
-            font-size: 1.25rem; 
-            height: 450px !important; /* Default Large Height */
-            width: 100% !important;
-            display: block;
-        }
-        
+        .textarea-contrast { @apply w-full h-full bg-white border-2 border-slate-400 rounded-xl p-6 text-slate-900 leading-relaxed focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm resize-none; font-size: 1.25rem; height: 450px !important; width: 100% !important; display: block; }
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
 
         /* Lightbox */
         .lightbox-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .lightbox-img { max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 2rem; padding: 1rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
-        .lightbox-nav:hover { opacity: 1; }
+        .lightbox-img { max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); z-index: 20; transition: opacity 0.2s; }
+        .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 2rem; padding: 1rem; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; z-index: 30; background: rgba(0,0,0,0.3); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+        .lightbox-nav:hover { opacity: 1; background: rgba(255,255,255,0.2); }
         .lightbox-prev { left: 1rem; }
         .lightbox-next { right: 1rem; }
-        .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; }
+        .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: white; font-size: 2rem; cursor: pointer; z-index: 10001; opacity: 0.7; }
+        .lightbox-close:hover { opacity: 1; }
+        .lightbox-loader { position: absolute; z-index: 10; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rotation 1s linear infinite; }
         
-        .img-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10; transition: transform 0.2s; }
-        .img-delete-btn:hover { transform: scale(1.1); }
+        .img-delete-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 10; transition: transform 0.2s; border: 2px solid white; }
+        .img-delete-btn:hover { transform: scale(1.1); background: #dc2626; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
@@ -86,27 +78,24 @@
     </div>
 
     <!-- LIGHTBOX -->
-    <div id="lightbox" class="lightbox-overlay hidden">
+    <div id="lightbox" class="lightbox-overlay hidden" tabindex="0">
         <i class="fa-solid fa-xmark lightbox-close" onclick="closeLightbox()"></i>
-        <i class="fa-solid fa-chevron-left lightbox-nav lightbox-prev" onclick="prevImage()"></i>
-        <img id="lightboxImg" src="" class="lightbox-img">
-        <i class="fa-solid fa-chevron-right lightbox-nav lightbox-next" onclick="nextImage()"></i>
-        <div class="absolute bottom-6 text-white bg-black/50 px-4 py-1 rounded-full text-sm backdrop-blur-sm"><span id="lightboxCounter">1/1</span></div>
+        <div class="lightbox-loader" id="lightboxLoader"></div>
+        <div class="lightbox-nav lightbox-prev" onclick="prevImage()"><i class="fa-solid fa-chevron-left"></i></div>
+        <!-- Img Click advances to next -->
+        <img id="lightboxImg" src="" class="lightbox-img opacity-0" onload="onImageLoad()" onclick="event.stopPropagation(); nextImage();">
+        <div class="lightbox-nav lightbox-next" onclick="nextImage()"><i class="fa-solid fa-chevron-right"></i></div>
+        <div class="absolute bottom-6 text-white bg-black/60 px-6 py-2 rounded-full text-sm backdrop-blur-sm font-bold tracking-widest"><span id="lightboxCounter">1/1</span></div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="h-full flex flex-col hidden">
-        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
-            <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
-        </button>
+        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce"><i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span></button>
 
         <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 text-white transition-all duration-500"><i class="fa-solid fa-user-doctor text-lg"></i></div>
-                <div>
-                    <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1>
-                    <div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div>
-                </div>
+                <div><h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1><div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div></div>
             </div>
             <div class="flex bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
                 <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50"><i class="fa-regular fa-calendar"></i></button>
@@ -291,7 +280,7 @@
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-slate-100 border border-slate-300 bg-cover bg-center shadow-sm cursor-pointer relative group";
                  div.style.backgroundImage = `url(${src})`;
-                 div.onclick = () => window.open(url, '_blank');
+                 div.onclick = () => openLightbox(idx, 'kept');
                  
                  const del = document.createElement('div');
                  del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
@@ -306,6 +295,7 @@
                  const div = document.createElement('div');
                  div.className = "w-16 h-16 rounded-lg bg-emerald-50 border-2 border-emerald-300 bg-cover bg-center shadow-sm relative group";
                  div.style.backgroundImage = `url(data:${img.type};base64,${img.data})`;
+                 div.onclick = () => openLightbox(idx, 'pending'); // Added lightbox support for pending
                  
                  const del = document.createElement('div');
                  del.className = "img-delete-btn opacity-0 group-hover:opacity-100";
@@ -319,15 +309,8 @@
             document.getElementById('fileCount').innerText = `${keptImages.length + pendingImages.length} images`;
         }
         
-        function removeKeptImage(index) {
-            keptImages.splice(index, 1);
-            renderImagePreviews();
-        }
-        
-        function removePendingImage(index) {
-            pendingImages.splice(index, 1);
-            renderImagePreviews();
-        }
+        function removeKeptImage(index) { keptImages.splice(index, 1); renderImagePreviews(); }
+        function removePendingImage(index) { pendingImages.splice(index, 1); renderImagePreviews(); }
 
         async function saveToBackend(payload, action="save") {
             if(action==='save') payload.timestamp="'"+payload.timestamp;
@@ -340,7 +323,6 @@
         async function exportBatch(){if(selectedBatchIds.size===0)return;const rs=records.filter(r=>selectedBatchIds.has(r.id));for(const r of rs){let b=(r.name||'Untitled').replace(/[/\\?%*:|"<>]/g,'-');downloadFile(b+".txt",generateTxtContent(r));await new Promise(x=>setTimeout(x,200));}}
         
         function renderCalendar(){const g=document.getElementById('calendarGrid');g.innerHTML='';const y=currentMonth.getFullYear();const m=currentMonth.getMonth();applyTheme(m);document.getElementById('monthLabel').innerText=new Date(y,m).toLocaleString('en-US',{month:'long',year:'numeric'});const fd=new Date(y,m,1).getDay();const dim=new Date(y,m+1,0).getDate();
-        // FORCE LOCAL TIME STRING FOR TODAY
         const now=new Date();const offset=now.getTimezoneOffset()*60000;const todayStr=new Date(now.getTime()-offset).toISOString().split('T')[0];
         for(let i=0;i<fd;i++)g.innerHTML+='<div class="bg-slate-100/50 rounded-xl opacity-50"></div>';for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dr=records.filter(r=>r.timestamp===ds&&!r.isDischarged);const isT=todayStr===ds;const c=document.createElement('div');c.className=`bg-white rounded-xl p-2 relative cursor-pointer transition-all duration-200 min-h-[100px] flex flex-col gap-1 group ${isT?'ring-2 ring-primary-500 shadow-md z-10':'border border-slate-200 hover:shadow-soft hover:border-primary-200'}`;c.onclick=()=>openPortal(ds);let html=`<div class="text-right text-sm font-bold mb-1 ${isT?'text-primary-600':'text-slate-400 group-hover:text-primary-500'}">${d}</div><div class="flex flex-col gap-1 overflow-hidden">`;dr.slice(0,3).forEach(r=>{const co=COLORS.find(x=>x.id===r.color)||COLORS[0];const ic=ICONS.find(x=>x.id===r.icon)||ICONS[0];html+=`<div class="h-6 rounded-md px-1.5 flex items-center gap-1.5 text-[10px] font-bold shadow-sm ${co.bg} text-white truncate"><i class="fa-solid ${ic.icon} text-[9px] opacity-90"></i> <span class="truncate tracking-wide">${r.name||r.ward||'Case'}</span></div>`;});if(dr.length>3)html+=`<div class="text-[10px] text-slate-400 text-center font-medium bg-slate-50 rounded py-0.5">+${dr.length-3}</div>`;c.innerHTML=html+'</div>';g.appendChild(c);}}
         function changeMonth(d){currentMonth.setMonth(currentMonth.getMonth()+d);renderCalendar();}
@@ -364,31 +346,14 @@
                     `</div>`;
                 }
                 
-                // Add Swipe Container
-                l.innerHTML+=`
-                <div class="swipe-item-container mb-3 relative">
-                    <div class="swipe-actions">
-                        <button onclick="confirmDelete('${r.id}')" class="text-white font-bold flex flex-col items-center">
-                            <i class="fa-regular fa-trash-can text-lg"></i>
-                            <span class="text-[10px]">Delete</span>
-                        </button>
-                    </div>
-                    <div class="swipe-content p-4 bg-white ${op}" 
-                         ontouchstart="handleTouchStart(event, this)" 
-                         ontouchmove="handleTouchMove(event, this)" 
-                         ontouchend="handleTouchEnd(event, this)">
-                         
-                        <div class="absolute top-4 right-4 ${isBatchMode?'block':'hidden'} batch-check z-30">
-                            <input type="checkbox" class="check-box !border-slate-400" onchange="toggleBatchSelect('${r.id}',this)" ${selectedBatchIds.has(r.id)?'checked':''}>
-                        </div>
-                        
+                l.innerHTML+=`<div class="swipe-item-container mb-3 relative">
+                    <div class="swipe-actions"><button onclick="confirmDelete('${r.id}')" class="text-white font-bold flex flex-col items-center"><i class="fa-regular fa-trash-can text-lg"></i><span class="text-[10px]">Delete</span></button></div>
+                    <div class="swipe-content p-4 bg-white ${op}" ontouchstart="handleTouchStart(event, this)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this)">
+                        <div class="absolute top-4 right-4 ${isBatchMode?'block':'hidden'} batch-check z-30"><input type="checkbox" class="check-box !border-slate-400" onchange="toggleBatchSelect('${r.id}',this)" ${selectedBatchIds.has(r.id)?'checked':''}></div>
                         <div class="flex items-start gap-4" onclick="if(!isSwiping) openEditor('${r.id}')">
                             <div class="w-11 h-11 shrink-0 rounded-xl ${c.bg} text-white flex items-center justify-center shadow-sm"><i class="fa-solid ${i.icon} text-lg"></i></div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <div><span class="block text-sm font-bold text-slate-800">${r.name||'Untitled'}</span><span class="text-[10px] font-bold text-slate-400">${formatDateDMY(r.timestamp)} &bull; ${r.ward||'Gen'}</span></div>
-                                    ${r.isDischarged?'<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>':''}
-                                </div>
+                                <div class="flex justify-between items-center mb-1.5"><div><span class="block text-sm font-bold text-slate-800">${r.name||'Untitled'}</span><span class="text-[10px] font-bold text-slate-400">${formatDateDMY(r.timestamp)} &bull; ${r.ward||'Gen'}</span></div>${r.isDischarged?'<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">D/C</span>':''}</div>
                                 <p class="text-slate-600 text-sm leading-relaxed font-sans line-clamp-3">${r.content.substring(0,120)+(r.content.length>120?'...':'')}</p>
                             </div>
                         </div>
@@ -399,93 +364,65 @@
         }
         
         // --- SWIPE LOGIC ---
-        let xDown = null;
-        let yDown = null;
-        let isSwiping = false;
-        let activeSwipeEl = null;
-
-        function handleTouchStart(evt, el) {
-            xDown = evt.touches[0].clientX;
-            yDown = evt.touches[0].clientY;
-            isSwiping = false;
-            // Close other swipes
-            if (activeSwipeEl && activeSwipeEl !== el) {
-                activeSwipeEl.style.transform = "translateX(0px)";
-                activeSwipeEl = null;
-            }
-        }
-
-        function handleTouchMove(evt, el) {
-            if (!xDown || !yDown) return;
-            const xUp = evt.touches[0].clientX;
-            const yUp = evt.touches[0].clientY;
-            const xDiff = xDown - xUp;
-            const yDiff = yDown - yUp;
-
-            // Detect horizontal swipe vs vertical scroll
-            if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                if (Math.abs(xDiff) > 10) { // Threshold
-                    isSwiping = true;
-                    // Swipe Left (Show Delete)
-                    if (xDiff > 0) {
-                        const translate = Math.min(xDiff, 80); // Cap at 80px
-                        el.style.transform = `translateX(-${translate}px)`;
-                    } else {
-                        // Swipe Right (Close)
-                        el.style.transform = `translateX(0px)`;
-                    }
-                }
-            }
-        }
-
-        function handleTouchEnd(evt, el) {
-            if (!xDown || !yDown) return;
-            const xUp = evt.changedTouches[0].clientX;
-            const xDiff = xDown - xUp;
-            
-            if (xDiff > 50) { // Snap open
-                el.style.transform = "translateX(-80px)";
-                activeSwipeEl = el;
-            } else { // Snap closed
-                el.style.transform = "translateX(0px)";
-                activeSwipeEl = null;
-            }
-            xDown = null; yDown = null;
-            setTimeout(() => isSwiping = false, 100); // Debounce click
-        }
-        
-        function confirmDelete(id) {
-            if(confirm("Delete this record?")) {
-                saveToBackend({ids:[id]},'delete').then(() => {
-                    fetchData(false);
-                    closePortal();
-                });
-            } else {
-                 if(activeSwipeEl) {
-                    activeSwipeEl.style.transform = "translateX(0px)";
-                    activeSwipeEl = null;
-                 }
-            }
-        }
+        let xDown = null; let yDown = null; let isSwiping = false; let activeSwipeEl = null;
+        function handleTouchStart(evt, el) { xDown = evt.touches[0].clientX; yDown = evt.touches[0].clientY; isSwiping = false; if (activeSwipeEl && activeSwipeEl !== el) { activeSwipeEl.style.transform = "translateX(0px)"; activeSwipeEl = null; } }
+        function handleTouchMove(evt, el) { if (!xDown || !yDown) return; const xUp = evt.touches[0].clientX; const yUp = evt.touches[0].clientY; const xDiff = xDown - xUp; const yDiff = yDown - yUp; if (Math.abs(xDiff) > Math.abs(yDiff)) { if (Math.abs(xDiff) > 10) { isSwiping = true; if (xDiff > 0) { const translate = Math.min(xDiff, 80); el.style.transform = `translateX(-${translate}px)`; } else { el.style.transform = `translateX(0px)`; } } } }
+        function handleTouchEnd(evt, el) { if (!xDown || !yDown) return; const xUp = evt.changedTouches[0].clientX; const xDiff = xDown - xUp; if (xDiff > 50) { el.style.transform = "translateX(-80px)"; activeSwipeEl = el; } else { el.style.transform = "translateX(0px)"; activeSwipeEl = null; } xDown = null; yDown = null; setTimeout(() => isSwiping = false, 100); }
+        function confirmDelete(id) { if(confirm("Delete this record?")) { saveToBackend({ids:[id]},'delete').then(() => { fetchData(false); closePortal(); }); } else { if(activeSwipeEl) { activeSwipeEl.style.transform = "translateX(0px)"; activeSwipeEl = null; } } }
 
         // --- LIGHTBOX LOGIC ---
-        function openLightbox(index, recordId) {
-            const rec = records.find(r => r.id === recordId);
-            if(!rec || !rec.images) return;
-            currentLightboxImages = rec.images.map(u => u.includes('export=download') ? u.replace('export=download', 'export=view') : u);
+        function openLightbox(index, mode) {
+            // mode = 'recordId' (from portal) OR 'kept'/'pending' (from editor)
+            // If mode is a string recordId
+            if (typeof mode === 'string' && mode !== 'kept' && mode !== 'pending') {
+                 const rec = records.find(r => r.id === mode);
+                 if(!rec || !rec.images) return;
+                 currentLightboxImages = rec.images.map(u => u.includes('export=download') ? u.replace('export=download', 'export=view') : u);
+            } else if (mode === 'kept') {
+                 currentLightboxImages = keptImages.map(u => u.includes('export=download') ? u.replace('export=download', 'export=view') : u);
+            } else if (mode === 'pending') {
+                 currentLightboxImages = pendingImages.map(img => `data:${img.type};base64,${img.data}`);
+            }
+
             currentLightboxIndex = index;
             updateLightbox();
             document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').focus(); // Focus for keyboard
         }
+
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextImage() { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; updateLightbox(); }
         function prevImage() { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; updateLightbox(); }
+        
         function updateLightbox() {
-            document.getElementById('lightboxImg').src = currentLightboxImages[currentLightboxIndex];
+            const imgEl = document.getElementById('lightboxImg');
+            const loader = document.getElementById('lightboxLoader');
+            
+            // Show loader, hide image
+            imgEl.classList.add('opacity-0');
+            loader.style.display = 'block';
+            
+            // Load new source
+            imgEl.src = currentLightboxImages[currentLightboxIndex];
             document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex + 1}/${currentLightboxImages.length}`;
         }
         
-        // Touch Swipe
+        // This function called by onload on img tag
+        function onImageLoad() {
+             const imgEl = document.getElementById('lightboxImg');
+             const loader = document.getElementById('lightboxLoader');
+             imgEl.classList.remove('opacity-0');
+             loader.style.display = 'none';
+        }
+        
+        // Keyboard & Swipe for Lightbox
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('lightbox').classList.contains('hidden')) return;
+            if (e.key === 'ArrowLeft') prevImage();
+            if (e.key === 'ArrowRight') nextImage();
+            if (e.key === 'Escape') closeLightbox();
+        });
+        
         let touchStartX = 0; let touchEndX = 0;
         const lb = document.getElementById('lightbox');
         lb.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
@@ -510,7 +447,7 @@
                 selectIcon(r.icon);selectColor(r.color);
                 
                 if(r.images && r.images.length > 0) {
-                     keptImages = [...r.images]; // Deep copy to local state
+                     keptImages = [...r.images]; 
                      renderImagePreviews();
                 }
 
