@@ -27,6 +27,7 @@
         :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s, --p-100 0.5s, --p-500 0.5s, --p-600 0.5s, --p-700 0.5s; }
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); }
         .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
         .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
@@ -93,14 +94,19 @@
         <div class="absolute bottom-6 text-white bg-black/50 px-4 py-1 rounded-full text-sm backdrop-blur-sm"><span id="lightboxCounter">1/1</span></div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="h-full flex flex-col hidden">
-        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce"><i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span></button>
+        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
+            <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
+        </button>
 
         <header class="h-16 glass flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 text-white transition-all duration-500"><i class="fa-solid fa-user-doctor text-lg"></i></div>
-                <div><h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1><div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div></div>
+                <div>
+                    <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1>
+                    <div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div>
+                </div>
             </div>
             <div class="flex bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
                 <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-primary-600 bg-primary-50"><i class="fa-regular fa-calendar"></i></button>
@@ -125,6 +131,7 @@
                 </div>
                 <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 px-4 pb-4 pt-4 gap-2 overflow-y-auto"></div>
             </div>
+
             <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-300 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
                 <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
                 <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
@@ -166,6 +173,7 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Context</label><div class="grid grid-cols-6 sm:grid-cols-12 gap-2" id="iconPicker"></div><input type="hidden" id="editIcon"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Color</label><div class="flex flex-wrap gap-2" id="colorPicker"></div><input type="hidden" id="editColor"></div>
+                <!-- IMAGE UPLOAD -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Images (Labs/X-rays)</label>
                     <div class="flex gap-3 items-center mb-2">
