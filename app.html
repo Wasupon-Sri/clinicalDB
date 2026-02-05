@@ -6,7 +6,7 @@
     <title>ConsultationDB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -86,7 +86,7 @@
             font-size: 1.15rem; height: 450px !important; width: 100% !important; resize: none;
             transition: all 0.2s; display: block;
         }
-        .textarea-glass:focus { outline: none; border-color: #f43f5e; background: white; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); }
+        .textarea-glass:focus { outline: none; border-color: #f43f5e; background: white; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); background: white; }
 
         /* Utilities */
         .hidden { display: none !important; }
@@ -129,17 +129,23 @@
             
             <div id="authSetup" class="hidden">
                 <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome</h2>
-                <p class="text-slate-500 text-sm mb-6">Create a secure PIN for <br><span id="dbNameSetup" class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md"></span></p>
-                <input type="password" id="createPin" class="input-glass text-center text-2xl tracking-[0.5em] font-bold mb-4" placeholder="••••" maxlength="4" inputmode="numeric">
-                <button onclick="setupPassword()" id="btnSetup" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">Set PIN Code</button>
+                <p class="text-slate-500 text-sm mb-6">Create a secure Password for <br><span id="dbNameSetup" class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md"></span></p>
+                <div class="relative mb-4">
+                    <input type="password" id="createPin" class="input-glass text-center text-xl font-bold pr-10" placeholder="Password">
+                    <i class="fa-solid fa-eye absolute right-4 top-4 text-slate-400 cursor-pointer hover:text-slate-600" onclick="togglePasswordVisibility('createPin')"></i>
+                </div>
+                <button onclick="setupPassword()" id="btnSetup" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">Set Password</button>
             </div>
 
             <div id="authLogin" class="hidden">
                 <h2 class="text-2xl font-bold text-slate-800 mb-2">Locked</h2>
-                <p class="text-slate-500 text-sm mb-6">Enter PIN to access <br><span id="dbNameLogin" class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md"></span></p>
-                <input type="password" id="loginPin" class="input-glass text-center text-2xl tracking-[0.5em] font-bold mb-4" placeholder="••••" maxlength="4" inputmode="numeric">
-                <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">Unlock Database</button>
-                <p id="loginError" class="text-rose-500 text-xs mt-4 hidden font-bold animate-pulse"><i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect PIN</p>
+                <p class="text-slate-500 text-sm mb-6">Enter Password for <br><span id="dbNameLogin" class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md"></span></p>
+                <div class="relative mb-4">
+                    <input type="password" id="loginPin" class="input-glass text-center text-xl font-bold pr-10" placeholder="Password">
+                    <i class="fa-solid fa-eye absolute right-4 top-4 text-slate-400 cursor-pointer hover:text-slate-600" onclick="togglePasswordVisibility('loginPin')"></i>
+                </div>
+                <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">Unlock</button>
+                <p id="loginError" class="text-rose-500 text-xs mt-4 hidden font-bold animate-pulse"><i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect Password. Try 1415 if you forgot.</p>
             </div>
             
             <div id="authLoading">
@@ -215,10 +221,7 @@
 
             <!-- WARDS VIEW -->
             <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-500 p-6 overflow-y-auto">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl"><i class="fa-solid fa-building-user"></i></div>
-                    <h2 class="text-2xl font-bold text-slate-800">Ward Matrix</h2>
-                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
                 <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
                     <!-- JS Injected Here -->
                 </div>
@@ -376,10 +379,10 @@
             {id:'skull',icon:'fa-skull'}, {id:'flask',icon:'fa-flask'}, {id:'file-medical',icon:'fa-file-medical'}, {id:'bed',icon:'fa-bed'}
         ];
         const COLORS = [
-            {id:'slate',bg:'bg-slate-500'},{id:'red',bg:'bg-red-400'},{id:'orange',bg:'bg-orange-400'},{id:'amber',bg:'bg-amber-400'},
-            {id:'lime',bg:'bg-lime-400'},{id:'green',bg:'bg-green-400'},{id:'emerald',bg:'bg-emerald-400'},{id:'teal',bg:'bg-teal-400'},
-            {id:'cyan',bg:'bg-cyan-400'},{id:'sky',bg:'bg-sky-400'},{id:'blue',bg:'bg-blue-400'},{id:'indigo',bg:'bg-indigo-400'},
-            {id:'violet',bg:'bg-violet-400'},{id:'purple',bg:'bg-purple-400'},{id:'fuchsia',bg:'bg-fuchsia-400'},{id:'rose',bg:'bg-rose-500'}
+            {id:'slate',bg:'bg-slate-500',ring:'ring-slate-200'}, {id:'red',bg:'bg-red-400',ring:'ring-red-200'}, {id:'orange',bg:'bg-orange-400',ring:'ring-orange-200'}, {id:'amber',bg:'bg-amber-400',ring:'ring-amber-200'},
+            {id:'yellow',bg:'bg-yellow-400',ring:'ring-yellow-200'}, {id:'lime',bg:'bg-lime-400',ring:'ring-lime-200'}, {id:'green',bg:'bg-green-400',ring:'ring-green-200'}, {id:'emerald',bg:'bg-emerald-400',ring:'ring-emerald-200'},
+            {id:'teal',bg:'bg-teal-400',ring:'ring-teal-200'}, {id:'cyan',bg:'bg-cyan-400',ring:'ring-cyan-200'}, {id:'sky',bg:'bg-sky-400',ring:'ring-sky-200'}, {id:'blue',bg:'bg-blue-400',ring:'ring-blue-200'},
+            {id:'indigo',bg:'bg-indigo-400',ring:'ring-indigo-200'}, {id:'violet',bg:'bg-violet-400',ring:'ring-violet-200'}, {id:'purple',bg:'bg-purple-400',ring:'ring-purple-200'}, {id:'fuchsia',bg:'bg-fuchsia-400',ring:'ring-fuchsia-200'}, {id:'pink',bg:'bg-pink-400',ring:'ring-pink-200'}, {id:'rose',bg:'bg-rose-500',ring:'ring-rose-200'}
         ];
 
         // STATE
@@ -397,6 +400,11 @@
             checkAuth(); 
         };
 
+        function togglePasswordVisibility(id) {
+            const input = document.getElementById(id);
+            if(input.type === 'password') input.type = 'text'; else input.type = 'password';
+        }
+
         function toggleElement(id,show){const e=document.getElementById(id);if(e){if(show)e.classList.remove('hidden');else e.classList.add('hidden');}}
         async function robustFetch(p, useGet = false) {
             try {
@@ -410,7 +418,7 @@
         async function checkAuth(){ toggleElement('authOverlay',true); toggleElement('authLoading',true); toggleElement('authSetup',false); toggleElement('authLogin',false); toggleElement('authError',false); try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET}, true); toggleElement('authLoading',false); if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");} }
         function showAuthError(m){ toggleElement('authLoading',false); toggleElement('authError',true); document.getElementById('errorDetail').innerText=m; }
         
-        async function setupPassword(){ const p=document.getElementById('createPin').value; if(p.length<4)return alert("4+ digits"); const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating..."; try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;} }
+        async function setupPassword(){ const p=document.getElementById('createPin').value; if(p.trim().length === 0) return alert("Password cannot be empty"); const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating..."; try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;} }
         async function verifyPassword(){ const p=document.getElementById('loginPin').value; const b=document.getElementById('btnLogin');const o=b.innerText;b.disabled=true;b.innerText="Verifying..."; try{const j=await robustFetch({action:'auth_verify',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else{toggleElement('loginError',true);document.getElementById('loginPin').value='';}}catch(e){alert("Network Error");}finally{b.disabled=false;b.innerText=o;} }
         
         function startApp(){ toggleElement('appContainer',true); fetchData(); pollTimer=setInterval(()=>fetchData(true),POLLING_INTERVAL); }
@@ -576,11 +584,6 @@
         }
         
         function switchView(m){viewMode=m;const c=document.getElementById('viewCalendar');const w=document.getElementById('viewWards');const bc=document.getElementById('btnViewCal');const bw=document.getElementById('btnViewWard');if(m==='calendar'){c.classList.remove('-translate-x-full');w.classList.add('translate-x-full');bc.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-white bg-rose-600 shadow-md";bw.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}else{c.classList.add('-translate-x-full');w.classList.remove('translate-x-full');bw.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-white bg-rose-600 shadow-md";bc.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}}
-        
-        // --- LIGHTBOX (REMOVED) ---
-        let currentLightboxImages=[]; let currentLightboxIndex=0;
-        function openLightbox(i,m){} function closeLightbox(){} function nextImage(){} function prevImage(){}
-        function onImageLoad(){} function onImageError(){}
     </script>
 </body>
 </html>
