@@ -14,307 +14,399 @@
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'] },
                     colors: {
-                        primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }, 
+                        primary: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }, // Futuristic Blue
                         rose: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' },
                         slate: { 850: '#1e293b', 900: '#0f172a' }
                     },
                     boxShadow: {
                         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
                         'glow': '0 0 15px rgba(59, 130, 246, 0.3)',
+                        'float': '0 10px 30px -10px rgba(0, 0, 0, 0.05)'
                     }
                 }
             }
         }
     </script>
     <style>
-        :root { --p-50: #eef2ff; --p-100: #e0e7ff; --p-500: #6366f1; --p-600: #4f46e5; --p-700: #4338ca; --p-glow: rgba(99, 102, 241, 0.3); transition: --p-50 0.5s; }
+        /* Modern Background Gradient */
         body { 
-            background: radial-gradient(circle at 0% 0%, #f0f9ff 0%, #f8fafc 100%);
+            background: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #f8fafc 100%);
             color: #334155; 
             -webkit-tap-highlight-color: transparent; 
             overscroll-behavior-y: none;
         }
 
-        /* Glass Components */
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Glassmorphism Classes */
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         }
+
+        .glass-card {
+            background: white;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         .glass-card:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.9);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            border-color: rgba(226, 232, 240, 0.8);
+            border-color: #e2e8f0;
         }
+
+        /* Calendar Grid Styling */
+        #calendarGrid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem; /* Gap between floating cards */
+            padding: 0.5rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         /* Form Elements */
         .input-glass { 
-            width: 100%; background: rgba(255, 255, 255, 0.8); border: 1px solid #e2e8f0; 
-            border-radius: 1rem; padding: 0.75rem 1rem; font-size: 0.95rem; color: #1e293b; 
-            transition: all 0.2s; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+            width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; 
+            border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.95rem; color: #1e293b; 
+            transition: all 0.2s; 
         }
-        .input-glass:focus { outline: none; border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); background: white; }
+        .input-glass:focus { outline: none; border-color: #f43f5e; background: white; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); }
 
-        .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
-        .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
-
-        /* Large Textarea */
+        /* Large Textbox */
         .textarea-glass { 
-            @apply w-full bg-white/80 border border-slate-200 rounded-2xl p-6 text-slate-800 leading-relaxed;
+            @apply w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-800 leading-relaxed;
             font-size: 1.15rem; height: 450px !important; width: 100% !important; resize: none;
-            transition: all 0.2s;
-            display: block;
+            transition: all 0.2s; display: block;
         }
-        .textarea-glass:focus { outline: none; border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); background: white; }
+        .textarea-glass:focus { outline: none; border-color: #f43f5e; background: white; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); }
 
-        /* Context Icons */
-        .ctx-btn { 
-            width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; 
-            border: 1px solid #e2e8f0; background: white; color: #94a3b8; transition: all 0.2s; cursor: pointer; 
-        }
-        .ctx-btn.active { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); transform: translateY(-2px); }
-        .ctx-btn:hover:not(.active) { background: #f1f5f9; color: #64748b; }
+        /* Utilities */
+        .hidden { display: none !important; }
+        .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: #f43f5e; border-radius: 50%; animation: rotation 0.8s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Color Circles */
-        .color-btn { 
-            width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; 
-            border: 2px solid transparent; flex-shrink: 0; 
-        }
-        .color-btn:hover { transform: scale(1.1); }
-        .color-btn.active { border-color: #e11d48; transform: scale(1.1); box-shadow: 0 0 0 2px white, 0 0 0 4px #e11d48; }
-
-        /* Checkbox & Loader */
-        .check-box { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; transition: 0.2s; cursor: pointer; background: white; }
-        .check-box::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
-        .check-box:checked { background: var(--p-600); border-color: var(--p-600); } .check-box:checked::before { transform: scale(1); }
+        /* Checkbox */
         .custom-check { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; display: grid; place-content: center; cursor: pointer; transition: all 0.2s; }
         .custom-check:checked { background: #f43f5e; border-color: #f43f5e; transform: scale(1.1); }
         .custom-check::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 12px; color: white; transform: scale(0); transition: 0.2s; }
         .custom-check:checked::before { transform: scale(1); }
-        .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Swipe Actions - Critical Updates */
-        .swipe-item-container { 
-            position: relative; 
-            overflow: hidden; 
-            border-radius: 1rem; 
-            margin-bottom: 0.75rem; 
-            background-color: #ef4444; /* Red background visible when swiped */
-        }
-        .swipe-content { 
-            position: relative; 
-            background: white; 
-            z-index: 20; 
-            transition: transform 0.2s ease-out; 
-            width: 100%; 
-            border-radius: 1rem; 
-            border: 1px solid #f1f5f9; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            touch-action: pan-y; /* CRITICAL: Allows vertical scroll but captures horizontal */
-        }
-        .swipe-actions { 
-            position: absolute; 
-            top: 0; 
-            bottom: 0; 
-            right: 0; 
-            width: 80px; 
-            z-index: 10; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
+        /* Swipe Actions */
+        .swipe-item-container { position: relative; overflow: hidden; border-radius: 1rem; margin-bottom: 0.75rem; background-color: #ef4444; }
+        .swipe-content { position: relative; background: white; z-index: 20; transition: transform 0.2s ease-out; width: 100%; border-radius: 1rem; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.03); touch-action: pan-y; }
+        .swipe-actions { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; z-index: 10; display: flex; align-items: center; justify-content: center; }
 
+        /* Expanded Note */
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
-        .hidden { display: none !important; }
+
+        /* Context Icons */
+        .ctx-btn { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; background: white; color: #94a3b8; transition: all 0.2s; cursor: pointer; }
+        .ctx-btn.active { background: #f43f5e; color: white; border-color: #f43f5e; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); transform: translateY(-2px); }
+        .ctx-btn:hover:not(.active) { background: #f8fafc; color: #64748b; }
+
+        /* Color Circles */
+        .color-btn { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; border: 2px solid transparent; flex-shrink: 0; }
+        .color-btn:hover { transform: scale(1.15); }
+        .color-btn.active { border-color: #f43f5e; transform: scale(1.15); box-shadow: 0 0 0 2px white, 0 0 0 4px #f43f5e; }
     </style>
 </head>
-<body class="h-[100dvh] flex flex-col overflow-hidden font-sans bg-slate-50 text-slate-600 transition-colors duration-500">
+<body class="h-[100dvh] flex flex-col overflow-hidden font-sans text-slate-600">
 
     <!-- AUTH OVERLAY -->
-    <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-50/50 backdrop-blur-xl flex items-center justify-center">
-        <div class="bg-white/90 p-10 rounded-[2rem] shadow-2xl shadow-slate-200/50 w-full max-w-sm text-center relative border border-white">
-            <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
+    <div id="authOverlay" class="fixed inset-0 z-[200] bg-slate-50/80 backdrop-blur-xl flex items-center justify-center">
+        <div class="bg-white p-10 rounded-[2rem] shadow-float w-full max-w-sm text-center relative border border-slate-100">
+            <div class="w-20 h-20 bg-gradient-to-br from-rose-400 to-rose-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-white text-3xl shadow-lg shadow-rose-500/30 transform rotate-3">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
             
             <div id="authSetup" class="hidden">
-                <h2 class="text-xl font-bold text-slate-800">Welcome</h2>
-                <p class="text-slate-500 text-sm mb-6">Set a security PIN for <span id="dbNameSetup" class="font-bold text-indigo-600"></span></p>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome</h2>
+                <p class="text-slate-500 text-sm mb-6">Create a secure PIN for <br><span id="dbNameSetup" class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md"></span></p>
                 <input type="password" id="createPin" class="input-glass text-center text-2xl tracking-[0.5em] font-bold mb-4" placeholder="••••" maxlength="4" inputmode="numeric">
-                <button onclick="setupPassword()" id="btnSetup" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Create PIN</button>
+                <button onclick="setupPassword()" id="btnSetup" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">Set PIN Code</button>
             </div>
 
             <div id="authLogin" class="hidden">
-                <h2 class="text-xl font-bold text-slate-800">Locked</h2>
-                <p class="text-slate-500 text-sm mb-6">Enter PIN for <span id="dbNameLogin" class="font-bold text-indigo-600"></span></p>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Locked</h2>
+                <p class="text-slate-500 text-sm mb-6">Enter PIN to access <br><span id="dbNameLogin" class="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md"></span></p>
                 <input type="password" id="loginPin" class="input-glass text-center text-2xl tracking-[0.5em] font-bold mb-4" placeholder="••••" maxlength="4" inputmode="numeric">
-                <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">Unlock</button>
-                <p id="loginError" class="text-rose-500 text-xs mt-3 hidden font-bold"><i class="fa-solid fa-circle-exclamation"></i> Incorrect PIN</p>
+                <button onclick="verifyPassword()" id="btnLogin" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">Unlock Database</button>
+                <p id="loginError" class="text-rose-500 text-xs mt-4 hidden font-bold animate-pulse"><i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect PIN</p>
             </div>
             
             <div id="authLoading">
-                <span class="loader mx-auto"></span>
-                <p class="text-slate-500 text-sm mt-4">Connecting to Secure Database...</p>
+                <div class="loader mx-auto mb-4"></div>
+                <p class="text-slate-400 text-sm font-medium tracking-wide">SECURE CONNECTION</p>
             </div>
 
             <div id="authError" class="hidden">
-                <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
+                <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500 text-2xl"><i class="fa-solid fa-wifi"></i></div>
                 <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
-                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p>
-                <button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button>
+                <p id="errorDetail" class="text-xs text-slate-500 mb-6 mt-2">Could not reach the secure server.</p>
+                <button onclick="location.reload()" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm">Retry Connection</button>
             </div>
         </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="h-full flex flex-col hidden">
-        <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white text-slate-700 px-6 py-3 rounded-full shadow-2xl border-2 border-slate-200 font-bold hover:bg-slate-50 hover:text-rose-600 hover:border-rose-200 transition flex items-center gap-3 animate-bounce">
-            <i class="fa-solid fa-compress text-lg"></i> <span>Exit Full Screen</span>
-        </button>
-
-        <header class="h-16 glass-panel flex items-center justify-between px-6 z-20 shrink-0 sticky top-0 transition-colors duration-500 bg-white/80 backdrop-blur-md border-b border-slate-200">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/20 text-white"><i class="fa-solid fa-user-doctor text-lg"></i></div>
-                <div>
-                    <h1 class="font-bold text-xl text-slate-800 tracking-tight leading-none" id="appTitle">ConsultationDB</h1>
-                    <div class="flex items-center gap-1.5 mt-0.5"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span><span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="syncStatus">Initializing</span></div>
-                </div>
-            </div>
-            <div class="flex bg-slate-100 p-1 rounded-xl shadow-inner">
-                <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-slate-500 hover:text-slate-800"><i class="fa-regular fa-calendar-days"></i></button>
-                <button onclick="switchView('wards')" id="btnViewWard" class="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600"><i class="fa-solid fa-layer-group"></i></button>
-                <div class="w-px bg-slate-300 my-1 mx-1"></div>
-                <button onclick="manualRefresh()" id="btnRefresh" class="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-primary-600 hover:bg-white"><i class="fa-solid fa-rotate"></i></button>
-            </div>
-        </header>
-
-        <main class="flex-1 relative overflow-hidden">
-            <div id="viewCalendar" class="absolute inset-0 flex flex-col transition-transform duration-500 bg-[#f8fafc] p-4">
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <h2 id="monthLabel" class="text-2xl font-extrabold text-slate-800 tracking-tight">Loading...</h2>
-                    <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                        <button onclick="changeMonth(-1)" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition"><i class="fa-solid fa-chevron-left"></i></button>
-                        <button onclick="goToToday()" class="px-4 h-9 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg uppercase tracking-wide transition">Today</button>
-                        <button onclick="changeMonth(1)" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition"><i class="fa-solid fa-chevron-right"></i></button>
+        
+        <!-- HEADER (Floating) -->
+        <div class="px-4 pt-4 pb-2 z-30">
+            <header class="h-18 glass-panel rounded-2xl flex items-center justify-between px-5 py-3">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/20 text-white transform hover:scale-105 transition duration-300 cursor-pointer" onclick="manualRefresh()">
+                        <i class="fa-solid fa-user-doctor text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg text-slate-800 leading-tight tracking-tight" id="appTitle">ConsultationDB</h1>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="statusDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" id="syncStatus">Ready</span>
+                        </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-7 px-2 py-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                
+                <div class="flex bg-slate-100/80 p-1.5 rounded-xl border border-slate-200/50 backdrop-blur-sm">
+                    <button onclick="switchView('calendar')" id="btnViewCal" class="w-10 h-10 rounded-lg flex items-center justify-center transition font-medium text-slate-500 hover:text-slate-800"><i class="fa-regular fa-calendar-days text-lg"></i></button>
+                    <button onclick="switchView('wards')" id="btnViewWard" class="w-10 h-10 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-800"><i class="fa-solid fa-layer-group text-lg"></i></button>
                 </div>
-                <div id="calendarGrid" class="grid grid-cols-7 grid-rows-6 flex-1 gap-2 overflow-y-auto pb-20 px-2"></div>
+            </header>
+        </div>
+
+        <!-- MAIN VIEW AREA -->
+        <main class="flex-1 relative overflow-hidden">
+            
+            <!-- CALENDAR VIEW -->
+            <div id="viewCalendar" class="absolute inset-0 flex flex-col transition-transform duration-500 p-2">
+                <div class="flex justify-between items-center mb-2 px-4 py-2">
+                    <h2 id="monthLabel" class="text-2xl font-extrabold text-slate-800 tracking-tight">Loading...</h2>
+                    <div class="flex items-center gap-2 bg-white/60 p-1 rounded-xl border border-slate-200 backdrop-blur-sm">
+                        <button onclick="changeMonth(-1)" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm text-slate-500 transition"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button onclick="goToToday()" class="px-4 h-9 text-xs font-bold text-slate-600 hover:bg-white hover:shadow-sm rounded-lg uppercase tracking-wide transition">Today</button>
+                        <button onclick="changeMonth(1)" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm text-slate-500 transition"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Days Header -->
+                <div class="grid grid-cols-7 text-center mb-2 px-2">
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Sun</div>
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Mon</div>
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tue</div>
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Wed</div>
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Thu</div>
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Fri</div>
+                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Sat</div>
+                </div>
+
+                <!-- Calendar Grid (Cards) -->
+                <div id="calendarGrid" class="flex-1 overflow-y-auto pb-20 px-2">
+                    <!-- JS Injected Here -->
+                </div>
             </div>
 
-            <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-500 bg-[#f8fafc] overflow-y-auto p-6">
-                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-building-user"></i></span>Ward Matrix</h2>
-                <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-20"></div>
+            <!-- WARDS VIEW -->
+            <div id="viewWards" class="absolute inset-0 translate-x-full transition-transform duration-500 p-6 overflow-y-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl"><i class="fa-solid fa-building-user"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800">Ward Matrix</h2>
+                </div>
+                <div id="wardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
+                    <!-- JS Injected Here -->
+                </div>
             </div>
         </main>
-        
-        <!-- FAB (Mobile) -->
+
+        <!-- FLOATING ACTION BUTTON (Mobile) -->
         <button onclick="openEditor()" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-rose-600 text-white rounded-2xl shadow-xl shadow-rose-600/30 flex items-center justify-center z-30 transform hover:scale-110 active:scale-95 transition duration-300">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
     </div>
 
-    <!-- PORTAL -->
+    <!-- PORTAL (SIDE PANEL) -->
     <div id="portalModal" class="fixed inset-0 z-40 hidden">
         <div class="absolute inset-0 bg-slate-900/10 backdrop-blur-sm transition-opacity" onclick="closePortal()"></div>
-        <div class="absolute inset-y-0 right-0 w-full md:w-[480px] bg-white shadow-2xl transition-transform transform translate-x-full duration-300 flex flex-col" id="portalPanel">
+        <div class="absolute inset-y-0 right-0 w-full md:w-[480px] bg-white shadow-2xl transition-transform transform translate-x-full duration-500 flex flex-col" id="portalPanel">
+            
             <div class="px-8 py-6 border-b border-slate-100 bg-white/95 backdrop-blur z-10 flex justify-between items-start">
-                <div><h3 id="portalTitle" class="text-3xl font-extrabold text-slate-800 tracking-tight">Details</h3><p id="portalSubtitle" class="text-slate-400 text-sm font-medium mt-1">Daily Records</p></div>
-                <div class="flex gap-2"><button onclick="toggleBatchMode()" id="btnBatch" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition flex items-center justify-center"><i class="fa-solid fa-list-check"></i></button><button onclick="closePortal()" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+                <div>
+                    <h3 id="portalTitle" class="text-3xl font-extrabold text-slate-800 tracking-tight">Details</h3>
+                    <p id="portalSubtitle" class="text-slate-400 text-sm font-medium mt-1">Daily Records</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleBatchMode()" id="btnBatch" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition flex items-center justify-center"><i class="fa-solid fa-list-check"></i></button>
+                    <button onclick="closePortal()" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
             </div>
-            <div id="portalList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-[#f8fafc]"></div>
+
+            <div id="portalList" class="flex-1 overflow-y-auto p-6 space-y-4 bg-[#f8fafc]">
+                <!-- List Items JS -->
+            </div>
+
+            <!-- Batch Actions Toolbar -->
             <div id="batchToolbar" class="hidden shrink-0 px-8 py-5 bg-white border-t border-slate-100 flex justify-between items-center shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
                 <span class="text-sm font-bold text-slate-700"><span id="batchCount" class="text-indigo-600 text-lg">0</span> selected</span>
-                <div class="flex gap-3"><button onclick="exportBatch()" class="px-4 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold transition hover:bg-indigo-100 flex items-center gap-2"><i class="fa-solid fa-download"></i> Export</button><button onclick="executeBatchDelete()" class="px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition hover:bg-rose-100 flex items-center gap-2"><i class="fa-regular fa-trash-can"></i> Delete</button></div>
+                <div class="flex gap-3">
+                    <button onclick="exportBatch()" class="px-4 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold transition hover:bg-indigo-100 flex items-center gap-2"><i class="fa-solid fa-download"></i> Export</button>
+                    <button onclick="executeBatchDelete()" class="px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition hover:bg-rose-100 flex items-center gap-2"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                </div>
             </div>
-            <div class="p-8 border-t border-slate-100 bg-white shrink-0" id="portalFooter"><button onclick="openEditor()" class="w-full py-4 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-2xl font-bold shadow-lg shadow-rose-500/20 flex items-center justify-center gap-3 transition transform active:scale-[0.98]"><i class="fa-solid fa-plus"></i> New Record</button></div>
+
+            <!-- Standard Footer -->
+            <div class="p-8 border-t border-slate-100 bg-white shrink-0" id="portalFooter">
+                <button onclick="openEditor()" class="w-full py-4 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-2xl font-bold shadow-lg shadow-rose-500/20 flex items-center justify-center gap-3 transition transform active:scale-[0.98]">
+                    <i class="fa-solid fa-plus"></i> New Record
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- EDITOR -->
+    <!-- EDITOR MODAL -->
     <div id="editorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 sm:p-6">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closeEditor()"></div>
-        <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-zoomIn ring-1 ring-slate-900/5">
+        <div class="absolute inset-0 bg-slate-900/30 backdrop-blur-md transition-opacity" onclick="closeEditor()"></div>
+        
+        <!-- Modal Card -->
+        <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-zoomIn ring-1 ring-slate-900/5">
+            
+            <!-- Header -->
             <div class="px-8 py-5 border-b border-slate-100 bg-white flex justify-between items-center">
-                <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shadow-sm"><i class="fa-solid fa-pen-nib"></i></div><div><h3 class="text-xl font-bold text-slate-800" id="editorMode">New Record</h3><p class="text-xs text-slate-400 font-medium">Consultation Details</p></div></div>
-                <div class="flex gap-2"><button onclick="exportCurrentRecord()" id="btnExportSingle" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 transition"><i class="fa-solid fa-file-export"></i> Export</button><button onclick="closeEditor()" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-            </div>
-            <div class="p-8 overflow-y-auto space-y-8 bg-white">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-2"><label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Date</label><div class="relative group"><input type="date" id="editTimestamp" class="input-glass pl-11 font-medium bg-slate-50 border-transparent focus:bg-white focus:border-rose-200 focus:ring-4 focus:ring-rose-50"><i class="fa-regular fa-calendar-days absolute left-4 top-3.5 text-slate-400 group-hover:text-rose-500 transition"></i></div></div>
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center pl-1 pr-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ward / Unit</label><div class="flex items-center gap-2 bg-rose-50 px-2 py-1 rounded-lg"><input type="checkbox" id="editDischarged" class="custom-check"><label for="editDischarged" class="text-[10px] font-bold text-rose-600 cursor-pointer uppercase tracking-wide">Discharge</label></div></div>
-                        <div class="relative group"><input type="text" id="editWard" list="wardSuggestions" placeholder="Select or type..." class="input-glass pl-11 font-medium bg-slate-50 border-transparent focus:bg-white focus:border-rose-200 focus:ring-4 focus:ring-rose-50"><i class="fa-solid fa-hospital absolute left-4 top-3.5 text-slate-400 group-hover:text-rose-500 transition"></i><datalist id="wardSuggestions"></datalist></div>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid fa-pen-nib"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800" id="editorMode">New Record</h3>
+                        <p class="text-xs text-slate-400 font-medium">Consultation Details</p>
                     </div>
                 </div>
-                <div class="space-y-3"><label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Context</label><div class="flex flex-wrap gap-3" id="iconPicker"></div><input type="hidden" id="editIcon"></div>
-                <div class="space-y-3"><label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Priority Label</label><div class="flex flex-wrap gap-4 px-2" id="colorPicker"></div><input type="hidden" id="editColor"></div>
+                <div class="flex gap-2">
+                    <button onclick="exportCurrentRecord()" id="btnExportSingle" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 transition"><i class="fa-solid fa-file-export"></i> Export</button>
+                    <button onclick="closeEditor()" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="p-8 overflow-y-auto space-y-8 bg-[#ffffff]">
+                
+                <!-- Top Row: Date & Ward -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Date</label>
+                        <div class="relative group">
+                            <input type="date" id="editTimestamp" class="input-glass pl-11 font-medium bg-slate-50 border-transparent focus:bg-white focus:border-rose-200 focus:ring-4 focus:ring-rose-50">
+                            <i class="fa-regular fa-calendar-days absolute left-4 top-3.5 text-slate-400 group-hover:text-rose-500 transition"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center pl-1 pr-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ward / Unit</label>
+                            <div class="flex items-center gap-2 bg-rose-50 px-2 py-1 rounded-lg">
+                                <input type="checkbox" id="editDischarged" class="custom-check">
+                                <label for="editDischarged" class="text-[10px] font-bold text-rose-600 cursor-pointer uppercase tracking-wide">Discharge</label>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <input type="text" id="editWard" list="wardSuggestions" placeholder="Select or type..." class="input-glass pl-11 font-medium bg-slate-50 border-transparent focus:bg-white focus:border-rose-200 focus:ring-4 focus:ring-rose-50">
+                            <i class="fa-solid fa-hospital absolute left-4 top-3.5 text-slate-400 group-hover:text-rose-500 transition"></i>
+                            <datalist id="wardSuggestions"></datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Context Grid -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Context</label>
+                    <div class="flex flex-wrap gap-3" id="iconPicker"></div>
+                    <input type="hidden" id="editIcon">
+                </div>
+
+                <!-- Color Palette -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Priority Label</label>
+                    <div class="flex flex-wrap gap-4 px-2" id="colorPicker"></div>
+                    <input type="hidden" id="editColor">
+                </div>
+
+                <!-- Large Text Area -->
                 <div class="flex-1 flex flex-col space-y-2"> 
-                    <div class="flex justify-between items-end pl-1 pr-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Clinical Notes</label><button onclick="toggleExpandNote()" class="text-xs text-rose-500 font-bold hover:text-rose-700 flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-lg transition"><i class="fa-solid fa-expand"></i> Full Screen</button></div>
+                    <div class="flex justify-between items-end pl-1 pr-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Clinical Notes</label>
+                        <button onclick="toggleExpandNote()" class="text-xs text-rose-500 font-bold hover:text-rose-700 flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-lg transition"><i class="fa-solid fa-expand"></i> Full Screen</button>
+                    </div>
                     <input type="text" id="editName" class="input-glass font-bold text-lg mb-2 bg-slate-50 border-transparent placeholder:text-slate-300" placeholder="Record Name (e.g. Data_001)">
                     <textarea id="editContent" ondblclick="toggleExpandNote()" class="textarea-glass focus:ring-4 focus:ring-rose-50" placeholder="Type detailed progress note here..."></textarea>
                 </div>
             </div>
+
+            <!-- Footer -->
             <div class="px-8 py-5 border-t border-slate-100 bg-white flex justify-between items-center z-20">
                 <button type="button" onclick="deleteRecord()" id="btnDeleteRecord" class="text-rose-500 hover:text-white hover:bg-rose-500 text-xs font-bold px-5 py-3 rounded-xl transition hidden flex items-center gap-2 border border-rose-100 hover:border-rose-500"><i class="fa-regular fa-trash-can"></i> Delete</button>
-                <div class="flex gap-4 ml-auto"><button onclick="closeEditor()" class="px-6 py-3 text-slate-500 hover:text-slate-800 font-bold transition text-sm">Cancel</button><button onclick="saveRecord()" id="btnSave" class="px-8 py-3 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-xl font-bold shadow-lg shadow-rose-200/50 transition transform active:scale-[0.98] text-sm flex items-center gap-2"><i class="fa-solid fa-check"></i> Save Record</button></div>
+                <div class="flex gap-4 ml-auto">
+                    <button onclick="closeEditor()" class="px-6 py-3 text-slate-500 hover:text-slate-800 font-bold transition text-sm">Cancel</button>
+                    <button onclick="saveRecord()" id="btnSave" class="px-8 py-3 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-xl font-bold shadow-lg shadow-rose-200/50 transition transform active:scale-[0.98] text-sm flex items-center gap-2"><i class="fa-solid fa-check"></i> Save Record</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Exit Full Screen Button -->
+    <button id="btnExitExpand" onclick="toggleExpandNote(false)" class="hidden fixed top-6 right-6 z-[10000] bg-white/90 backdrop-blur text-slate-800 px-6 py-3 rounded-full shadow-2xl border border-slate-200 font-bold hover:bg-rose-50 hover:text-rose-600 transition flex items-center gap-3 animate-bounce">
+        <i class="fa-solid fa-compress text-lg"></i> <span>Exit Focus Mode</span>
+    </button>
+
     <script>
+        // CONFIG
         const API_URL = "https://script.google.com/macros/s/AKfycbzvnNr78eq_mRDQNeJuTGpLlu1_Lbfxxm5Pif1XZkrYxpOfpRIqVAbZJKIUpmR-mrzVNQ/exec";
-        let USER_PASSWORD = ""; const POLLING_INTERVAL = 5000; 
-        const MONTH_THEMES = [{name:'Jan',colors:{50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1'}},{name:'Feb',colors:{50:'#fff1f2',100:'#ffe4e6',500:'#f43f5e',600:'#e11d48',700:'#be123c'}},{name:'Mar',colors:{50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857'}},{name:'Apr',colors:{50:'#fffbeb',100:'#fef3c7',500:'#f59e0b',600:'#d97706',700:'#b45309'}},{name:'May',colors:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}},{name:'Jun',colors:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca'}},{name:'Jul',colors:{50:'#f5f3ff',100:'#ede9fe',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9'}},{name:'Aug',colors:{50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}},{name:'Sep',colors:{50:'#fdf4ff',100:'#fae8ff',500:'#d946ef',600:'#c026d3',700:'#a21caf'}},{name:'Oct',colors:{50:'#fff7ed',100:'#ffedd5',500:'#f97316',600:'#ea580c',700:'#c2410c'}},{name:'Nov',colors:{50:'#f7fee7',100:'#ecfccb',500:'#84cc16',600:'#65a30d',700:'#4d7c0f'}},{name:'Dec',colors:{50:'#fef2f2',100:'#fee2e2',500:'#ef4444',600:'#dc2626',700:'#b91c1c'}}];
-        const ICONS = [{id:'heart-pulse',icon:'fa-heart-pulse'},{id:'lungs',icon:'fa-lungs'},{id:'brain',icon:'fa-brain'},{id:'kidneys',icon:'fa-bacterium'},{id:'pills',icon:'fa-pills'},{id:'syringe',icon:'fa-syringe'},{id:'user-doctor',icon:'fa-user-doctor'},{id:'clipboard',icon:'fa-clipboard-list'},{id:'skull',icon:'fa-skull'},{id:'flask',icon:'fa-flask'},{id:'file-medical',icon:'fa-file-medical'},{id:'bed',icon:'fa-bed'}];
-        const COLORS = [
-            {id:'slate',bg:'bg-slate-500'},{id:'red',bg:'bg-red-400'},{id:'orange',bg:'bg-orange-400'},{id:'amber',bg:'bg-amber-400'},
-            {id:'lime',bg:'bg-lime-400'},{id:'green',bg:'bg-green-400'},{id:'emerald',bg:'bg-emerald-400'},{id:'teal',bg:'bg-teal-400'},
-            {id:'cyan',bg:'bg-cyan-400'},{id:'sky',bg:'bg-sky-400'},{id:'blue',bg:'bg-blue-400'},{id:'indigo',bg:'bg-indigo-400'},
-            {id:'violet',bg:'bg-violet-400'},{id:'purple',bg:'bg-purple-400'},{id:'fuchsia',bg:'bg-fuchsia-400'},{id:'rose',bg:'bg-rose-500'}
-        ];
+        const POLLING_INTERVAL = 5000;
+        let USER_PASSWORD = ""; 
         
+        // ICONS & COLORS (15 Pastels + Slate)
+        const ICONS = [
+            {id:'heart-pulse',icon:'fa-heart-pulse'}, {id:'lungs',icon:'fa-lungs'}, {id:'brain',icon:'fa-brain'}, {id:'virus',icon:'fa-virus'}, 
+            {id:'pills',icon:'fa-pills'}, {id:'syringe',icon:'fa-syringe'}, {id:'user-doctor',icon:'fa-user-doctor'}, {id:'clipboard',icon:'fa-clipboard-list'}, 
+            {id:'skull',icon:'fa-skull'}, {id:'flask',icon:'fa-flask'}, {id:'file-medical',icon:'fa-file-medical'}, {id:'bed',icon:'fa-bed'}
+        ];
+        const COLORS = [
+            {id:'slate',bg:'bg-slate-500',ring:'ring-slate-200'}, {id:'red',bg:'bg-red-400',ring:'ring-red-200'}, {id:'orange',bg:'bg-orange-400',ring:'ring-orange-200'}, {id:'amber',bg:'bg-amber-400',ring:'ring-amber-200'},
+            {id:'yellow',bg:'bg-yellow-400',ring:'ring-yellow-200'}, {id:'lime',bg:'bg-lime-400',ring:'ring-lime-200'}, {id:'green',bg:'bg-green-400',ring:'ring-green-200'}, {id:'emerald',bg:'bg-emerald-400',ring:'ring-emerald-200'},
+            {id:'teal',bg:'bg-teal-400',ring:'ring-teal-200'}, {id:'cyan',bg:'bg-cyan-400',ring:'ring-cyan-200'}, {id:'sky',bg:'bg-sky-400',ring:'ring-sky-200'}, {id:'blue',bg:'bg-blue-400',ring:'ring-blue-200'},
+            {id:'indigo',bg:'bg-indigo-400',ring:'ring-indigo-200'}, {id:'violet',bg:'bg-violet-400',ring:'ring-violet-200'}, {id:'purple',bg:'bg-purple-400',ring:'ring-purple-200'}, {id:'fuchsia',bg:'bg-fuchsia-400',ring:'ring-fuchsia-200'}, {id:'pink',bg:'bg-pink-400',ring:'ring-pink-200'}, {id:'rose',bg:'bg-rose-500',ring:'ring-rose-200'}
+        ];
+
+        // STATE
         let records=[]; let currentMonth=new Date(); 
         const now=new Date(); const offset=now.getTimezoneOffset()*60000; let selectedDateStr=new Date(now.getTime()-offset).toISOString().split('T')[0]; 
-        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let pollTimer=null; let isNoteExpanded=false; 
-        const urlParams = new URLSearchParams(window.location.search); const TARGET_SHEET = urlParams.get('db') || 'Sheet1'; 
+        let editingId=null; let isBatchMode=false; let selectedBatchIds=new Set(); let viewMode='calendar'; let pollTimer=null; let isNoteExpanded=false;
         let currentPortalRecords = []; 
+        const urlParams = new URLSearchParams(window.location.search); const TARGET_SHEET = urlParams.get('db') || 'Sheet1'; 
 
-        function applyTheme(m){const t=MONTH_THEMES[m];const r=document.documentElement;r.style.setProperty('--p-50',t.colors[50]);r.style.setProperty('--p-100',t.colors[100]);r.style.setProperty('--p-500',t.colors[500]);r.style.setProperty('--p-600',t.colors[600]);r.style.setProperty('--p-700',t.colors[700]);r.style.setProperty('--p-glow',`${t.colors[500]}4D`);}
-        window.onload = function() { applyTheme(currentMonth.getMonth()); renderIconPicker(); renderColorPicker(); if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; document.getElementById('dbNameSetup').innerText=TARGET_SHEET; document.getElementById('dbNameLogin').innerText=TARGET_SHEET; checkAuth(); };
+        function applyTheme(m){ /* Keeps calendar theme consistent */ }
+        window.onload = function() { 
+            renderIconPicker(); renderColorPicker(); 
+            if(TARGET_SHEET!=='Sheet1') document.getElementById('appTitle').innerHTML=`ConsultationDB <span class='opacity-50 text-sm font-normal'>(${TARGET_SHEET})</span>`; 
+            document.getElementById('dbNameSetup').innerText=TARGET_SHEET; document.getElementById('dbNameLogin').innerText=TARGET_SHEET; 
+            checkAuth(); 
+        };
+
         function toggleElement(id,show){const e=document.getElementById(id);if(e){if(show)e.classList.remove('hidden');else e.classList.add('hidden');}}
-        async function robustFetch(p, useGet = false) {
-            try {
-                let res;
-                if (useGet) { const params = new URLSearchParams(); for (const key in p) params.append(key, p[key]); params.append('_t', Date.now()); res = await fetch(`${API_URL}?${params.toString()}`, { method: 'GET', redirect: 'follow' }); } 
-                else { res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(p), headers: { "Content-Type": "text/plain;charset=utf-8" } }); }
-                const t=await res.text(); try{return JSON.parse(t);}catch(e){if(t.trim().startsWith("<"))throw new Error("Server Error");throw new Error("Invalid Response");}
-            } catch(e){throw e;}
-        }
-
-        async function checkAuth(){ toggleElement('authOverlay',true); toggleElement('authLoading',true); toggleElement('authSetup',false); toggleElement('authLogin',false); toggleElement('authError',false); try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET}, true); toggleElement('authLoading',false); if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");} }
+        async function robustFetch(p){try{const r=await fetch(API_URL,{method:'POST',body:JSON.stringify(p),headers:{"Content-Type":"text/plain;charset=utf-8"}});const t=await r.text();try{return JSON.parse(t);}catch(e){if(t.trim().startsWith("<"))throw new Error("Server Error");throw new Error("Invalid Response");}}catch(e){throw e;}}
+        
+        async function checkAuth(){ toggleElement('authOverlay',true); toggleElement('authLoading',true); toggleElement('authSetup',false); toggleElement('authLogin',false); toggleElement('authError',false); try{const j=await robustFetch({action:'auth_check_status',db:TARGET_SHEET});toggleElement('authLoading',false);if(j.status==='setup_needed')toggleElement('authSetup',true);else if(j.status==='locked')toggleElement('authLogin',true);else if(j.error)showAuthError(j.error);}catch(e){showAuthError("Connection Failed");} }
         function showAuthError(m){ toggleElement('authLoading',false); toggleElement('authError',true); document.getElementById('errorDetail').innerText=m; }
         
         async function setupPassword(){ const p=document.getElementById('createPin').value; if(p.length<4)return alert("4+ digits"); const b=document.getElementById('btnSetup');const o=b.innerText;b.disabled=true;b.innerText="Creating..."; try{const j=await robustFetch({action:'auth_set_password',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else alert(j.error);}catch(e){alert(e.message);}finally{b.disabled=false;b.innerText=o;} }
         async function verifyPassword(){ const p=document.getElementById('loginPin').value; const b=document.getElementById('btnLogin');const o=b.innerText;b.disabled=true;b.innerText="Verifying..."; try{const j=await robustFetch({action:'auth_verify',db:TARGET_SHEET,password:p});if(j.status==='success'){USER_PASSWORD=p;toggleElement('authOverlay',false);startApp();}else{toggleElement('loginError',true);document.getElementById('loginPin').value='';}}catch(e){alert("Network Error");}finally{b.disabled=false;b.innerText=o;} }
         
         function startApp(){ toggleElement('appContainer',true); fetchData(); pollTimer=setInterval(()=>fetchData(true),POLLING_INTERVAL); }
-        async function fetchData(s=false){
-            if(!s)updateSyncStatus('Syncing...','amber');
-            try {
-                const j=await robustFetch({action:'read',db:TARGET_SHEET,password:USER_PASSWORD}, true);
-                if(j.error)throw new Error(j.error);
-                records=j.map(r=>{const rawDC=r.is_discharged??r.isDischarged;const isDC=(rawDC===true||String(rawDC).toLowerCase()==='true'||rawDC===1||rawDC==="1");
-                let ds=String(r.timestamp).replace(/'/g,'');if(ds.includes('T'))ds=ds.split('T')[0];
-                return{...r,isDischarged:isDC,timestamp:ds};}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-                renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');
-            } catch(e){if(!s){console.warn(e);updateSyncStatus('Offline','rose');}}
-        }
+        async function fetchData(s=false){if(!s)updateSyncStatus('Syncing...','amber');try{const j=await robustFetch({action:'read',db:TARGET_SHEET,password:USER_PASSWORD});if(j.error)throw new Error(j.error);records=j.map(r=>{const rawDC=r.is_discharged??r.isDischarged;const isDC=(rawDC===true||String(rawDC).toLowerCase()==='true'||rawDC===1||rawDC==="1");let ds=String(r.timestamp).replace(/'/g,'');if(ds.includes('T'))ds=ds.split('T')[0]; return{...r,isDischarged:isDC,timestamp:ds};}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));renderCalendar();renderWards();updateWardSuggestions();updateSyncStatus('Live','emerald');}catch(e){if(!s){console.warn(e);updateSyncStatus('Offline','rose');}}}
         
         function manualRefresh(){ const b=document.getElementById('btnRefresh'); b.classList.add('animate-spin'); fetchData(false).then(()=>setTimeout(()=>b.classList.remove('animate-spin'),1000)); }
         function updateSyncStatus(m,c){ const l=document.getElementById('syncStatus'); const d=document.getElementById('statusDot'); const cl={'amber':'bg-amber-400','emerald':'bg-emerald-500','rose':'bg-rose-500','slate':'bg-slate-400'}; l.innerText=m; l.className=`text-[10px] font-bold uppercase tracking-wider text-${c}-500`; d.className=`w-2 h-2 rounded-full ${cl[c]||'bg-slate-400'} shadow-sm ${m==='Live'?'animate-pulse':''}`; }
@@ -327,6 +419,7 @@
         function exportCurrentRecord(){if(!editingId)return;const t={name:document.getElementById('editName').value,timestamp:document.getElementById('editTimestamp').value,ward:document.getElementById('editWard').value,content:document.getElementById('editContent').value};downloadFile((t.name||'Untitled')+".txt",generateTxtContent(t));}
         async function exportBatch(){if(selectedBatchIds.size===0)return;const rs=records.filter(r=>selectedBatchIds.has(r.id));for(const r of rs){let b=(r.name||'Untitled').replace(/[/\\?%*:|"<>]/g,'-');downloadFile(b+".txt",generateTxtContent(r));await new Promise(x=>setTimeout(x,200));}}
         
+        // RENDERERS
         function renderCalendar(){
             const g=document.getElementById('calendarGrid'); g.innerHTML=''; 
             const y=currentMonth.getFullYear(); const m=currentMonth.getMonth(); 
@@ -475,6 +568,11 @@
         }
         
         function switchView(m){viewMode=m;const c=document.getElementById('viewCalendar');const w=document.getElementById('viewWards');const bc=document.getElementById('btnViewCal');const bw=document.getElementById('btnViewWard');if(m==='calendar'){c.classList.remove('-translate-x-full');w.classList.add('translate-x-full');bc.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-white bg-rose-600 shadow-md";bw.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}else{c.classList.add('-translate-x-full');w.classList.remove('translate-x-full');bw.className="w-10 h-9 rounded-lg flex items-center justify-center transition font-medium text-white bg-rose-600 shadow-md";bc.className="w-10 h-9 rounded-lg text-slate-400 flex items-center justify-center transition hover:text-slate-600";}}
+        
+        // --- LIGHTBOX (REMOVED) ---
+        let currentLightboxImages=[]; let currentLightboxIndex=0;
+        function openLightbox(i,m){} function closeLightbox(){} function nextImage(){} function prevImage(){}
+        function onImageLoad(){} function onImageError(){}
     </script>
 </body>
 </html>
