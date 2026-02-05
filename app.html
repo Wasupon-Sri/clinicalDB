@@ -62,7 +62,7 @@
         .input-modern { @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition duration-200 outline-none; }
         .input-contrast { @apply w-full bg-white border-2 border-slate-400 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:border-primary-600 focus:ring-4 focus:ring-primary-100 outline-none transition shadow-sm; }
 
-        /* FIXED: Large Textarea */
+        /* Large Textarea */
         .textarea-glass { 
             @apply w-full bg-white/80 border border-slate-200 rounded-2xl p-6 text-slate-800 leading-relaxed;
             font-size: 1.15rem; height: 450px !important; width: 100% !important; resize: none;
@@ -71,7 +71,7 @@
         }
         .textarea-glass:focus { outline: none; border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1); background: white; }
 
-        /* RESTORED: Context Icons */
+        /* Context Icons */
         .ctx-btn { 
             width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; 
             border: 1px solid #e2e8f0; background: white; color: #94a3b8; transition: all 0.2s; cursor: pointer; 
@@ -79,7 +79,7 @@
         .ctx-btn.active { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); transform: translateY(-2px); }
         .ctx-btn:hover:not(.active) { background: #f1f5f9; color: #64748b; }
 
-        /* RESTORED: Color Circles */
+        /* Color Circles */
         .color-btn { 
             width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; 
             border: 2px solid transparent; flex-shrink: 0; 
@@ -98,10 +98,36 @@
         .loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-bottom-color: var(--p-600); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Swipe Actions */
-        .swipe-item-container { position: relative; overflow: hidden; border-radius: 1rem; margin-bottom: 0.75rem; background-color: #ef4444; }
-        .swipe-content { position: relative; background: white; z-index: 20; transition: transform 0.2s ease-out; width: 100%; border-radius: 1rem; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .swipe-actions { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        /* Swipe Actions - Critical Updates */
+        .swipe-item-container { 
+            position: relative; 
+            overflow: hidden; 
+            border-radius: 1rem; 
+            margin-bottom: 0.75rem; 
+            background-color: #ef4444; /* Red background visible when swiped */
+        }
+        .swipe-content { 
+            position: relative; 
+            background: white; 
+            z-index: 20; 
+            transition: transform 0.2s ease-out; 
+            width: 100%; 
+            border-radius: 1rem; 
+            border: 1px solid #f1f5f9; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            touch-action: pan-y; /* CRITICAL: Allows vertical scroll but captures horizontal */
+        }
+        .swipe-actions { 
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            right: 0; 
+            width: 80px; 
+            z-index: 10; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
 
         .expanded-note { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 95vw !important; height: 95vh !important; z-index: 9999 !important; font-size: 1.5rem !important; border-radius: 1rem !important; box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.85) !important; border-color: var(--p-600) !important; border-width: 4px !important; padding: 3rem !important; margin: 0 !important; max-width: none !important; max-height: none !important; }
         .hidden { display: none !important; }
@@ -137,7 +163,7 @@
             <div id="authError" class="hidden">
                 <i class="fa-solid fa-circle-exclamation text-4xl text-rose-500 mb-2"></i>
                 <h3 class="text-lg font-bold text-slate-800">Connection Failed</h3>
-                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 break-all">Could not reach server.</p>
+                <p id="errorDetail" class="text-xs text-slate-500 mb-4 mt-2 font-mono bg-slate-100 p-2 rounded break-all">Could not reach the server.</p>
                 <button onclick="location.reload()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg mb-2">Retry</button>
             </div>
         </div>
@@ -355,11 +381,12 @@
             currentPortalRecords.forEach(r=>{
                 const c=COLORS.find(x=>x.id===r.color)||COLORS[0]; const i=ICONS.find(x=>x.id===r.icon)||ICONS[0]; const op=r.isDischarged?'opacity-75 grayscale-[0.5]':'';
                 const isSelected = selectedBatchIds.has(r.id);
+                // Modern Card Style
                 const borderClass = isSelected ? 'border-2 border-indigo-500 ring-4 ring-indigo-50 bg-indigo-50/50' : 'border border-slate-100 bg-white hover:border-rose-200 hover:shadow-md';
                 const iconCheck = isSelected ? `<i class="fa-solid fa-circle-check text-indigo-600 text-xl absolute top-4 right-4 animate-bounce"></i>` : (isBatchMode ? `<i class="fa-regular fa-circle text-slate-300 text-xl absolute top-4 right-4"></i>` : '');
 
                 let html = `
-                <div class="${borderClass} rounded-2xl p-5 transition-all duration-300 cursor-pointer relative group ${op} shadow-sm" onclick="${isBatchMode ? `toggleBatchSelect('${r.id}')` : `openEditor('${r.id}')`}">
+                <div class="${borderClass} rounded-2xl p-5 transition-all duration-300 cursor-pointer relative group ${op} shadow-sm" onclick="${isBatchMode ? `toggleBatchSelect('${r.id}')` : `if(!isSwiping) openEditor('${r.id}')`}">
                     ${iconCheck}
                     <div class="flex items-start gap-4">
                         <div class="w-12 h-12 shrink-0 rounded-2xl ${c.bg} text-white flex items-center justify-center shadow-md"><i class="fa-solid ${i.icon} text-lg"></i></div>
